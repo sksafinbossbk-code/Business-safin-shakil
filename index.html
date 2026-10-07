@@ -2423,66 +2423,49 @@ async function loadOrCreateFirebaseProfile(user) {
 
   if (!user) return;
 
-
-  firebaseUser =
-    user;
-
+  firebaseUser = user;
 
   /*
-    Device lock check BEFORE loading account.
+    IMPORTANT AUTH LOGIC:
+    Device binding শুধু NEW ACCOUNT তৈরি করার সময় check হবে।
+    Existing account login কখনো device lock-এর কারণে block হবে না।
   */
 
-  const deviceCheck =
-    await checkDeviceBinding(
-      user.uid
-    );
+  const local = getLocalProfile();
 
+  const [firestore, realtime] = await Promise.all([
+    loadUserFromFirestore(user.uid),
+    loadUserFromRealtimeDB(user.uid)
+  ]);
 
-  if (!deviceCheck.allowed) {
+  /* UID-এর profile যেকোনো একটি database-এ থাকলে এটি existing account। */
+  const existingAccount = !!firestore || !!realtime;
 
-    console.error(
-      "Device is already bound:",
-      deviceCheck
-    );
+  /* NEW account হলে তবেই device lock check হবে। */
+  if (!existingAccount) {
 
+    const deviceCheck = await checkDeviceBinding(user.uid);
 
-    try {
+    if (!deviceCheck.allowed) {
 
-      await signOut(auth);
+      console.error(
+        "New account blocked by device binding:",
+        deviceCheck
+      );
 
-    } catch (e) {}
+      try { await signOut(auth); } catch (e) {}
 
+      showToast(
+        "এই ডিভাইসে আগে থেকেই একটি account আছে। নতুন account তৈরি করা যাবে না।"
+      );
 
-    showToast(
-      "এই ডিভাইসে অন্য একটি account আগে থেকেই যুক্ত আছে!"
-    );
-
-
-    return;
-
+      return;
+    }
   }
-
-
-  const local =
-    getLocalProfile();
-
-
-  const firestore =
-    await loadUserFromFirestore(
-      user.uid
-    );
-
-
-  const realtime =
-    await loadUserFromRealtimeDB(
-      user.uid
-    );
-
 
   const firebaseBasicData = {
 
-    uid:
-      user.uid,
+    uid: user.uid,
 
     name:
       user.displayName ||
@@ -2507,111 +2490,73 @@ async function loadOrCreateFirebaseProfile(user) {
         "https://api.dicebear.com/7.x/bottts/svg?seed=" +
         user.uid
       )
-
   };
 
+  currentUserProfile = mergeUserData(
+    local,
+    firestore,
+    realtime,
+    firebaseBasicData
+  );
 
-  currentUserProfile =
-    mergeUserData(
-      local,
-      firestore,
-      realtime,
-      firebaseBasicData
-    );
-
-
-  if (
-    !currentUserProfile.referralCode
-  ) {
-
-    currentUserProfile.referralCode =
-      generateReferralCode(
-        user.uid
-      );
-
+  if (!currentUserProfile.referralCode) {
+    currentUserProfile.referralCode = generateReferralCode(user.uid);
   }
 
-
-  if (
-    !currentUserProfile.createdAt
-  ) {
-
-    currentUserProfile.createdAt =
-      new Date().toISOString();
-
+  if (!currentUserProfile.createdAt) {
+    currentUserProfile.createdAt = new Date().toISOString();
   }
 
-
-  currentUserProfile.isLoggedIn =
-    true;
-
+  currentUserProfile.isLoggedIn = true;
 
   /*
-    Firebase device binding
+    NEW account-এর জন্য device binding তৈরি হবে।
+    Existing account login-এর সময় binding পরিবর্তন করা হবে না।
   */
+  if (!existingAccount) {
 
-  const bound =
-    await bindDeviceToAccount(
+    const bound = await bindDeviceToAccount(
       user.uid,
       currentUserProfile
     );
 
+    if (!bound) {
 
-  if (!bound) {
+      try { await signOut(auth); } catch (e) {}
 
-    try {
+      currentUserProfile.isLoggedIn = false;
+      saveLocalProfile(currentUserProfile);
+      updateDashboardUI(currentUserProfile);
 
-      await signOut(auth);
+      showToast(
+        "এই ডিভাইসে আগে থেকেই একটি account আছে। নতুন account তৈরি করা যাবে না।"
+      );
 
-    } catch (e) {}
-
-
-    currentUserProfile.isLoggedIn =
-      false;
-
-    saveLocalProfile(
-      currentUserProfile
-    );
-
-    updateDashboardUI(
-      currentUserProfile
-    );
-
-
-    showToast(
-      "এই ডিভাইসটি অন্য account-এর সাথে যুক্ত!"
-    );
-
-    return;
-
+      return;
+    }
   }
 
+  saveLocalProfile(currentUserProfile);
 
-  saveLocalProfile(
-    currentUserProfile
-  );
+  await syncUserToFirebase(currentUserProfile);
 
-
-  await syncUserToFirebase(
-    currentUserProfile
-  );
-
-
-  updateDashboardUI(
-    currentUserProfile
-  );
-
+  updateDashboardUI(currentUserProfile);
 
   await loadTransactionHistory();
 
+  closeLoginModal();
+
+  showToast(
+    existingAccount
+      ? "Login সফল হয়েছে!"
+      : "নতুন account সফলভাবে তৈরি হয়েছে!"
+  );
 
   console.log(
     "User data loaded successfully",
-    currentUserProfile
+    { existingAccount, uid: currentUserProfile.uid }
   );
-
 }
-
 
 /* =========================================================
    AUTH STATE
@@ -2963,142 +2908,38 @@ window.handleGoogleLogin =
 async function() {
 
   if (!auth) {
-
-    showToast(
-      "Firebase চালু হয়নি!"
-    );
-
+    showToast("Firebase চালু হয়নি!");
     return;
-
   }
-
 
   /*
-    যদি device আগে থেকেই অন্য account-এর
-    সাথে bind থাকে, login শুরুই করা হবে না।
+    IMPORTANT:
+    এখানে DEVICE_LOCK_KEY আগে check করা যাবে না।
+    প্রথমে Google account নির্বাচন/sign-in হবে। তারপর
+    loadOrCreateFirebaseProfile() UID দেখে বুঝবে accountটি
+    আগে থেকেই আছে নাকি নতুন।
   */
-
-  const localBoundUid =
-    localStorage.getItem(
-      DEVICE_LOCK_KEY
-    );
-
-
-  if (localBoundUid) {
-
-    /*
-      বর্তমানে একই account Firebase session
-      থাকলে auth state সেটা handle করবে।
-    */
-
-    if (
-      auth.currentUser &&
-      auth.currentUser.uid ===
-      localBoundUid
-    ) {
-
-      showToast(
-        "এই account ইতিমধ্যেই লগইন আছে!"
-      );
-
-      closeLoginModal();
-
-      return;
-
-    }
-
-
-    showToast(
-      "এই ডিভাইসে অন্য account খোলা যাবে না!"
-    );
-
-    return;
-
-  }
-
 
   try {
 
-    const provider =
-      new GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
 
-
-    const result =
-      await signInWithPopup(
-        auth,
-        provider
-      );
-
-
-    const user =
-      result.user;
-
-
-    const check =
-      await checkDeviceBinding(
-        user.uid
-      );
-
-
-    if (!check.allowed) {
-
-      await signOut(auth);
-
-      showToast(
-        "এই ডিভাইসে অন্য account আগে থেকেই যুক্ত আছে!"
-      );
-
-      return;
-
-    }
-
-
-    const profileForBinding = {
-
-      uid:
-        user.uid,
-
-      name:
-        user.displayName ||
-        "ব্যবহারকারী",
-
-      email:
-        user.email ||
-        "",
-
-      photoURL:
-        user.photoURL ||
-        ""
-
-    };
-
-
-    const bound =
-      await bindDeviceToAccount(
-        user.uid,
-        profileForBinding
-      );
-
-
-    if (!bound) {
-
-      await signOut(auth);
-
-      showToast(
-        "এই ডিভাইসটি অন্য account-এর সাথে যুক্ত!"
-      );
-
-      return;
-
-    }
-
-
-    closeLoginModal();
-
-
-    showToast(
-      "Google login সফল হয়েছে!"
+    const result = await signInWithPopup(
+      auth,
+      provider
     );
+
+    console.log(
+      "Google account selected:",
+      result.user.uid,
+      result.user.email || ""
+    );
+
+    /*
+      onAuthStateChanged ইতিমধ্যেই profile load করবে।
+      Existing account হলে login allow হবে।
+      New account হলে device lock check হবে।
+    */
 
   } catch (error) {
 
@@ -3107,15 +2948,21 @@ async function() {
       error
     );
 
+    if (error?.code === "auth/popup-closed-by-user") {
+      showToast("Google login বাতিল করা হয়েছে।");
+      return;
+    }
+
+    if (error?.code === "auth/popup-blocked") {
+      showToast("Browser popup block করেছে। Popup permission দিন।");
+      return;
+    }
 
     showToast(
-      "Google login ব্যর্থ হয়েছে!"
+      "Google login ব্যর্থ হয়েছে! আবার চেষ্টা করুন।"
     );
-
   }
-
 };
-
 
 /* =========================================================
    ANONYMOUS LOGIN
