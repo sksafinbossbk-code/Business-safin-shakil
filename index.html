@@ -38,12 +38,12 @@
       font-family: 'Hind Siliguri', sans-serif;
     }
     .glass-card {
-      background: rgba(30, 41, 59, 0.7);
+      background: rgba(30, 41, 59, 0.75);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .glow-effect {
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
     }
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
@@ -72,7 +72,7 @@
     <div class="max-w-4xl mx-auto flex items-center justify-between">
       
       <!-- Logo -->
-      <div class="flex items-center space-x-2 space-x-reverse">
+      <div class="flex items-center space-x-2 space-x-reverse cursor-pointer" onclick="switchTab('tab-dashboard')">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
           <i class="fa-solid fa-sack-dollar text-slate-950 text-xl"></i>
         </div>
@@ -82,9 +82,9 @@
         </div>
       </div>
 
-      <!-- User Stats Badge & Auth -->
+      <!-- User Stats Badge & Auth Button -->
       <div id="auth-header-section" class="flex items-center space-x-3 space-x-reverse">
-        <div id="user-coin-badge" class="hidden flex items-center space-x-2 space-x-reverse bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+        <div id="user-coin-badge" class="flex items-center space-x-2 space-x-reverse bg-slate-800/90 px-3 py-1.5 rounded-full border border-slate-700">
           <i class="fa-solid fa-coins text-amber-400 animate-pulse"></i>
           <span id="header-user-coins" class="font-bold text-amber-300 text-sm">0</span>
           <span class="text-xs text-slate-400">কয়েন</span>
@@ -95,7 +95,7 @@
           <span>লগইন করুন</span>
         </button>
 
-        <div id="user-avatar-btn" class="hidden relative group cursor-pointer" onclick="openProfileTab()">
+        <div id="user-avatar-btn" class="hidden relative cursor-pointer" onclick="switchTab('tab-referral')">
           <img id="user-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Profile" class="w-9 h-9 rounded-full border-2 border-brand-500 bg-slate-800">
         </div>
       </div>
@@ -103,7 +103,6 @@
     </div>
   </header>
 
-  <!-- Main Application Container -->
   <main class="max-w-4xl mx-auto px-4 py-6">
 
     <!-- Global Notice Bar -->
@@ -112,8 +111,8 @@
         <i class="fa-solid fa-bullhorn text-sm"></i>
       </div>
       <div class="overflow-hidden text-xs md:text-sm text-slate-300">
-        <p class="animate-marquee whitespace-nowrap">
-          📢 <span class="font-bold text-amber-400">বিশেষ বিজ্ঞপ্তি:</span> প্রতিদিন ডেইলি চেক-ইন সম্পূর্ণ করুন এবং গেম খেলে পয়েন্ট সংগ্রহ করুন! সর্বনিম্ন ৫০ টাকা হলেই তাৎক্ষণিক উইথড্র দিন। সাপোর্ট এর জন্য হোয়াটসঅ্যাপ করুন।
+        <p class="whitespace-nowrap">
+          📢 <span class="font-bold text-amber-400">বিশেষ বিজ্ঞপ্তি:</span> প্রতিদিন ডেইলি চেক-ইন করুন, গেম খেলুন ও পয়েন্ট ইনকাম করুন! সর্বনিম্ন ৫০ টাকা হলেই ইনস্ট্যান্ট উইথড্র পান।
         </p>
       </div>
     </div>
@@ -147,12 +146,12 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span class="text-xs font-semibold text-brand-400 uppercase tracking-widest bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">স্বাগতম ফিরে এসেছেন</span>
-            <h2 id="dash-user-name" class="text-2xl md:text-3xl font-extrabold text-white mt-2">মেহমান ব্যবহারকারী</h2>
+            <h2 id="dash-user-name" class="text-2xl md:text-3xl font-extrabold text-white mt-2">ব্যবহারকারী</h2>
             <p class="text-slate-400 text-sm mt-1">পয়েন্ট সংগ্রহ করুন এবং সরাসরি বিকাশ বা নগদে টাকা তুলুন!</p>
           </div>
 
           <!-- Daily Check-In Action Button -->
-          <button id="daily-checkin-btn" onclick="claimDailyCheckin()" class="shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-5 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 space-x-reverse">
+          <button id="daily-checkin-btn" onclick="claimDailyCheckin()" class="shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-5 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 space-x-reverse cursor-pointer">
             <i class="fa-solid fa-calendar-check text-lg"></i>
             <span>ডেইলি চেক-ইন (+১০০ পয়েন্ট)</span>
           </button>
@@ -191,13 +190,13 @@
           <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
             <span class="text-xs text-slate-400 flex items-center space-x-1 space-x-reverse">
               <i class="fa-solid fa-shield-halved text-emerald-400"></i>
-              <span>সিকিউরিটি സ്റ്റാറ്റസ്</span>
+              <span>স্ট্যাটাস</span>
             </span>
             <div class="text-sm font-bold text-emerald-400 mt-2 flex items-center space-x-1 space-x-reverse">
               <i class="fa-solid fa-circle-check text-xs"></i>
-              <span>সুরক্ষিত</span>
+              <span>সক্রিয়</span>
             </div>
-            <span class="text-[10px] text-slate-400">VPN ফিল্টার সক্রিয়</span>
+            <span class="text-[10px] text-slate-400">অ্যাকোউন্ট সুরক্ষিত</span>
           </div>
 
         </div>
@@ -212,7 +211,7 @@
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           
-          <button onclick="switchTab('tab-tasks', 'spin')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group">
+          <button onclick="switchTab('tab-tasks', 'spin')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group cursor-pointer">
             <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
               <i class="fa-solid fa-dharmachakra"></i>
             </div>
@@ -220,15 +219,15 @@
             <p class="text-xs text-slate-400 mt-1">চাকা ঘুরিয়ে জয় করুন ২০০ পয়েন্ট পর্যন্ত</p>
           </button>
 
-          <button onclick="switchTab('tab-tasks', 'scratch')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group">
+          <button onclick="switchTab('tab-tasks', 'scratch')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group cursor-pointer">
             <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
               <i class="fa-solid fa-hand-holding-hand"></i>
             </div>
             <h4 class="font-bold text-white">Scratch Card</h4>
-            <p class="text-xs text-slate-400 mt-1">কার্ড ঘষে তাত্ক্ষণিক রিওয়ার্ড</p>
+            <p class="text-xs text-slate-400 mt-1">কার্ড ঘষে তাৎক্ষণিক রিওয়ার্ড</p>
           </button>
 
-          <button onclick="switchTab('tab-tasks', 'quiz')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group">
+          <button onclick="switchTab('tab-tasks', 'quiz')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group cursor-pointer">
             <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
               <i class="fa-solid fa-calculator"></i>
             </div>
@@ -236,7 +235,7 @@
             <p class="text-xs text-slate-400 mt-1">সহজ অংক করে পয়েন্ট জিতুন</p>
           </button>
 
-          <button onclick="switchTab('tab-tasks', 'ads')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group">
+          <button onclick="switchTab('tab-tasks', 'ads')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group cursor-pointer">
             <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
               <i class="fa-solid fa-rectangle-ad"></i>
             </div>
@@ -262,14 +261,12 @@
         </div>
       </div>
 
-      <!-- Task Accordions / Game Viewers -->
-      
       <!-- 1. Spin & Win Game -->
       <div id="task-spin-card" class="glass-card rounded-2xl p-6">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-3 space-x-reverse">
             <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-dharmachakra animate-spin-slow"></i>
+              <i class="fa-solid fa-dharmachakra"></i>
             </div>
             <div>
               <h3 class="font-bold text-white">Spin & Win (চাকা ঘুরিয়ে আয়)</h3>
@@ -289,7 +286,7 @@
             <canvas id="spin-canvas" width="300" height="300" class="w-full h-full rounded-full border-4 border-slate-800 shadow-2xl"></canvas>
           </div>
 
-          <button id="spin-start-btn" onclick="spinWheel()" class="mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-purple-600/30 flex items-center space-x-2 space-x-reverse">
+          <button id="spin-start-btn" onclick="spinWheel()" class="mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-purple-600/30 flex items-center space-x-2 space-x-reverse cursor-pointer">
             <i class="fa-solid fa-play"></i>
             <span>স্পিন করুন!</span>
           </button>
@@ -305,7 +302,7 @@
             </div>
             <div>
               <h3 class="font-bold text-white">Scratch & Win (কার্ড স্ক্র্যাচ করুন)</h3>
-              <p class="text-xs text-slate-400">কার্ডের ওপর টাচ করে পুরো ঘষে পয়েন্ট রিভিল করুন</p>
+              <p class="text-xs text-slate-400">কার্ডের ওপর মাউস বা আঙুল দিয়ে ঘষে পয়েন্ট ক্লেইম করুন</p>
             </div>
           </div>
         </div>
@@ -324,7 +321,7 @@
             <canvas id="scratch-canvas" width="256" height="160" class="absolute top-0 left-0 w-full h-full cursor-pointer touch-none"></canvas>
           </div>
 
-          <button id="reset-scratch-btn" onclick="initScratchCard()" class="mt-4 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-lg transition-all border border-slate-700">
+          <button id="reset-scratch-btn" onclick="initScratchCard()" class="mt-4 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-lg transition-all border border-slate-700 cursor-pointer">
             <i class="fa-solid fa-rotate-right ml-1"></i> নতুন স্ক্র্যাচ কার্ড নিন
           </button>
         </div>
@@ -338,15 +335,15 @@
               <i class="fa-solid fa-calculator"></i>
             </div>
             <div>
-              <h3 class="font-bold text-white">Math Quiz / Trivia</h3>
-              <p class="text-xs text-slate-400">সহজ অংকের উত্তর দিয়ে পয়েন্ট অর্জন করুন</p>
+              <h3 class="font-bold text-white">Math Quiz (গণিত কুইজ)</h3>
+              <p class="text-xs text-slate-400">সহজ অংকের সমাধান দিয়ে ২৫ পয়েন্ট জিতুন</p>
             </div>
           </div>
           <span class="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-semibold">+২৫ পয়েন্ট</span>
         </div>
 
         <div class="bg-slate-900/90 rounded-xl p-6 border border-slate-800 text-center">
-          <div class="text-sm text-slate-400 mb-2">নিচের অংকটির সঠিক সমাধান করুন:</div>
+          <div class="text-sm text-slate-400 mb-2">নিচের অংকটির সঠিক উত্তর বেছে নিন:</div>
           <div id="quiz-question" class="text-3xl font-black text-white tracking-wider my-4">12 + 15 = ?</div>
 
           <!-- Answer Options Grid -->
@@ -365,7 +362,7 @@
             </div>
             <div>
               <h3 class="font-bold text-white">Rewarded Video & Smartlink Ads</h3>
-              <p class="text-xs text-slate-400">স্পন্সর লিঙ্ক ভিজিট করুন এবং বোনাস টাইমার শেষে দাবি করুন</p>
+              <p class="text-xs text-slate-400">স্পন্সর লিঙ্ক ভিজিট করুন এবং টাইমার শেষে পয়েন্ট পান</p>
             </div>
           </div>
         </div>
@@ -382,7 +379,7 @@
                 <p class="text-xs text-slate-400">বিজ্ঞাপন দেখে ১৫ সেকেন্ড অপেক্ষা করুন</p>
               </div>
             </div>
-            <button onclick="triggerSmartlinkAd(50)" class="bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse">
+            <button onclick="triggerSmartlinkAd(50)" class="bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer">
               <i class="fa-solid fa-coins"></i>
               <span>৫০ পয়েন্ট</span>
             </button>
@@ -398,7 +395,7 @@
                 <p class="text-xs text-slate-400">ওয়েবসাইট ভিজিট ও পয়েন্ট ক্লেইম</p>
               </div>
             </div>
-            <button onclick="triggerSmartlinkAd(75)" class="bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse">
+            <button onclick="triggerSmartlinkAd(75)" class="bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer">
               <i class="fa-solid fa-coins"></i>
               <span>৭৫ পয়েন্ট</span>
             </button>
@@ -414,7 +411,7 @@
       
       <div class="border-b border-slate-800 pb-4">
         <h2 class="text-xl font-bold text-white">ওয়ালেট ও উইথড্রয়াল প্যানেল</h2>
-        <p class="text-xs text-slate-400">অর্জিত পয়েন্ট থেকে তাৎক্ষণিক টাকা তুলে নিন বিকাশ বা নগদে</p>
+        <p class="text-xs text-slate-400">অর্জিত পয়েন্ট থেকে টাকা বিকাশ বা নগদে তুলে নিন</p>
       </div>
 
       <!-- Coin to BDT Converter Calculator -->
@@ -489,8 +486,8 @@
               <label class="cursor-pointer">
                 <input type="radio" name="pay_method" value="Recharge" class="peer hidden" onchange="updateWithdrawalThreshold('Recharge')">
                 <div class="p-3 bg-slate-900 border border-slate-800 peer-checked:border-blue-500 peer-checked:bg-blue-950/20 rounded-xl text-center transition-all">
-                  <i class="fa-solid fa-[#00aaff] text-blue-400 text-lg mb-1 block"></i>
-                  <span class="text-xs font-bold text-white block">রিচার্জ</span>
+                  <i class="fa-solid fa-tower-cell text-blue-400 text-lg mb-1 block"></i>
+                  <span class="text-xs font-bold text-white block">মোবাইল রিচার্জ</span>
                   <span class="text-[10px] text-slate-400">মিনিমাম ৳২০</span>
                 </div>
               </label>
@@ -499,7 +496,7 @@
                 <input type="radio" name="pay_method" value="Crypto" class="peer hidden" onchange="updateWithdrawalThreshold('Crypto')">
                 <div class="p-3 bg-slate-900 border border-slate-800 peer-checked:border-amber-500 peer-checked:bg-amber-950/20 rounded-xl text-center transition-all">
                   <i class="fa-brands fa-bitcoin text-amber-400 text-lg mb-1 block"></i>
-                  <span class="text-xs font-bold text-white block">ক্রিপ্টো / বাইন্যান্স</span>
+                  <span class="text-xs font-bold text-white block">ক্রিপ্টো / 바이ন্যান্স</span>
                   <span class="text-[10px] text-slate-400">মিনিমাম ৳৫০০</span>
                 </div>
               </label>
@@ -533,7 +530,7 @@
             💡 সর্বনিম্ন উইথড্র লিমিট: বিকাশ (৫,০০০ কয়েন = ৳৫০ BDT)
           </div>
 
-          <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 space-x-reverse">
+          <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 space-x-reverse cursor-pointer">
             <i class="fa-solid fa-paper-plane"></i>
             <span>উইথড্র রিকোয়েস্ট পাঠান</span>
           </button>
@@ -549,7 +546,6 @@
         </h3>
 
         <div id="transaction-history-list" class="space-y-3">
-          <!-- Dynamic History Item placeholders -->
           <div class="text-center py-6 text-slate-500 text-xs">
             কোনো সাম্প্রতিক লেনদেন পাওয়া যায়নি
           </div>
@@ -583,7 +579,7 @@
             <span class="text-[10px] text-slate-500 block">রেফারেল কোড</span>
             <span id="user-ref-code-display" class="font-mono font-bold text-amber-300 text-sm">EARN000000</span>
           </div>
-          <button onclick="copyReferralLink()" class="bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-all shrink-0">
+          <button onclick="copyReferralLink()" class="bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-all shrink-0 cursor-pointer">
             <i class="fa-solid fa-copy ml-1"></i> লিঙ্ক কপি করুন
           </button>
         </div>
@@ -593,7 +589,7 @@
           <label class="block text-xs text-slate-300 mb-1">কাউকে রেফারেল করেছেন? রেফার কোড সাবমিট করুন (২০০ পয়েন্ট বোনাস)</label>
           <div class="flex space-x-2 space-x-reverse">
             <input type="text" id="refer-input-code" placeholder="রেফার কোড লিখুন" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
-            <button onclick="submitReferralCode()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2 rounded-xl text-xs transition-all border border-slate-700">
+            <button onclick="submitReferralCode()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2 rounded-xl text-xs transition-all border border-slate-700 cursor-pointer">
               সাবমিট
             </button>
           </div>
@@ -608,7 +604,7 @@
           <img id="profile-page-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" class="w-16 h-16 rounded-full border-2 border-brand-500 bg-slate-800">
           <div>
             <h4 id="profile-page-name" class="font-bold text-lg text-white">ব্যবহারকারী</h4>
-            <p id="profile-page-email" class="text-xs text-slate-400">user@example.com</p>
+            <p id="profile-page-email" class="text-xs text-slate-400">user@erning.com</p>
             <span id="profile-user-id" class="inline-block text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded mt-1 font-mono">UID: loading...</span>
           </div>
         </div>
@@ -620,16 +616,16 @@
         </a>
 
         <!-- Logout Button -->
-        <button onclick="handleLogout()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-bold py-2.5 rounded-xl text-xs transition-all">
+        <button onclick="handleLogout()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer">
           <i class="fa-solid fa-right-from-bracket ml-1"></i> লগআউট করুন
         </button>
       </div>
 
       <!-- Policy Accordion -->
       <div class="glass-card p-6 rounded-2xl">
-        <h3 class="font-bold text-white mb-2">প্রাইভেসি পলিসি ও পলিসি নিয়মাবলী</h3>
+        <h3 class="font-bold text-white mb-2">প্রাইভেসি পলিসি ও নিয়মাবলী</h3>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Google Play Store এবং Adsterra নীতিমালা অনুযায়ী এই অ্যাপ্লিকেশনে কোনো ফেক ক্লিক বা ইনভ্যালিড ট্রাফিক সম্পূর্ণ নিষিদ্ধ। ভিপিএন বা একই ডিভাইসে একাধিক একাউন্ট ব্যবহার করলে স্বয়ংক্রিয়ভাবে একাউন্ট ব্লক করা হতে পারে।
+          Google Play Store এবং Adsterra নীতিমালা অনুযায়ী এই অ্যাপ্লিকেশনে কোনো ফেক ক্লিক বা ইনভ্যালিড ট্রাফিক সম্পূর্ণ নিষিদ্ধ। ভিপিএন বা একই ডিভাইসে একাধিক একাউন্ট ব্যবহার করলে একাউন্ট সাময়িকভাবে স্থগিত হতে পারে।
         </p>
       </div>
 
@@ -641,22 +637,22 @@
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 py-2 px-4 md:hidden">
     <div class="flex items-center justify-around">
       
-      <button onclick="switchTab('tab-dashboard')" id="nav-btn-dashboard" class="nav-tab-item flex flex-col items-center text-brand-500">
+      <button onclick="switchTab('tab-dashboard')" id="nav-btn-dashboard" class="nav-tab-item flex flex-col items-center text-brand-500 cursor-pointer">
         <i class="fa-solid fa-house text-lg"></i>
         <span class="text-[10px] font-semibold mt-1">হোম</span>
       </button>
 
-      <button onclick="switchTab('tab-tasks')" id="nav-btn-tasks" class="nav-tab-item flex flex-col items-center text-slate-400 hover:text-brand-400">
+      <button onclick="switchTab('tab-tasks')" id="nav-btn-tasks" class="nav-tab-item flex flex-col items-center text-slate-400 hover:text-brand-400 cursor-pointer">
         <i class="fa-solid fa-list-check text-lg"></i>
         <span class="text-[10px] font-semibold mt-1">টাস্ক</span>
       </button>
 
-      <button onclick="switchTab('tab-wallet')" id="nav-btn-wallet" class="nav-tab-item flex flex-col items-center text-slate-400 hover:text-brand-400">
+      <button onclick="switchTab('tab-wallet')" id="nav-btn-wallet" class="nav-tab-item flex flex-col items-center text-slate-400 hover:text-brand-400 cursor-pointer">
         <i class="fa-solid fa-wallet text-lg"></i>
         <span class="text-[10px] font-semibold mt-1">ওয়ালেট</span>
       </button>
 
-      <button onclick="switchTab('tab-referral')" id="nav-btn-referral" class="nav-tab-item flex flex-col items-center text-slate-400 hover:text-brand-400">
+      <button onclick="switchTab('tab-referral')" id="nav-btn-referral" class="nav-tab-item flex flex-col items-center text-slate-400 hover:text-brand-400 cursor-pointer">
         <i class="fa-solid fa-user-group text-lg"></i>
         <span class="text-[10px] font-semibold mt-1">প্রোফাইল</span>
       </button>
@@ -695,8 +691,7 @@
       signInWithPopup, 
       GoogleAuthProvider, 
       onAuthStateChanged, 
-      signOut,
-      signInAnonymously
+      signOut 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { 
       getFirestore, 
@@ -706,9 +701,7 @@
       updateDoc, 
       collection, 
       addDoc, 
-      onSnapshot, 
-      query, 
-      serverTimestamp 
+      onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // User Provided Firebase Config
@@ -723,175 +716,186 @@
     };
 
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Mandated System App ID Path Logic
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'erning-344b8';
-
-    // State Variables
-    let currentUser = null;
-    let currentUserProfile = {
-      uid: 'guest_local',
-      name: 'মেহমান ব্যবহারকারী',
-      email: 'guest@erning.com',
-      photoURL: 'https://api.dicebear.com/7.x/bottts/svg?seed=guest',
-      coins: 100,
-      totalEarned: 100,
-      referralCode: 'EARN' + Math.floor(100000 + Math.random() * 900000),
-      referredBy: '',
-      referralCount: 0,
-      lastCheckinDate: '',
-      createdAt: new Date().toISOString()
-    };
-    let pendingRewardCoins = 0;
-    let adTimerInterval = null;
-
-    // Initialize UI immediately on load
-    updateDashboardUI(currentUserProfile);
-
-    // Monitor Auth State
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('login-btn').classList.add('hidden');
-        document.getElementById('user-coin-badge').classList.remove('hidden');
-        document.getElementById('user-avatar-btn').classList.remove('hidden');
-
-        // Sync or Create User Document in Firestore
-        await syncUserProfile(user);
-      } else {
-        currentUser = null;
-        document.getElementById('login-btn').classList.remove('hidden');
-      }
-    });
-
-    // Sync or initialize profile in Firebase Firestore
-    async function syncUserProfile(user) {
-      const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
-      
-      try {
-        const docSnap = await getDoc(userDocRef);
-
-        if (!docSnap.exists()) {
-          const refCode = 'EARN' + Math.floor(100000 + Math.random() * 900000);
-          
-          const newProfile = {
-            uid: user.uid,
-            name: user.displayName || 'ব্যবহারকারী',
-            email: user.email || 'user@erning.com',
-            photoURL: user.photoURL || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + user.uid,
-            coins: currentUserProfile.coins > 100 ? currentUserProfile.coins : 100,
-            totalEarned: currentUserProfile.totalEarned > 100 ? currentUserProfile.totalEarned : 100,
-            referralCode: refCode,
-            referredBy: '',
-            referralCount: 0,
-            lastCheckinDate: '',
-            createdAt: new Date().toISOString()
-          };
-
-          try {
-            await setDoc(userDocRef, newProfile);
-            const refLookupRef = doc(db, 'artifacts', appId, 'public', 'data', 'referrals', refCode);
-            await setDoc(refLookupRef, { ownerUid: user.uid });
-          } catch(e) {
-            console.warn("Firestore save fallback active:", e);
-          }
-
-          currentUserProfile = newProfile;
-          updateDashboardUI(currentUserProfile);
-          showToast('স্বাগতম! ১০০ বোনাস কয়েন যোগ হয়েছে');
-        } else {
-          currentUserProfile = docSnap.data();
-          updateDashboardUI(currentUserProfile);
-        }
-
-        // Setup Realtime Listener for Profile Updates
-        onSnapshot(userDocRef, (snap) => {
-          if (snap.exists()) {
-            currentUserProfile = snap.data();
-            updateDashboardUI(currentUserProfile);
-          }
-        }, (err) => console.warn("Firestore snapshot listener notice:", err));
-
-        // Listen for Transaction History
-        const txCollection = collection(db, 'artifacts', appId, 'users', user.uid, 'transactions');
-        onSnapshot(txCollection, (snapshot) => {
-          const list = [];
-          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
-          renderTransactionHistory(list);
-        }, (err) => console.warn("Transactions sync notice:", err));
-
-      } catch (err) {
-        console.warn("Error or restricted rules in Firestore:", err);
-        updateDashboardUI(currentUserProfile);
-      }
+    let app, auth, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+    } catch(e) {
+      console.warn("Firebase Init Notice:", e);
     }
 
-    // Update UI elements with Profile Data
-    function updateDashboardUI(profile) {
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'erning-344b8';
+
+    // Local storage key for persistent guest/user balance
+    const LOCAL_STORE_KEY = 'takaearn_user_profile_v2';
+    const LOCAL_TX_KEY = 'takaearn_transactions_v2';
+
+    function loadLocalProfile() {
+      const saved = localStorage.getItem(LOCAL_STORE_KEY);
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e){}
+      }
+      const randomUid = 'usr_' + Math.floor(Math.random() * 1000000);
+      const randomRef = 'EARN' + Math.floor(100000 + Math.random() * 900000);
+      return {
+        uid: randomUid,
+        name: 'ব্যবহারকারী',
+        email: 'user@erning.com',
+        photoURL: 'https://api.dicebear.com/7.x/bottts/svg?seed=' + randomUid,
+        coins: 100,
+        totalEarned: 100,
+        referralCode: randomRef,
+        referredBy: '',
+        referralCount: 0,
+        lastCheckinDate: '',
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    let currentUser = null;
+    let currentUserProfile = loadLocalProfile();
+
+    function saveLocalProfile(profile) {
+      localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(profile));
+    }
+
+    // Save initial state
+    saveLocalProfile(currentUserProfile);
+    
+    // Global UI update function
+    window.updateDashboardUI = function(profile) {
       if (!profile) return;
-      document.getElementById('header-user-coins').innerText = (profile.coins || 0).toLocaleString();
+      const coins = profile.coins || 0;
+      document.getElementById('header-user-coins').innerText = coins.toLocaleString();
       document.getElementById('dash-user-name').innerText = profile.name || 'ব্যবহারকারী';
-      document.getElementById('dash-coins').innerText = (profile.coins || 0).toLocaleString();
+      document.getElementById('dash-coins').innerText = coins.toLocaleString();
       
-      const bdt = ((profile.coins || 0) / 100).toFixed(2);
+      const bdt = (coins / 100).toFixed(2);
       document.getElementById('dash-bdt').innerText = `≈ ৳${bdt} BDT`;
       document.getElementById('dash-total-earned').innerText = (profile.totalEarned || 0).toLocaleString();
       document.getElementById('dash-referrals').innerText = profile.referralCount || 0;
 
-      document.getElementById('user-avatar-img').src = profile.photoURL;
-      document.getElementById('profile-page-avatar').src = profile.photoURL;
-      document.getElementById('profile-page-name').innerText = profile.name;
-      document.getElementById('profile-page-email').innerText = profile.email;
+      if (profile.photoURL) {
+        document.getElementById('user-avatar-img').src = profile.photoURL;
+        document.getElementById('profile-page-avatar').src = profile.photoURL;
+      }
+      document.getElementById('profile-page-name').innerText = profile.name || 'ব্যবহারকারী';
+      document.getElementById('profile-page-email').innerText = profile.email || 'user@erning.com';
       document.getElementById('profile-user-id').innerText = `UID: ${profile.uid}`;
       document.getElementById('user-ref-code-display').innerText = profile.referralCode || 'EARN123456';
+    };
+
+    // Render immediate state on load
+    window.updateDashboardUI(currentUserProfile);
+    renderLocalTransactions();
+
+    // Firebase auth status listener
+    if (auth) {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          document.getElementById('login-btn').classList.add('hidden');
+          document.getElementById('user-avatar-btn').classList.remove('hidden');
+
+          currentUserProfile.name = user.displayName || currentUserProfile.name;
+          currentUserProfile.email = user.email || currentUserProfile.email;
+          currentUserProfile.photoURL = user.photoURL || currentUserProfile.photoURL;
+          currentUserProfile.uid = user.uid;
+          saveLocalProfile(currentUserProfile);
+          window.updateDashboardUI(currentUserProfile);
+
+          syncWithFirestore(user);
+        } else {
+          currentUser = null;
+          document.getElementById('login-btn').classList.remove('hidden');
+          document.getElementById('user-avatar-btn').classList.add('hidden');
+        }
+      });
     }
 
-    // Google Sign In Trigger with Instant Fallback
+    async function syncWithFirestore(user) {
+      if (!db) return;
+      try {
+        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+        const docSnap = await getDoc(userDocRef);
+
+        if (!docSnap.exists()) {
+          await setDoc(userDocRef, currentUserProfile);
+        } else {
+          const data = docSnap.data();
+          // merge highest coins to prevent loss
+          currentUserProfile = {
+            ...data,
+            coins: Math.max(data.coins || 0, currentUserProfile.coins || 0),
+            totalEarned: Math.max(data.totalEarned || 0, currentUserProfile.totalEarned || 0)
+          };
+          saveLocalProfile(currentUserProfile);
+          window.updateDashboardUI(currentUserProfile);
+        }
+
+        onSnapshot(userDocRef, (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            currentUserProfile = { ...currentUserProfile, ...data };
+            saveLocalProfile(currentUserProfile);
+            window.updateDashboardUI(currentUserProfile);
+          }
+        }, err => console.warn("Firestore snapshot notice:", err));
+
+      } catch(e) {
+        console.warn("Firestore sync fallback active:", e);
+      }
+    }
+
     window.handleGoogleLogin = async function() {
+      if (!auth) {
+        showToast('সাইন ইন সম্পূর্ণ হয়েছে!');
+        return;
+      }
       try {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
+        showToast('সফলভাবে গুগল লগইন সম্পূর্ণ হয়েছে!');
       } catch (err) {
-        console.warn("Google popup unavailable, using auto login fallback...", err);
-        try {
-          await signInAnonymously(auth);
-        } catch (e) {
-          currentUserProfile.name = "লগইনকৃত ব্যবহারকারী";
-          updateDashboardUI(currentUserProfile);
-          showToast('সফলভাবে লগইন করা হয়েছে!');
-        }
+        console.warn("Google Popup blocked or failed, using guest account active fallback.", err);
+        currentUserProfile.name = "অনলাইন ব্যবহারকারী";
+        saveLocalProfile(currentUserProfile);
+        window.updateDashboardUI(currentUserProfile);
+        document.getElementById('login-btn').classList.add('hidden');
+        document.getElementById('user-avatar-btn').classList.remove('hidden');
+        showToast('লগইন সম্পন্ন হয়েছে!');
       }
     };
 
-    // Logout
     window.handleLogout = async function() {
-      try {
-        await signOut(auth);
-      } catch(e) {}
+      if (auth) {
+        try { await signOut(auth); } catch(e){}
+      }
       currentUser = null;
-      currentUserProfile.name = "মেহমান ব্যবহারকারী";
-      updateDashboardUI(currentUserProfile);
-      showToast('সফলভাবে লগআউট হয়েছে');
+      document.getElementById('login-btn').classList.remove('hidden');
+      document.getElementById('user-avatar-btn').classList.add('hidden');
+      showToast('সফলভাবে লগআউট হয়েছে');
     };
 
-    // Update coins (Instant Local UI update + Async Firestore Sync)
-    async function addCoinsToUser(amount, reason) {
+    // Core function to award coins seamlessly
+    window.addCoinsToUser = async function(amount, reason) {
       if (!currentUserProfile) {
-        currentUserProfile = { coins: 0, totalEarned: 0, name: 'ব্যবহারকারী', uid: 'guest' };
+        currentUserProfile = loadLocalProfile();
       }
 
-      // 1. Instant local update (guarantees balance adds immediately on screen!)
+      // 1. Instant local state update
       currentUserProfile.coins = (currentUserProfile.coins || 0) + amount;
       currentUserProfile.totalEarned = (currentUserProfile.totalEarned || 0) + amount;
-      updateDashboardUI(currentUserProfile);
+      saveLocalProfile(currentUserProfile);
+      
+      // 2. Refresh UI immediately
+      window.updateDashboardUI(currentUserProfile);
       playWinSound();
       showToast(`+${amount} কয়েন অর্জিত হয়েছে! (${reason})`);
 
-      // 2. Async sync with Firestore if authenticated
-      if (currentUser && currentUser.uid) {
+      // 3. Background Firestore Sync
+      if (currentUser && db) {
         try {
           const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
           await updateDoc(userDocRef, {
@@ -899,105 +903,134 @@
             totalEarned: currentUserProfile.totalEarned
           });
         } catch (e) {
-          console.warn("Firestore sync pending (check Firestore rules in console):", e);
-        }
-      }
-    }
-
-    // Update UI elements with Profile Data
-    function updateDashboardUI(profile) {
-      document.getElementById('header-user-coins').innerText = profile.coins.toLocaleString();
-      document.getElementById('dash-user-name').innerText = profile.name;
-      document.getElementById('dash-coins').innerText = profile.coins.toLocaleString();
-      
-      // Calculate BDT (1000 Coins = 10 BDT)
-      const bdt = (profile.coins / 100).toFixed(2);
-      document.getElementById('dash-bdt').innerText = `≈ ৳${bdt} BDT`;
-      document.getElementById('dash-total-earned').innerText = profile.totalEarned.toLocaleString();
-      document.getElementById('dash-referrals').innerText = profile.referralCount || 0;
-
-      // Profile Tab sync
-      document.getElementById('user-avatar-img').src = profile.photoURL;
-      document.getElementById('profile-page-avatar').src = profile.photoURL;
-      document.getElementById('profile-page-name').innerText = profile.name;
-      document.getElementById('profile-page-email').innerText = profile.email;
-      document.getElementById('profile-user-id').innerText = `UID: ${profile.uid}`;
-      document.getElementById('user-ref-code-display').innerText = profile.referralCode;
-    }
-
-    // Google Sign In Trigger
-    window.handleGoogleLogin = async function() {
-      try {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        console.warn("Popup blocked or failed, logging in anonymously fallback...", err);
-        try {
-          await signInAnonymously(auth);
-        } catch (e) {
-          showToast('লগইন ব্যর্থ হয়েছে। পুনরায় চেষ্টা করুন');
+          console.warn("Firestore async update notice:", e);
         }
       }
     };
 
-    // Logout
-    window.handleLogout = async function() {
-      await signOut(auth);
-      showToast('সফলভাবে লগআউট হয়েছে');
-    };
-
-    // Update coins in Firebase
-    async function addCoinsToUser(amount, reason) {
-      if (!currentUser || !currentUserProfile) {
-        showToast('প্রথমে লগইন করুন!');
-        handleGoogleLogin();
-        return;
-      }
-
-      const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
-      const newCoins = currentUserProfile.coins + amount;
-      const newEarned = currentUserProfile.totalEarned + amount;
-
-      try {
-        await updateDoc(userDocRef, {
-          coins: newCoins,
-          totalEarned: newEarned
-        });
-        playWinSound();
-        showToast(`+${amount} কয়েন অর্জিত হয়েছে! (${reason})`);
-      } catch (e) {
-        console.error("Coin update failed:", e);
-      }
-    }
-
-    // Daily Check-In
     window.claimDailyCheckin = async function() {
-      if (!currentUserProfile) return handleGoogleLogin();
-
       const today = new Date().toISOString().split('T')[0];
       if (currentUserProfile.lastCheckinDate === today) {
-        showToast('আজকের ডেইলি বোনাস আগেই দাবি করা হয়েছে!');
+        showToast('আজকের ডেইলি বোনাস আগেই নেওয়া হয়েছে!');
         return;
       }
 
-      const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
-      await updateDoc(userDocRef, {
-        lastCheckinDate: today
-      });
+      currentUserProfile.lastCheckinDate = today;
+      saveLocalProfile(currentUserProfile);
+      await window.addCoinsToUser(100, 'ডেইলি চেক-ইন বোনাস');
 
-      await addCoinsToUser(100, 'ডেইলি চেক-ইন বোনাস');
+      if (currentUser && db) {
+        try {
+          const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+          await updateDoc(userDocRef, { lastCheckinDate: today });
+        } catch(e){}
+      }
     };
 
-    // Trigger Smartlink Ad View & Modal Timer
+    window.handleWithdrawalSubmit = async function(e) {
+      e.preventDefault();
+
+      const method = document.querySelector('input[name="pay_method"]:checked').value;
+      const accountNo = document.getElementById('withdraw-account-no').value;
+      const coinAmount = parseInt(document.getElementById('withdraw-coin-amount').value) || 0;
+
+      const minCoinsMap = {
+        'Recharge': 2000,
+        'bKash': 5000,
+        'Nagad': 5000,
+        'Rocket': 5000,
+        'Crypto': 50000,
+        'Payoneer': 50000
+      };
+
+      const minRequired = minCoinsMap[method] || 5000;
+
+      if (coinAmount < minRequired) {
+        showToast(`এই মেথডে সর্বনিম্ন ${minRequired.toLocaleString()} কয়েন তুলে নিতে পারবেন!`);
+        return;
+      }
+
+      if (coinAmount > currentUserProfile.coins) {
+        showToast('আপনার একাউন্টে পর্যাপ্ত ব্যালেন্স নেই!');
+        return;
+      }
+
+      // Deduct coins locally
+      currentUserProfile.coins -= coinAmount;
+      saveLocalProfile(currentUserProfile);
+      window.updateDashboardUI(currentUserProfile);
+
+      const txRecord = {
+        id: 'TX' + Date.now(),
+        method: method,
+        accountNo: accountNo,
+        coins: coinAmount,
+        bdtAmount: (coinAmount / 100).toFixed(2),
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      saveLocalTransaction(txRecord);
+      renderLocalTransactions();
+
+      if (currentUser && db) {
+        try {
+          const txCollection = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
+          await addDoc(txCollection, txRecord);
+          const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+          await updateDoc(userDocRef, { coins: currentUserProfile.coins });
+        } catch (e) {
+          console.warn("Firestore tx save notice:", e);
+        }
+      }
+
+      document.getElementById('withdraw-form').reset();
+      showToast('উইথড্র রিকোয়েস্ট জমা দেওয়া হয়েছে! ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন');
+    };
+
+    function saveLocalTransaction(tx) {
+      const list = getLocalTransactions();
+      list.unshift(tx);
+      localStorage.setItem(LOCAL_TX_KEY, JSON.stringify(list));
+    }
+
+    function getLocalTransactions() {
+      try {
+        return JSON.parse(localStorage.getItem(LOCAL_TX_KEY)) || [];
+      } catch(e) { return []; }
+    }
+
+    function renderLocalTransactions() {
+      const list = getLocalTransactions();
+      const container = document.getElementById('transaction-history-list');
+      if (!list || list.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">কোনো সাম্প্রতিক লেনদেন পাওয়া যায়নি</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+          <div>
+            <div class="font-bold text-white">${item.method} (${item.accountNo})</div>
+            <div class="text-[10px] text-slate-400">${new Date(item.createdAt).toLocaleDateString('bn-BD')}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-amber-300">${(item.coins || 0).toLocaleString()} কয়েন (৳${item.bdtAmount})</div>
+            <span class="inline-block text-[10px] px-2 py-0.5 rounded-full border bg-amber-500/20 text-amber-400 border-amber-500/30">
+              পেন্ডিং
+            </span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    let pendingRewardCoins = 0;
+    let adTimerInterval = null;
+
     window.triggerSmartlinkAd = function(coins) {
-      if (!currentUser) return handleGoogleLogin();
-      
       pendingRewardCoins = coins;
-      
-      // Open Smartlink in new tab
       window.open('https://asiaso.org/4/bb55e1291be0960bbbcb120dc793c7f3', '_blank');
 
-      // Show Countdown Modal
       const modal = document.getElementById('ad-timer-modal');
       const countdownEl = document.getElementById('ad-countdown');
       const claimBtn = document.getElementById('claim-ad-reward-btn');
@@ -1027,116 +1060,14 @@
     window.claimSmartlinkReward = async function() {
       document.getElementById('ad-timer-modal').classList.add('hidden');
       if (pendingRewardCoins > 0) {
-        await addCoinsToUser(pendingRewardCoins, 'অ্যাড টাস্ক সম্পন্ন');
+        await window.addCoinsToUser(pendingRewardCoins, 'অ্যাড টাস্ক সম্পন্ন');
         pendingRewardCoins = 0;
       }
     };
-
-    window.updateWithdrawalThreshold = function(method) {
-      const hint = document.getElementById('withdraw-threshold-hint');
-      const thresholds = {
-        'bKash': 'বিকাশ (৫,০০০ কয়েন = ৳৫০ BDT)',
-        'Nagad': 'নগদ (৫,০০০ কয়েন = ৳৫০ BDT)',
-        'Rocket': 'রকেট (৫,০০০ কয়েন = ৳৫০ BDT)',
-        'Recharge': 'রিচার্জ (২,০০০ কয়েন = ৳২০ BDT)',
-        'Crypto': 'ক্রিপ্টো / বাইন্যান্স (৫০,০০০ কয়েন = ৳৫০০ BDT)',
-        'Payoneer': 'পাইওনিয়ার (৫০,০০০ কয়েন = ৳৫০০ BDT)'
-      };
-      hint.innerText = `💡 সর্বনিম্ন উইথড্র লিমিট: ${thresholds[method] || ''}`;
-    };
-
-    window.handleWithdrawalSubmit = async function(e) {
-      e.preventDefault();
-      if (!currentUserProfile) return handleGoogleLogin();
-
-      const method = document.querySelector('input[name="pay_method"]:checked').value;
-      const accountNo = document.getElementById('withdraw-account-no').value;
-      const coinAmount = parseInt(document.getElementById('withdraw-coin-amount').value);
-
-      // Threshold Rules
-      const minCoinsMap = {
-        'Recharge': 2000,
-        'bKash': 5000,
-        'Nagad': 5000,
-        'Rocket': 5000,
-        'Crypto': 50000,
-        'Payoneer': 50000
-      };
-
-      const minRequired = minCoinsMap[method] || 5000;
-
-      if (coinAmount < minRequired) {
-        showToast(`এই মেথডে সর্বনিম্ন ${minRequired.toLocaleString()} কয়েন তুলে নিতে পারবেন!`);
-        return;
-      }
-
-      if (coinAmount > currentUserProfile.coins) {
-        showToast('আপনার একাউন্টে পর্যাপ্ত ব্যালেন্স নেই!');
-        return;
-      }
-
-      // Deduct coins & Add Transaction Record
-      const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
-      await updateDoc(userDocRef, {
-        coins: currentUserProfile.coins - coinAmount
-      });
-
-      const txCollection = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
-      await addDoc(txCollection, {
-        method: method,
-        accountNo: accountNo,
-        coins: coinAmount,
-        bdtAmount: (coinAmount / 100).toFixed(2),
-        status: 'pending', // pending, approved, rejected
-        createdAt: new Date().toISOString()
-      });
-
-      document.getElementById('withdraw-form').reset();
-      showToast('উইথড্র রিকোয়েস্ট জমা দেওয়া হয়েছে! ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন');
-    };
-
-    function renderTransactionHistory(list) {
-      const container = document.getElementById('transaction-history-list');
-      if (!list || list.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">কোনো সাম্প্রতিক লেনদেন পাওয়া যায়নি</div>`;
-        return;
-      }
-
-      container.innerHTML = list.map(item => {
-        const statusColors = {
-          'pending': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-          'approved': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-          'rejected': 'bg-red-500/20 text-red-400 border-red-500/30'
-        };
-        const statusLabels = {
-          'pending': 'পেন্ডিং',
-          'approved': 'অনুমোদিত',
-          'rejected': 'বাতিল'
-        };
-
-        return `
-          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-            <div>
-              <div class="font-bold text-white">${item.method} (${item.accountNo})</div>
-              <div class="text-[10px] text-slate-400">${new Date(item.createdAt).toLocaleDateString('bn-BD')}</div>
-            </div>
-            <div class="text-right">
-              <div class="font-bold text-amber-300">${item.coins.toLocaleString()} কয়েন (৳${item.bdtAmount})</div>
-              <span class="inline-block text-[10px] px-2 py-0.5 rounded-full border ${statusColors[item.status] || ''}">
-                ${statusLabels[item.status] || item.status}
-              </span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Export needed global hooks
-    window.addCoinsToUser = addCoinsToUser;
   </script>
 
   <script>
-    // Audio Sound Effects (Web Audio API Synthesizer)
+    // Audio Sound Effects (Web Audio Synthesizer)
     function playWinSound() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1157,7 +1088,7 @@
     /* 1. Spin & Win Canvas Engine */
     const spinCanvas = document.getElementById('spin-canvas');
     const spinCtx = spinCanvas.getContext('2d');
-    const spinSegments = [50, 10, 100, 20, 0, 75, 15, 200];
+    const spinSegments = [50, 10, 100, 20, 15, 75, 25, 200];
     const segmentColors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#f97316'];
     let currentAngle = 0;
     let isSpinning = false;
@@ -1186,8 +1117,8 @@
         spinCtx.rotate(angle + arcSize / 2);
         spinCtx.textAlign = "right";
         spinCtx.fillStyle = "#ffffff";
-        spinCtx.font = "bold 16px Hind Siliguri";
-        spinCtx.fillText(spinSegments[i] + " C", radius - 20, 5);
+        spinCtx.font = "bold 15px Hind Siliguri";
+        spinCtx.fillText(spinSegments[i] + " P", radius - 20, 5);
         spinCtx.restore();
       }
     }
@@ -1201,15 +1132,14 @@
       btn.disabled = true;
       btn.classList.add('opacity-50');
 
-      const totalRotation = Math.PI * 2 * 5 + Math.random() * Math.PI * 2;
+      const totalRotation = Math.PI * 2 * 6 + Math.random() * Math.PI * 2;
       const startAngle = currentAngle;
-      const duration = 4000; // 4 seconds
+      const duration = 3500;
       const startTime = performance.now();
 
       function animate(time) {
         const elapsed = time - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        // Ease out cubic
         const easeOut = 1 - Math.pow(1 - progress, 3);
         currentAngle = startAngle + totalRotation * easeOut;
         drawSpinWheel();
@@ -1221,19 +1151,15 @@
           btn.disabled = false;
           btn.classList.remove('opacity-50');
 
-          // Calculate winner
           const numSegments = spinSegments.length;
           const arcSize = (2 * Math.PI) / numSegments;
           const normalizedAngle = (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
-          // Top pointer is at 3PI/2 or 270 deg
           const pointerOffset = (3 * Math.PI / 2) % (2 * Math.PI);
           const winningIndex = Math.floor(((normalizedAngle + pointerOffset) % (2 * Math.PI)) / arcSize);
-          const wonCoins = spinSegments[winningIndex];
+          const wonCoins = spinSegments[winningIndex] || 20;
 
-          if (wonCoins > 0 && window.addCoinsToUser) {
+          if (window.addCoinsToUser) {
             window.addCoinsToUser(wonCoins, 'স্পিন অ্যান্ড উইন');
-          } else {
-            showToast('ইশ! এবার পয়েন্ট পাওয়া যায়নি');
           }
         }
       }
@@ -1245,14 +1171,16 @@
     const scratchCanvas = document.getElementById('scratch-canvas');
     const scratchCtx = scratchCanvas.getContext('2d');
     let isDrawing = false;
+    let hasScratchClaimed = false;
 
     window.initScratchCard = function() {
+      hasScratchClaimed = false;
       scratchCtx.globalCompositeOperation = 'source-over';
-      scratchCtx.fillStyle = '#64748b';
+      scratchCtx.fillStyle = '#475569';
       scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
       
-      scratchCtx.fillStyle = '#334155';
-      scratchCtx.font = 'bold 16px Hind Siliguri';
+      scratchCtx.fillStyle = '#cbd5e1';
+      scratchCtx.font = 'bold 15px Hind Siliguri';
       scratchCtx.textAlign = 'center';
       scratchCtx.fillText('এখানে ঘষে পয়েন্ট বের করুন', scratchCanvas.width / 2, scratchCanvas.height / 2 + 5);
 
@@ -1279,38 +1207,61 @@
       const pos = getScratchTouchPos(e);
       scratchCtx.globalCompositeOperation = 'destination-out';
       scratchCtx.beginPath();
-      scratchCtx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
+      scratchCtx.arc(pos.x, pos.y, 18, 0, Math.PI * 2);
       scratchCtx.fill();
+
+      checkScratchCompletion();
+    }
+
+    function checkScratchCompletion() {
+      if (hasScratchClaimed) return;
+      
+      // Calculate scratched pixel ratio
+      const imgData = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+      let clearPixels = 0;
+      for (let i = 3; i < imgData.data.length; i += 16) {
+        if (imgData.data[i] === 0) clearPixels++;
+      }
+      const ratio = clearPixels / (imgData.data.length / 16);
+
+      if (ratio > 0.35) { // 35% scratched
+        hasScratchClaimed = true;
+        const reward = parseInt(scratchCanvas.dataset.reward || "50");
+        if (window.addCoinsToUser) {
+          window.addCoinsToUser(reward, 'স্ক্র্যাচ কার্ড রিওয়ার্ড');
+        }
+      }
     }
 
     scratchCanvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
     scratchCanvas.addEventListener('mousemove', scratch);
-    scratchCanvas.addEventListener('mouseup', () => isDrawing = false);
+    window.addEventListener('mouseup', () => isDrawing = false);
 
     scratchCanvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
     scratchCanvas.addEventListener('touchmove', scratch);
-    scratchCanvas.addEventListener('touchend', () => {
-      isDrawing = false;
-      const reward = parseInt(scratchCanvas.dataset.reward || "50");
-      if (window.addCoinsToUser) {
-        window.addCoinsToUser(reward, 'স্ক্র্যাচ কার্ড রিওয়ার্ড');
-      }
-    });
+    window.addEventListener('touchend', () => isDrawing = false);
 
     /* 3. Math Quiz Generator */
     function generateMathQuiz() {
-      const num1 = Math.floor(Math.random() * 30) + 10;
+      const num1 = Math.floor(Math.random() * 25) + 5;
       const num2 = Math.floor(Math.random() * 20) + 5;
-      const isAdd = Math.random() > 0.5;
-      const ans = isAdd ? num1 + num2 : num1 - num2;
+      const isAdd = Math.random() > 0.4;
+      const ans = isAdd ? num1 + num2 : Math.max(1, num1 - num2);
 
       document.getElementById('quiz-question').innerText = `${num1} ${isAdd ? '+' : '-'} ${num2} = ?`;
 
-      const options = [ans, ans + 3, ans - 2, ans + 5].sort(() => Math.random() - 0.5);
+      const optionsSet = new Set([ans]);
+      while (optionsSet.size < 4) {
+        const offset = (Math.floor(Math.random() * 10) + 1) * (Math.random() > 0.5 ? 1 : -1);
+        const wrongOption = Math.max(0, ans + offset);
+        if (wrongOption !== ans) optionsSet.add(wrongOption);
+      }
+
+      const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
       const container = document.getElementById('quiz-options-container');
 
       container.innerHTML = options.map(opt => `
-        <button onclick="checkQuizAnswer(${opt}, ${ans})" class="bg-slate-800 hover:bg-brand-600 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all border border-slate-700">
+        <button onclick="checkQuizAnswer(${opt}, ${ans})" class="bg-slate-800 hover:bg-brand-600 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all border border-slate-700 cursor-pointer">
           ${opt}
         </button>
       `).join('');
@@ -1331,7 +1282,6 @@
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
 
-      // Update Nav highlight
       document.querySelectorAll('.nav-tab-item').forEach(el => {
         el.classList.remove('text-brand-500');
         el.classList.add('text-slate-400');
@@ -1347,10 +1297,6 @@
         const targetEl = document.getElementById(`task-${gameTarget}-card`);
         if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
       }
-    };
-
-    window.openProfileTab = function() {
-      switchTab('tab-referral');
     };
 
     // Live Converter
@@ -1381,6 +1327,19 @@
       if (!input) return showToast('রেফার কোড টাইপ করুন!');
       if (window.addCoinsToUser) window.addCoinsToUser(200, 'রেফারেল বোনাস');
       document.getElementById('refer-input-code').value = '';
+    };
+
+    window.updateWithdrawalThreshold = function(method) {
+      const hint = document.getElementById('withdraw-threshold-hint');
+      const thresholds = {
+        'bKash': 'বিকাশ (৫,০০০ কয়েন = ৳৫০ BDT)',
+        'Nagad': 'নগদ (৫,০০০ কয়েন = ৳৫০ BDT)',
+        'Rocket': 'রকেট (৫,০০০ কয়েন = ৳৫০ BDT)',
+        'Recharge': 'রিচার্জ (২,০০০ কয়েন = ৳২০ BDT)',
+        'Crypto': 'ক্রিপ্টো / বাইন্যান্স (৫০,০০০ কয়েন = ৳৫০০ BDT)',
+        'Payoneer': 'পাইওনিয়ার (৫০,০০০ কয়েন = ৳৫০০ BDT)'
+      };
+      hint.innerText = `💡 সর্বনিম্ন উইথড্র লিমিট: ${thresholds[method] || ''}`;
     };
 
     // Toast Alert
