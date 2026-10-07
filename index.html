@@ -656,6 +656,9 @@
       GoogleAuthProvider, 
       signOut 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getDatabase, ref, set, onValue, get
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 
     // Firebase Config
@@ -665,13 +668,15 @@
       projectId: "erning-344b8",
       storageBucket: "erning-344b8.firebasestorage.app",
       messagingSenderId: "69804884240",
-      appId: "1:69804884240:web:2e2ea56642c937b15ae595"
+      appId: "1:69804884240:web:2e2ea56642c937b15ae595",
+      databaseURL: "https://erning-344b8-default-rtdb.firebaseio.com"
     };
 
-    let app, auth;
+    let app, auth, db;
     try {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
+      db = getDatabase(app);
     } catch(e) {
       console.warn("Firebase Init Notice:", e);
     }
@@ -790,6 +795,16 @@
     };
 
     window.updateDashboardUI(currentUserProfile);
+    if (db && currentUserProfile && currentUserProfile.uid) {
+      get(ref(db, `users/${currentUserProfile.uid}`)).then(snap => {
+        if (snap.exists()) {
+          currentUserProfile = {...currentUserProfile, ...snap.val()};
+          saveLocalProfile(currentUserProfile);
+          window.updateDashboardUI(currentUserProfile);
+        }
+      }).catch(()=>{});
+      listenToFirebaseUser(currentUserProfile.uid);
+    }
 
     window.openLoginModal = function() {
       document.getElementById('login-modal').classList.remove('hidden');
@@ -799,7 +814,7 @@
       document.getElementById('login-modal').classList.add('hidden');
     };
 
-    window.loginWithGuest = function(e) {
+    window.loginWithGuest = async function(e) {
       if (e) e.preventDefault();
       const inputName = document.getElementById('quick-login-name').value.trim();
       if (!inputName) return;
@@ -821,6 +836,8 @@
       currentUserProfile.isLoggedIn = true;
 
       saveLocalProfile(currentUserProfile);
+      await saveUserToFirebase(currentUserProfile);
+      listenToFirebaseUser(currentUserProfile.uid);
       window.updateDashboardUI(currentUserProfile);
       window.closeLoginModal();
       window.showToast(`স্বাগতম, ${inputName}! সফলভাবে লগইন হয়েছে`);
@@ -838,6 +855,8 @@
         currentUserProfile.name = "গুগল ব্যবহারকারী";
         currentUserProfile.isLoggedIn = true;
         saveLocalProfile(currentUserProfile);
+        await saveUserToFirebase(currentUserProfile);
+        listenToFirebaseUser(currentUserProfile.uid);
         window.updateDashboardUI(currentUserProfile);
         window.closeLoginModal();
         window.showToast('লগইন সম্পূর্ণ হয়েছে!');
@@ -862,6 +881,8 @@
         currentUserProfile.isLoggedIn = true;
         
         saveLocalProfile(currentUserProfile);
+        await saveUserToFirebase(currentUserProfile);
+        listenToFirebaseUser(currentUserProfile.uid);
         window.updateDashboardUI(currentUserProfile);
         window.closeLoginModal();
         window.showToast('গুগল দিয়ে সফলভাবে লগইন হয়েছে!');
@@ -877,6 +898,8 @@
         currentUserProfile.name = "অনলাইন ব্যবহারকারী";
         currentUserProfile.isLoggedIn = true;
         saveLocalProfile(currentUserProfile);
+        await saveUserToFirebase(currentUserProfile);
+        listenToFirebaseUser(currentUserProfile.uid);
         window.updateDashboardUI(currentUserProfile);
         window.closeLoginModal();
         window.showToast('সফলভাবে লগইন সম্পূর্ণ হয়েছে!');
@@ -904,7 +927,7 @@
       }, 600);
     };
 
-    window.addCoinsToUser = function(amount, reason) {
+    window.addCoinsToUser = async function(amount, reason) {
       if (!currentUserProfile) currentUserProfile = loadLocalProfile();
 
       const numVal = parseInt(amount) || 0;
@@ -912,12 +935,13 @@
       currentUserProfile.totalEarned = (parseInt(currentUserProfile.totalEarned) || 0) + numVal;
       
       saveLocalProfile(currentUserProfile);
+      await saveUserToFirebase(currentUserProfile);
       window.updateDashboardUI(currentUserProfile);
       playWinSound();
       window.showToast(`+${numVal} কয়েন যোগ হয়েছে! (${reason})`);
     };
 
-    window.claimDailyCheckin = function() {
+    window.claimDailyCheckin = async function() {
       const today = new Date().toISOString().split('T')[0];
       if (currentUserProfile.lastCheckinDate === today) {
         window.showToast('আজকের ডেইলি বোনাস আগেই নেওয়া হয়েছে!');
@@ -926,10 +950,10 @@
 
       currentUserProfile.lastCheckinDate = today;
       saveLocalProfile(currentUserProfile);
-      window.addCoinsToUser(100, 'ডেইলি চেক-ইন বোনাস');
+      await window.addCoinsToUser(100, 'ডেইলি চেক-ইন বোনাস');
     };
 
-    window.handleWithdrawalSubmit = function(e) {
+    window.handleWithdrawalSubmit = async function(e) {
       e.preventDefault();
 
       const method = document.querySelector('input[name="pay_method"]:checked').value;
@@ -972,6 +996,18 @@
       };
 
       saveLocalTransaction(txRecord);
+      if (db && currentUserProfile.uid) {
+        try {
+          await set(ref(db, `withdrawals/${txRecord.id}`), {
+            ...txRecord,
+            uid: currentUserProfile.uid,
+            userName: currentUserProfile.name || ""
+          });
+          await saveUserToFirebase(currentUserProfile);
+        } catch (err) {
+          console.warn("Firebase withdrawal save failed:", err);
+        }
+      }
       renderLocalTransactions();
 
       document.getElementById('withdraw-form').reset();
