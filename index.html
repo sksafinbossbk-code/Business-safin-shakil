@@ -1,8 +1,3 @@
-html
-<!-- ========================================================= -->
-<!-- FIREBASE APPLICATION - UPDATED LOGIN VERSION -->
-<!-- ========================================================= -->
-
 <script type="module">
 
 /* =========================================================
@@ -54,7 +49,8 @@ import {
 
 const firebaseConfig = {
 
-  apiKey: "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
+  apiKey:
+    "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
 
   authDomain:
     "erning-344b8.firebaseapp.com",
@@ -78,7 +74,7 @@ const firebaseConfig = {
 
 
 /* =========================================================
-   GLOBAL VARIABLES
+   INITIALIZE
 ========================================================= */
 
 let app = null;
@@ -86,15 +82,50 @@ let auth = null;
 let db = null;
 let rtdb = null;
 
-let firebaseUser = null;
-let currentUserProfile = null;
-let deviceInstallationId = null;
+let authPersistenceReady = false;
+let authProfileLoading = false;
+let loginInProgress = false;
 
-let firebaseReady = false;
+try {
+
+  app = initializeApp(firebaseConfig);
+
+  auth = getAuth(app);
+
+  db = getFirestore(app);
+
+  rtdb = getDatabase(app);
+
+  /*
+    IMPORTANT:
+    Login করার আগে persistence ready করতে হবে।
+  */
+
+  await setPersistence(
+    auth,
+    browserLocalPersistence
+  );
+
+  authPersistenceReady = true;
+
+  console.log(
+    "Firebase initialized successfully"
+  );
+
+} catch (error) {
+
+  console.error(
+    "Firebase initialization error:",
+    error
+  );
+
+  authPersistenceReady = false;
+
+}
 
 
 /* =========================================================
-   LOCAL STORAGE KEYS
+   LOCAL STORAGE
 ========================================================= */
 
 const LOCAL_STORE_KEY =
@@ -111,10 +142,21 @@ const DEVICE_ID_KEY =
 
 
 /* =========================================================
+   CURRENT USER
+========================================================= */
+
+let currentUserProfile = null;
+
+let firebaseUser = null;
+
+let deviceInstallationId = null;
+
+
+/* =========================================================
    RANDOM ID
 ========================================================= */
 
-function generateRandomId(length = 40) {
+function generateRandomId(length = 32) {
 
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -260,7 +302,7 @@ currentUserProfile =
 
 
 /* =========================================================
-   SAVE LOCAL PROFILE
+   SAVE LOCAL
 ========================================================= */
 
 function saveLocalProfile(profile) {
@@ -275,7 +317,7 @@ function saveLocalProfile(profile) {
   } catch (error) {
 
     console.warn(
-      "Local save error:",
+      "Local save failed:",
       error
     );
 
@@ -288,27 +330,12 @@ function saveLocalProfile(profile) {
    DEVICE LOCAL LOCK
 ========================================================= */
 
-function getLocalBoundUid() {
-
-  try {
-
-    return localStorage.getItem(
-      DEVICE_LOCK_KEY
-    ) || "";
-
-  } catch (error) {
-
-    return "";
-
-  }
-
-}
-
-
 function isDeviceLockedToOtherAccount(uid) {
 
   const boundUid =
-    getLocalBoundUid();
+    localStorage.getItem(
+      DEVICE_LOCK_KEY
+    );
 
   return (
     !!boundUid &&
@@ -322,107 +349,29 @@ function lockDeviceToAccount(uid) {
 
   if (!uid) return false;
 
-  try {
+  const boundUid =
+    localStorage.getItem(
+      DEVICE_LOCK_KEY
+    );
 
-    const existing =
-      getLocalBoundUid();
+  if (!boundUid) {
 
-    if (!existing) {
-
-      localStorage.setItem(
-        DEVICE_LOCK_KEY,
-        uid
-      );
-
-      return true;
-
-    }
-
-    return existing === uid;
-
-  } catch (error) {
-
-    console.warn(
-      "Device local lock error:",
-      error
+    localStorage.setItem(
+      DEVICE_LOCK_KEY,
+      uid
     );
 
     return true;
 
   }
 
-}
-
-
-/* =========================================================
-   FIREBASE INITIALIZATION
-========================================================= */
-
-async function initializeFirebase() {
-
-  try {
-
-    app =
-      initializeApp(
-        firebaseConfig
-      );
-
-    auth =
-      getAuth(app);
-
-    db =
-      getFirestore(app);
-
-    rtdb =
-      getDatabase(app);
-
-
-    /*
-      IMPORTANT:
-      Persistence আগে সেট হবে,
-      তারপর Auth State Listener চালু হবে।
-    */
-
-    await setPersistence(
-      auth,
-      browserLocalPersistence
-    );
-
-
-    firebaseReady = true;
-
-    console.log(
-      "Firebase initialized successfully."
-    );
-
-    console.log(
-      "Local persistence enabled."
-    );
-
-
-    startAuthListener();
-
-
-  } catch (error) {
-
-    console.error(
-      "Firebase initialization error:",
-      error
-    );
-
-    firebaseReady = false;
-
-    showToast(
-      "Firebase চালু করা যায়নি। Console পরীক্ষা করুন।"
-    );
-
-  }
+  return boundUid === uid;
 
 }
 
 
 /* =========================================================
-   FIRESTORE DEVICE BINDING READ
+   FIRESTORE DEVICE BINDING
 ========================================================= */
 
 async function getFirestoreDeviceBinding() {
@@ -446,9 +395,7 @@ async function getFirestoreDeviceBinding() {
       );
 
     const snap =
-      await getDoc(
-        deviceRef
-      );
+      await getDoc(deviceRef);
 
     if (snap.exists()) {
 
@@ -458,9 +405,14 @@ async function getFirestoreDeviceBinding() {
 
   } catch (error) {
 
+    /*
+      IMPORTANT:
+      Permission error হলে login বন্ধ হবে না।
+    */
+
     console.warn(
-      "Firestore device binding read:",
-      error
+      "Firestore device binding unavailable:",
+      error?.code || error
     );
 
   }
@@ -471,7 +423,7 @@ async function getFirestoreDeviceBinding() {
 
 
 /* =========================================================
-   RTDB DEVICE BINDING READ
+   RTDB DEVICE BINDING
 ========================================================= */
 
 async function getRealtimeDeviceBinding() {
@@ -495,9 +447,7 @@ async function getRealtimeDeviceBinding() {
       );
 
     const snap =
-      await get(
-        deviceRef
-      );
+      await get(deviceRef);
 
     if (snap.exists()) {
 
@@ -508,8 +458,8 @@ async function getRealtimeDeviceBinding() {
   } catch (error) {
 
     console.warn(
-      "RTDB device binding read:",
-      error
+      "RTDB device binding unavailable:",
+      error?.code || error
     );
 
   }
@@ -536,63 +486,53 @@ async function checkDeviceBinding(uid) {
 
 
   /*
-    Local check
+    Local lock is fast and reliable.
   */
 
   if (
-    isDeviceLockedToOtherAccount(uid)
+    isDeviceLockedToOtherAccount(
+      uid
+    )
   ) {
 
     return {
-
       allowed: false,
-
-      reason:
-        "LOCAL_OTHER_ACCOUNT"
-
+      reason: "LOCAL_OTHER_ACCOUNT"
     };
 
   }
 
 
   /*
-    Server checks
+    Server binding is now OPTIONAL.
+    Permission failure will NOT block login.
   */
 
-  let firestoreBinding = null;
-  let realtimeBinding = null;
+  const results =
+    await Promise.allSettled([
+
+      getFirestoreDeviceBinding(),
+
+      getRealtimeDeviceBinding()
+
+    ]);
 
 
-  try {
-
-    firestoreBinding =
-      await getFirestoreDeviceBinding();
-
-  } catch (error) {
-
-    console.warn(
-      error
-    );
-
-  }
+  const firestoreBinding =
+    results[0].status === "fulfilled"
+      ? results[0].value
+      : null;
 
 
-  try {
-
-    realtimeBinding =
-      await getRealtimeDeviceBinding();
-
-  } catch (error) {
-
-    console.warn(
-      error
-    );
-
-  }
+  const realtimeBinding =
+    results[1].status === "fulfilled"
+      ? results[1].value
+      : null;
 
 
   const firestoreUid =
     firestoreBinding?.uid || "";
+
 
   const realtimeUid =
     realtimeBinding?.uid || "";
@@ -604,15 +544,9 @@ async function checkDeviceBinding(uid) {
   ) {
 
     return {
-
       allowed: false,
-
-      reason:
-        "FIRESTORE_OTHER_ACCOUNT",
-
-      boundUid:
-        firestoreUid
-
+      reason: "FIRESTORE_OTHER_ACCOUNT",
+      boundUid: firestoreUid
     };
 
   }
@@ -624,33 +558,24 @@ async function checkDeviceBinding(uid) {
   ) {
 
     return {
-
       allowed: false,
-
-      reason:
-        "RTDB_OTHER_ACCOUNT",
-
-      boundUid:
-        realtimeUid
-
+      reason: "RTDB_OTHER_ACCOUNT",
+      boundUid: realtimeUid
     };
 
   }
 
 
   return {
-
     allowed: true,
-
     reason: "OK"
-
   };
 
 }
 
 
 /* =========================================================
-   BIND DEVICE
+   CREATE DEVICE BINDING
 ========================================================= */
 
 async function bindDeviceToAccount(
@@ -669,17 +594,37 @@ async function bindDeviceToAccount(
 
 
   /*
-    Local binding first.
+    First local lock.
   */
 
-  const localBound =
-    getLocalBoundUid();
+  const localBoundUid =
+    localStorage.getItem(
+      DEVICE_LOCK_KEY
+    );
 
 
   if (
-    localBound &&
-    localBound !== uid
+    localBoundUid &&
+    localBoundUid !== uid
   ) {
+
+    return false;
+
+  }
+
+
+  /*
+    Local lock first.
+    This prevents login race.
+  */
+
+  const localLocked =
+    lockDeviceToAccount(
+      uid
+    );
+
+
+  if (!localLocked) {
 
     return false;
 
@@ -711,22 +656,10 @@ async function bindDeviceToAccount(
 
 
   /*
-    IMPORTANT:
-    Database binding failure should NOT
-    automatically destroy a successful
-    Firebase Auth session.
+    Firebase binding is BEST EFFORT.
 
-    This was one of the main login problems.
+    Rules permission না থাকলেও login block হবে না।
   */
-
-
-  let firestoreSuccess = false;
-  let rtdbSuccess = false;
-
-
-  /* -------------------------------------------------------
-     FIRESTORE
-  ------------------------------------------------------- */
 
   if (db) {
 
@@ -738,7 +671,6 @@ async function bindDeviceToAccount(
           "deviceBindings",
           deviceInstallationId
         );
-
 
       const existing =
         await getDoc(
@@ -759,6 +691,15 @@ async function bindDeviceToAccount(
           existingUid !== uid
         ) {
 
+          /*
+            Server says another account.
+            Local lock rollback করা হবে।
+          */
+
+          localStorage.removeItem(
+            DEVICE_LOCK_KEY
+          );
+
           return false;
 
         }
@@ -774,24 +715,17 @@ async function bindDeviceToAccount(
         }
       );
 
-
-      firestoreSuccess = true;
-
     } catch (error) {
 
       console.warn(
-        "Firestore device binding write failed:",
-        error
+        "Firestore device binding skipped:",
+        error?.code || error
       );
 
     }
 
   }
 
-
-  /* -------------------------------------------------------
-     RTDB
-  ------------------------------------------------------- */
 
   if (rtdb) {
 
@@ -824,6 +758,10 @@ async function bindDeviceToAccount(
           existingUid !== uid
         ) {
 
+          localStorage.removeItem(
+            DEVICE_LOCK_KEY
+          );
+
           return false;
 
         }
@@ -836,14 +774,11 @@ async function bindDeviceToAccount(
         bindingData
       );
 
-
-      rtdbSuccess = true;
-
     } catch (error) {
 
       console.warn(
-        "RTDB device binding write failed:",
-        error
+        "RTDB device binding skipped:",
+        error?.code || error
       );
 
     }
@@ -851,47 +786,7 @@ async function bindDeviceToAccount(
   }
 
 
-  /*
-    Local lock is always maintained
-    after Firebase authentication.
-  */
-
-  const localLocked =
-    lockDeviceToAccount(uid);
-
-
-  /*
-    Login should not fail merely because
-    one database rule is not configured.
-  */
-
-  if (
-    localLocked
-  ) {
-
-    if (
-      firestoreSuccess ||
-      rtdbSuccess ||
-      !db && !rtdb
-    ) {
-
-      console.log(
-        "Device bound:",
-        {
-          firestoreSuccess,
-          rtdbSuccess
-        }
-      );
-
-    }
-
-
-    return true;
-
-  }
-
-
-  return false;
+  return true;
 
 }
 
@@ -993,7 +888,7 @@ async function saveUserToFirestore(profile) {
 
     console.warn(
       "Firestore user save failed:",
-      error
+      error?.code || error
     );
 
     return false;
@@ -1086,7 +981,6 @@ async function saveUserToRealtimeDB(profile) {
           new Date().toISOString()
 
       }
-
     );
 
 
@@ -1096,7 +990,7 @@ async function saveUserToRealtimeDB(profile) {
 
     console.warn(
       "RTDB user save failed:",
-      error
+      error?.code || error
     );
 
     return false;
@@ -1107,36 +1001,31 @@ async function saveUserToRealtimeDB(profile) {
 
 
 /* =========================================================
-   SYNC USER
+   SYNC BOTH DATABASES
 ========================================================= */
 
-async function syncUserToFirebase(
-  profile
-) {
+async function syncUserToFirebase(profile) {
 
   saveLocalProfile(
     profile
   );
 
 
-  const results =
-    await Promise.allSettled([
+  /*
+    Firebase sync failure will NOT logout user.
+  */
 
-      saveUserToFirestore(
-        profile
-      ),
+  await Promise.allSettled([
 
-      saveUserToRealtimeDB(
-        profile
-      )
+    saveUserToFirestore(
+      profile
+    ),
 
-    ]);
+    saveUserToRealtimeDB(
+      profile
+    )
 
-
-  console.log(
-    "Firebase sync:",
-    results
-  );
+  ]);
 
 }
 
@@ -1145,9 +1034,7 @@ async function syncUserToFirebase(
    LOAD FIRESTORE USER
 ========================================================= */
 
-async function loadUserFromFirestore(
-  uid
-) {
+async function loadUserFromFirestore(uid) {
 
   if (
     !db ||
@@ -1186,7 +1073,7 @@ async function loadUserFromFirestore(
 
     console.warn(
       "Firestore load failed:",
-      error
+      error?.code || error
     );
 
   }
@@ -1200,9 +1087,7 @@ async function loadUserFromFirestore(
    LOAD RTDB USER
 ========================================================= */
 
-async function loadUserFromRealtimeDB(
-  uid
-) {
+async function loadUserFromRealtimeDB(uid) {
 
   if (
     !rtdb ||
@@ -1241,7 +1126,7 @@ async function loadUserFromRealtimeDB(
 
     console.warn(
       "RTDB load failed:",
-      error
+      error?.code || error
     );
 
   }
@@ -1252,7 +1137,7 @@ async function loadUserFromRealtimeDB(
 
 
 /* =========================================================
-   MERGE USER DATA
+   MERGE USER
 ========================================================= */
 
 function mergeUserData(
@@ -1282,8 +1167,10 @@ function mergeUserData(
     const source of sources
   ) {
 
-    Object.keys(source)
-      .forEach(key => {
+    Object.keys(
+      source
+    ).forEach(
+      key => {
 
         if (
           source[key] !== undefined &&
@@ -1295,7 +1182,8 @@ function mergeUserData(
 
         }
 
-      });
+      }
+    );
 
   }
 
@@ -1350,7 +1238,7 @@ function mergeUserData(
 
 
 /* =========================================================
-   GENERATE REFERRAL CODE
+   REFERRAL CODE
 ========================================================= */
 
 function generateReferralCode(uid) {
@@ -1371,10 +1259,6 @@ function generateReferralCode(uid) {
   return (
     "EARN" +
     uid
-      .replace(
-        /[^A-Za-z0-9]/g,
-        ""
-      )
       .substring(0, 8)
       .toUpperCase()
   );
@@ -1383,326 +1267,261 @@ function generateReferralCode(uid) {
 
 
 /* =========================================================
-   LOAD / CREATE USER
+   LOAD / CREATE PROFILE
 ========================================================= */
 
 async function loadOrCreateFirebaseProfile(
   user
 ) {
 
-  if (!user) return;
-
-
-  firebaseUser =
-    user;
-
-
-  console.log(
-    "Authenticated UID:",
-    user.uid
-  );
-
-
-  /*
-    Local account check.
-  */
-
-  const localBoundUid =
-    getLocalBoundUid();
-
-
   if (
-    localBoundUid &&
-    localBoundUid !== user.uid
+    !user ||
+    authProfileLoading
   ) {
-
-    console.warn(
-      "Another account is bound locally."
-    );
-
-
-    /*
-      Only reject a genuinely different
-      Firebase account.
-    */
-
-    try {
-
-      await signOut(
-        auth
-      );
-
-    } catch (error) {}
-
-
-    showToast(
-      "এই ডিভাইসে অন্য account আগে থেকেই যুক্ত আছে!"
-    );
 
     return;
 
   }
 
 
-  /*
-    Server binding check.
-  */
-
-  const deviceCheck =
-    await checkDeviceBinding(
-      user.uid
-    );
-
-
-  if (
-    !deviceCheck.allowed
-  ) {
-
-    console.warn(
-      "Device binding rejected:",
-      deviceCheck
-    );
-
-
-    try {
-
-      await signOut(
-        auth
-      );
-
-    } catch (error) {}
-
-
-    showToast(
-      "এই ডিভাইসে অন্য account যুক্ত আছে!"
-    );
-
-    return;
-
-  }
-
-
-  /*
-    Load existing data.
-  */
-
-  const local =
-    getLocalProfile();
-
-
-  const firestore =
-    await loadUserFromFirestore(
-      user.uid
-    );
-
-
-  const realtime =
-    await loadUserFromRealtimeDB(
-      user.uid
-    );
-
-
-  const firebaseBasicData = {
-
-    uid:
-      user.uid,
-
-    name:
-      user.displayName ||
-      firestore?.name ||
-      realtime?.name ||
-      local.name ||
-      "ব্যবহারকারী",
-
-    email:
-      user.email ||
-      firestore?.email ||
-      realtime?.email ||
-      local.email ||
-      "",
-
-    photoURL:
-      user.photoURL ||
-      firestore?.photoURL ||
-      realtime?.photoURL ||
-      local.photoURL ||
-      (
-        "https://api.dicebear.com/7.x/bottts/svg?seed=" +
-        encodeURIComponent(
-          user.uid
-        )
-      )
-
-  };
-
-
-  currentUserProfile =
-    mergeUserData(
-      local,
-      firestore,
-      realtime,
-      firebaseBasicData
-    );
-
-
-  /*
-    Anonymous login-এর নাম যেন
-    local profile থেকে থাকে।
-  */
-
-  if (
-    user.isAnonymous &&
-    local.uid === user.uid &&
-    local.name
-  ) {
-
-    currentUserProfile.name =
-      local.name;
-
-  }
-
-
-  if (
-    !currentUserProfile.referralCode
-  ) {
-
-    currentUserProfile.referralCode =
-      generateReferralCode(
-        user.uid
-      );
-
-  }
-
-
-  if (
-    !currentUserProfile.createdAt
-  ) {
-
-    currentUserProfile.createdAt =
-      new Date().toISOString();
-
-  }
-
-
-  currentUserProfile.isLoggedIn =
+  authProfileLoading =
     true;
 
 
-  /*
-    Device binding.
-    এখানে database permission failure
-    login বন্ধ করবে না।
-  */
+  try {
 
-  const bound =
-    await bindDeviceToAccount(
-      user.uid,
-      currentUserProfile
-    );
+    firebaseUser =
+      user;
 
-
-  if (!bound) {
 
     /*
-      শুধু অন্য account-এর local lock হলে
-      sign out করা হবে।
+      IMPORTANT:
+      এখানে আর Firebase device binding
+      failure হলে signOut করা হবে না।
     */
 
-    const currentBound =
-      getLocalBoundUid();
+    const deviceCheck =
+      await checkDeviceBinding(
+        user.uid
+      );
 
 
-    if (
-      currentBound &&
-      currentBound !== user.uid
-    ) {
+    if (!deviceCheck.allowed) {
 
-      try {
+      console.warn(
+        "Device binding conflict:",
+        deviceCheck
+      );
 
-        await signOut(
-          auth
+
+      /*
+        সত্যিই অন্য UID bind থাকলে
+        logout করা যাবে।
+      */
+
+      if (
+        deviceCheck.reason ===
+        "LOCAL_OTHER_ACCOUNT" ||
+
+        deviceCheck.reason ===
+        "FIRESTORE_OTHER_ACCOUNT" ||
+
+        deviceCheck.reason ===
+        "RTDB_OTHER_ACCOUNT"
+      ) {
+
+        try {
+
+          await signOut(
+            auth
+          );
+
+        } catch (e) {}
+
+        currentUserProfile =
+          getLocalProfile();
+
+        currentUserProfile.isLoggedIn =
+          false;
+
+        saveLocalProfile(
+          currentUserProfile
         );
 
-      } catch (error) {}
+        updateDashboardUI(
+          currentUserProfile
+        );
 
+        showToast(
+          "এই ডিভাইসে অন্য account আগে থেকেই যুক্ত আছে!"
+        );
 
-      currentUserProfile.isLoggedIn =
-        false;
+        return;
 
-
-      saveLocalProfile(
-        currentUserProfile
-      );
-
-
-      updateDashboardUI(
-        currentUserProfile
-      );
-
-
-      showToast(
-        "এই ডিভাইসে অন্য account যুক্ত আছে!"
-      );
-
-
-      return;
+      }
 
     }
 
 
+    const local =
+      getLocalProfile();
+
+
+    const firestore =
+      await loadUserFromFirestore(
+        user.uid
+      );
+
+
+    const realtime =
+      await loadUserFromRealtimeDB(
+        user.uid
+      );
+
+
+    const firebaseBasicData = {
+
+      uid:
+        user.uid,
+
+      name:
+        user.displayName ||
+        firestore?.name ||
+        realtime?.name ||
+        local.name ||
+        "ব্যবহারকারী",
+
+      email:
+        user.email ||
+        firestore?.email ||
+        realtime?.email ||
+        local.email ||
+        "",
+
+      photoURL:
+        user.photoURL ||
+        firestore?.photoURL ||
+        realtime?.photoURL ||
+        local.photoURL ||
+        (
+          "https://api.dicebear.com/7.x/bottts/svg?seed=" +
+          encodeURIComponent(user.uid)
+        )
+
+    };
+
+
+    currentUserProfile =
+      mergeUserData(
+        local,
+        firestore,
+        realtime,
+        firebaseBasicData
+      );
+
+
+    if (
+      !currentUserProfile.referralCode
+    ) {
+
+      currentUserProfile.referralCode =
+        generateReferralCode(
+          user.uid
+        );
+
+    }
+
+
+    if (
+      !currentUserProfile.createdAt
+    ) {
+
+      currentUserProfile.createdAt =
+        new Date().toISOString();
+
+    }
+
+
+    currentUserProfile.isLoggedIn =
+      true;
+
+
     /*
-      Otherwise login remains active.
+      Local binding first.
+      Firebase binding is best-effort.
     */
 
-    console.warn(
-      "Device binding server write unavailable; login kept active."
+    const bound =
+      await bindDeviceToAccount(
+        user.uid,
+        currentUserProfile
+      );
+
+
+    if (!bound) {
+
+      /*
+        এখানে Firebase permission failure-এর
+        কারণে আর signOut করা হবে না।
+      */
+
+      console.warn(
+        "Device binding could not be completed."
+      );
+
+    }
+
+
+    saveLocalProfile(
+      currentUserProfile
     );
 
+
+    updateDashboardUI(
+      currentUserProfile
+    );
+
+
+    /*
+      Background sync
+    */
+
+    syncUserToFirebase(
+      currentUserProfile
+    ).catch(
+      console.warn
+    );
+
+
+    loadTransactionHistory()
+      .catch(
+        console.warn
+      );
+
+
+    closeLoginModal();
+
+
+    console.log(
+      "User loaded:",
+      currentUserProfile
+    );
+
+  } finally {
+
+    authProfileLoading =
+      false;
+
   }
-
-
-  saveLocalProfile(
-    currentUserProfile
-  );
-
-
-  /*
-    Database sync failure will not
-    log the user out.
-  */
-
-  await syncUserToFirebase(
-    currentUserProfile
-  );
-
-
-  updateDashboardUI(
-    currentUserProfile
-  );
-
-
-  closeLoginModal();
-
-
-  await loadTransactionHistory();
-
-
-  console.log(
-    "User profile loaded successfully:",
-    currentUserProfile
-  );
 
 }
 
 
 /* =========================================================
-   AUTH STATE LISTENER
+   AUTH STATE
 ========================================================= */
 
-function startAuthListener() {
-
-  if (!auth) return;
-
+if (auth) {
 
   onAuthStateChanged(
     auth,
@@ -1712,82 +1531,15 @@ function startAuthListener() {
         "Auth state:",
         user
           ? user.uid
-          : "SIGNED OUT"
+          : "signed-out"
       );
 
 
       if (user) {
 
-        try {
-
-          await loadOrCreateFirebaseProfile(
-            user
-          );
-
-        } catch (error) {
-
-          console.error(
-            "Auth profile error:",
-            error
-          );
-
-
-          /*
-            Firebase authentication itself
-            should remain active.
-          */
-
-          firebaseUser =
-            user;
-
-
-          currentUserProfile =
-            getLocalProfile();
-
-
-          currentUserProfile.uid =
-            user.uid;
-
-
-          currentUserProfile.isLoggedIn =
-            true;
-
-
-          currentUserProfile.name =
-            user.displayName ||
-            currentUserProfile.name ||
-            "ব্যবহারকারী";
-
-
-          currentUserProfile.email =
-            user.email ||
-            currentUserProfile.email ||
-            "";
-
-
-          currentUserProfile.photoURL =
-            user.photoURL ||
-            currentUserProfile.photoURL;
-
-
-          saveLocalProfile(
-            currentUserProfile
-          );
-
-
-          updateDashboardUI(
-            currentUserProfile
-          );
-
-
-          closeLoginModal();
-
-
-          showToast(
-            "Login হয়েছে, তবে database sync পরে হবে।"
-          );
-
-        }
+        await loadOrCreateFirebaseProfile(
+          user
+        );
 
       } else {
 
@@ -1795,25 +1547,29 @@ function startAuthListener() {
           null;
 
 
-        currentUserProfile =
-          getLocalProfile();
+        /*
+          যদি login process চলতে থাকে,
+          তখন local profile immediately guest
+          করে দেওয়া হবে না।
+        */
 
+        if (!loginInProgress) {
 
-        currentUserProfile.isLoggedIn =
-          false;
+          currentUserProfile =
+            getLocalProfile();
 
+          currentUserProfile.isLoggedIn =
+            false;
 
-        saveLocalProfile(
-          currentUserProfile
-        );
+          saveLocalProfile(
+            currentUserProfile
+          );
 
+          updateDashboardUI(
+            currentUserProfile
+          );
 
-        updateDashboardUI(
-          currentUserProfile
-        );
-
-
-        await loadTransactionHistory();
+        }
 
       }
 
@@ -1868,8 +1624,9 @@ function(profile) {
 
 
   const bdt =
-    (coins / 100)
-      .toFixed(2);
+    (
+      coins / 100
+    ).toFixed(2);
 
 
   const dashBdtEl =
@@ -1980,14 +1737,14 @@ function(profile) {
   }
 
 
-  const profileUid =
+  const profileUID =
     document.getElementById(
       "profile-user-id"
     );
 
-  if (profileUid) {
+  if (profileUID) {
 
-    profileUid.innerText =
+    profileUID.innerText =
       "UID: " +
       (
         profile.uid ||
@@ -1997,14 +1754,14 @@ function(profile) {
   }
 
 
-  const refCode =
+  const referralDisplay =
     document.getElementById(
       "user-ref-code-display"
     );
 
-  if (refCode) {
+  if (referralDisplay) {
 
-    refCode.innerText =
+    referralDisplay.innerText =
       profile.referralCode ||
       "EARN000000";
 
@@ -2013,28 +1770,28 @@ function(profile) {
 
   if (profile.photoURL) {
 
-    const avatar1 =
+    const avatar =
       document.getElementById(
         "user-avatar-img"
       );
 
-    const avatar2 =
+    const profileAvatar =
       document.getElementById(
         "profile-page-avatar"
       );
 
 
-    if (avatar1) {
+    if (avatar) {
 
-      avatar1.src =
+      avatar.src =
         profile.photoURL;
 
     }
 
 
-    if (avatar2) {
+    if (profileAvatar) {
 
-      avatar2.src =
+      profileAvatar.src =
         profile.photoURL;
 
     }
@@ -2227,16 +1984,53 @@ function() {
 
 
 /* =========================================================
+   PREPARE AUTH
+========================================================= */
+
+async function prepareAuth() {
+
+  if (!auth) {
+
+    throw new Error(
+      "AUTH_NOT_INITIALIZED"
+    );
+
+  }
+
+
+  if (!authPersistenceReady) {
+
+    await setPersistence(
+      auth,
+      browserLocalPersistence
+    );
+
+    authPersistenceReady =
+      true;
+
+  }
+
+}
+
+
+/* =========================================================
    GOOGLE LOGIN
 ========================================================= */
 
 window.handleGoogleLogin =
 async function() {
 
-  if (!firebaseReady || !auth) {
+  if (loginInProgress) {
+
+    return;
+
+  }
+
+
+  if (!auth) {
 
     showToast(
-      "Firebase এখনো প্রস্তুত নয়। একটু পরে চেষ্টা করুন।"
+      "Firebase চালু হয়নি!"
     );
 
     return;
@@ -2244,78 +2038,41 @@ async function() {
   }
 
 
-  /*
-    Existing local binding.
-    Same account হলে login করা যাবে।
-    অন্য account হলে block।
-  */
-
-  const localBoundUid =
-    getLocalBoundUid();
-
-
-  if (
-    localBoundUid &&
-    auth.currentUser &&
-    auth.currentUser.uid ===
-    localBoundUid
-  ) {
-
-    showToast(
-      "এই account ইতিমধ্যে লগইন আছে!"
-    );
-
-    closeLoginModal();
-
-    return;
-
-  }
-
-
-  if (
-    localBoundUid &&
-    !auth.currentUser
-  ) {
-
-    showToast(
-      "এই ডিভাইসে আগে থেকেই একটি account যুক্ত আছে।"
-    );
-
-    return;
-
-  }
-
-
-  if (
-    localBoundUid
-  ) {
-
-    showToast(
-      "এই ডিভাইসে অন্য account খোলা যাবে না!"
-    );
-
-    return;
-
-  }
+  loginInProgress =
+    true;
 
 
   try {
+
+    await prepareAuth();
+
+
+    /*
+      Existing user?
+    */
+
+    if (
+      auth.currentUser
+    ) {
+
+      closeLoginModal();
+
+      showToast(
+        "আপনি ইতিমধ্যে লগইন আছেন!"
+      );
+
+      return;
+
+    }
+
 
     const provider =
       new GoogleAuthProvider();
 
 
     provider.setCustomParameters({
-
-      prompt:
-        "select_account"
-
+      prompt: "select_account"
     });
-
-
-    showToast(
-      "Google login খোলা হচ্ছে..."
-    );
 
 
     const result =
@@ -2325,28 +2082,27 @@ async function() {
       );
 
 
-    const user =
-      result.user;
+    if (
+      result &&
+      result.user
+    ) {
+
+      firebaseUser =
+        result.user;
 
 
-    console.log(
-      "Google login success:",
-      user.uid
-    );
+      /*
+        Auth state observer will load profile.
+      */
+
+      closeLoginModal();
 
 
-    /*
-      Auth success.
-      Profile loader এখন বাকি কাজ করবে।
-    */
+      showToast(
+        "Google login সফল হয়েছে!"
+      );
 
-    closeLoginModal();
-
-
-    showToast(
-      "Google login সফল হয়েছে!"
-    );
-
+    }
 
   } catch (error) {
 
@@ -2356,53 +2112,62 @@ async function() {
     );
 
 
+    let message =
+      "Google login ব্যর্থ হয়েছে!";
+
+
     if (
-      error.code ===
-      "auth/popup-blocked"
-    ) {
-
-      showToast(
-        "Browser popup block করেছে। Popup allow করুন।"
-      );
-
-    } else if (
-      error.code ===
+      error?.code ===
       "auth/popup-closed-by-user"
     ) {
 
-      showToast(
-        "Google login window বন্ধ করা হয়েছে।"
-      );
+      message =
+        "Login window বন্ধ করা হয়েছে।";
 
-    } else if (
-      error.code ===
+    }
+
+
+    if (
+      error?.code ===
+      "auth/popup-blocked"
+    ) {
+
+      message =
+        "Browser popup block করেছে। Popup allow করুন।";
+
+    }
+
+
+    if (
+      error?.code ===
       "auth/unauthorized-domain"
     ) {
 
-      showToast(
-        "Firebase Console-এর Authorized Domains-এ এই website যোগ করুন।"
-      );
+      message =
+        "Firebase Authentication-এর Authorized Domains-এ এই website/domain যোগ করুন।";
 
-    } else if (
-      error.code ===
+    }
+
+
+    if (
+      error?.code ===
       "auth/operation-not-allowed"
     ) {
 
-      showToast(
-        "Firebase Authentication-এ Google Sign-in চালু করুন।"
-      );
-
-    } else {
-
-      showToast(
-        "Google login ব্যর্থ: " +
-        (
-          error.message ||
-          "Unknown error"
-        )
-      );
+      message =
+        "Firebase Console-এ Google Sign-in চালু করুন।";
 
     }
+
+
+    showToast(
+      message
+    );
+
+  } finally {
+
+    loginInProgress =
+      false;
 
   }
 
@@ -2410,7 +2175,7 @@ async function() {
 
 
 /* =========================================================
-   ANONYMOUS / GUEST LOGIN
+   ANONYMOUS LOGIN
 ========================================================= */
 
 window.loginWithGuest =
@@ -2423,10 +2188,17 @@ async function(e) {
   }
 
 
-  if (!firebaseReady || !auth) {
+  if (loginInProgress) {
+
+    return;
+
+  }
+
+
+  if (!auth) {
 
     showToast(
-      "Firebase এখনো প্রস্তুত নয়।"
+      "Firebase Authentication পাওয়া যায়নি!"
     );
 
     return;
@@ -2434,55 +2206,15 @@ async function(e) {
   }
 
 
-  /*
-    Already logged in?
-  */
-
-  if (
-    auth.currentUser
-  ) {
-
-    showToast(
-      "আপনি ইতিমধ্যে লগইন আছেন!"
-    );
-
-    closeLoginModal();
-
-    return;
-
-  }
-
-
-  /*
-    Device already bound?
-  */
-
-  const localBoundUid =
-    getLocalBoundUid();
-
-
-  if (
-    localBoundUid
-  ) {
-
-    showToast(
-      "এই ডিভাইসে ইতিমধ্যে একটি account যুক্ত আছে!"
-    );
-
-    return;
-
-  }
-
-
-  const inputEl =
+  const inputElement =
     document.getElementById(
       "quick-login-name"
     );
 
 
   const input =
-    inputEl
-      ? inputEl.value.trim()
+    inputElement
+      ? inputElement.value.trim()
       : "";
 
 
@@ -2497,25 +2229,63 @@ async function(e) {
   }
 
 
-  if (
-    input.length < 2
-  ) {
-
-    showToast(
-      "কমপক্ষে ২ অক্ষরের নাম দিন।"
-    );
-
-    return;
-
-  }
+  loginInProgress =
+    true;
 
 
   try {
 
-    showToast(
-      "Account তৈরি হচ্ছে..."
-    );
+    await prepareAuth();
 
+
+    /*
+      যদি current session থাকে,
+      নতুন anonymous account বানাবো না।
+    */
+
+    if (
+      auth.currentUser
+    ) {
+
+      firebaseUser =
+        auth.currentUser;
+
+      closeLoginModal();
+
+      showToast(
+        "আপনি ইতিমধ্যে লগইন আছেন!"
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Local device lock শুধু অন্য UID হলে
+      নতুন account আটকাবে।
+    */
+
+    const localBoundUid =
+      localStorage.getItem(
+        DEVICE_LOCK_KEY
+      );
+
+
+    if (localBoundUid) {
+
+      showToast(
+        "এই ডিভাইসে ইতিমধ্যে একটি account যুক্ত আছে।"
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Anonymous sign-in.
+    */
 
     const result =
       await signInAnonymously(
@@ -2527,10 +2297,8 @@ async function(e) {
       result.user;
 
 
-    console.log(
-      "Anonymous login success:",
-      user.uid
-    );
+    firebaseUser =
+      user;
 
 
     const profile = {
@@ -2546,10 +2314,6 @@ async function(e) {
           .toLowerCase()
           .replace(
             /\s+/g,
-            ""
-          )
-          .replace(
-            /[^a-z0-9]/g,
             ""
           ) +
         "@erning.com",
@@ -2586,58 +2350,32 @@ async function(e) {
 
 
     /*
+      IMPORTANT:
       Local lock first.
+      Firebase binding failure no longer
+      cancels authentication.
     */
 
-    if (
-      !lockDeviceToAccount(
-        user.uid
-      )
-    ) {
-
-      await signOut(
-        auth
-      );
-
-
-      showToast(
-        "এই ডিভাইসে অন্য account যুক্ত আছে!"
-      );
-
-      return;
-
-    }
+    lockDeviceToAccount(
+      user.uid
+    );
 
 
     currentUserProfile =
       profile;
 
 
-    firebaseUser =
-      user;
-
-
     saveLocalProfile(
-      currentUserProfile
+      profile
     );
 
 
-    /*
-      Database sync should NOT
-      destroy login.
-    */
-
-    await syncUserToFirebase(
-      currentUserProfile
+    updateDashboardUI(
+      profile
     );
 
 
     closeLoginModal();
-
-
-    updateDashboardUI(
-      currentUserProfile
-    );
 
 
     showToast(
@@ -2645,7 +2383,23 @@ async function(e) {
     );
 
 
-    await loadTransactionHistory();
+    /*
+      Background Firebase sync.
+    */
+
+    bindDeviceToAccount(
+      user.uid,
+      profile
+    ).catch(
+      console.warn
+    );
+
+
+    syncUserToFirebase(
+      profile
+    ).catch(
+      console.warn
+    );
 
 
   } catch (error) {
@@ -2656,35 +2410,51 @@ async function(e) {
     );
 
 
+    let message =
+      "Login ব্যর্থ হয়েছে।";
+
+
     if (
-      error.code ===
+      error?.code ===
       "auth/operation-not-allowed"
     ) {
 
-      showToast(
-        "Firebase Console → Authentication → Anonymous Sign-in চালু করুন।"
-      );
+      message =
+        "Firebase Console → Authentication → Sign-in method → Anonymous Enable করুন।";
 
-    } else if (
-      error.code ===
+    }
+
+
+    if (
+      error?.code ===
       "auth/network-request-failed"
     ) {
 
-      showToast(
-        "Internet connection পরীক্ষা করুন।"
-      );
-
-    } else {
-
-      showToast(
-        "Login ব্যর্থ: " +
-        (
-          error.message ||
-          "Unknown error"
-        )
-      );
+      message =
+        "Internet connection পরীক্ষা করুন।";
 
     }
+
+
+    if (
+      error?.code ===
+      "auth/admin-restricted-operation"
+    ) {
+
+      message =
+        "Firebase Console-এ Anonymous Authentication চালু করুন।";
+
+    }
+
+
+    showToast(
+      message
+    );
+
+  } finally {
+
+    loginInProgress =
+      false;
 
   }
 
@@ -2746,18 +2516,14 @@ async function saveEarning(
 
       try {
 
-        const rtdbEarningRef =
+        await set(
           ref(
             rtdb,
             "earnings/" +
             firebaseUser.uid +
             "/" +
             earningRef.id
-          );
-
-
-        await set(
-          rtdbEarningRef,
+          ),
           {
 
             id:
@@ -2928,12 +2694,6 @@ async function() {
   }
 
 
-  await window.addCoinsToUser(
-    100,
-    "ডেইলি চেক-ইন বোনাস"
-  );
-
-
   currentUserProfile.lastCheckinDate =
     today;
 
@@ -2943,12 +2703,13 @@ async function() {
   );
 
 
-  await syncUserToFirebase(
-    currentUserProfile
+  await window.addCoinsToUser(
+    100,
+    "ডেইলি চেক-ইন বোনাস"
   );
 
 
-  updateDashboardUI(
+  await syncUserToFirebase(
     currentUserProfile
   );
 
@@ -2978,24 +2739,13 @@ async function(e) {
   }
 
 
-  if (!db) {
-
-    showToast(
-      "Firestore চালু নেই!"
-    );
-
-    return;
-
-  }
-
-
-  const selected =
+  const methodElement =
     document.querySelector(
       'input[name="pay_method"]:checked'
     );
 
 
-  if (!selected) {
+  if (!methodElement) {
 
     showToast(
       "Payment method নির্বাচন করুন!"
@@ -3007,25 +2757,32 @@ async function(e) {
 
 
   const method =
-    selected.value;
+    methodElement.value;
+
+
+  const accountElement =
+    document.getElementById(
+      "withdraw-account-no"
+    );
+
+
+  const amountElement =
+    document.getElementById(
+      "withdraw-coin-amount"
+    );
 
 
   const accountNo =
-    document
-      .getElementById(
-        "withdraw-account-no"
-      )
-      .value
-      .trim();
+    accountElement
+      ? accountElement.value.trim()
+      : "";
 
 
   const coinAmount =
     Number(
-      document
-        .getElementById(
-          "withdraw-coin-amount"
-        )
-        .value
+      amountElement
+        ? amountElement.value
+        : 0
     ) || 0;
 
 
@@ -3081,17 +2838,6 @@ async function(e) {
   }
 
 
-  if (!accountNo) {
-
-    showToast(
-      "Payment account লিখুন!"
-    );
-
-    return;
-
-  }
-
-
   const bdtAmount =
     (
       coinAmount / 100
@@ -3134,111 +2880,43 @@ async function(e) {
 
   try {
 
-    await setDoc(
-      doc(
-        db,
-        "withdrawals",
-        withdrawalId
-      ),
-      {
+    if (db) {
 
-        ...withdrawalData,
-
-        createdAt:
-          serverTimestamp()
-
-      }
-    );
-
-
-    const txRef =
-      await addDoc(
-        collection(
+      await setDoc(
+        doc(
           db,
-          "users",
-          firebaseUser.uid,
-          "transactions"
+          "withdrawals",
+          withdrawalId
         ),
         {
 
-          uid:
-            firebaseUser.uid,
-
-          withdrawalId:
-            withdrawalId,
-
-          type:
-            "withdrawal",
-
-          method:
-            method,
-
-          accountNo:
-            accountNo,
-
-          coins:
-            coinAmount,
-
-          bdtAmount:
-            bdtAmount,
-
-          status:
-            "pending",
+          ...withdrawalData,
 
           createdAt:
-            serverTimestamp(),
-
-          createdAtClient:
-            new Date().toISOString()
+            serverTimestamp()
 
         }
       );
 
 
-    if (rtdb) {
-
-      try {
-
-        await set(
-          ref(
-            rtdb,
-            "withdrawals/" +
-            firebaseUser.uid +
-            "/" +
-            withdrawalId
+      const txRef =
+        await addDoc(
+          collection(
+            db,
+            "users",
+            firebaseUser.uid,
+            "transactions"
           ),
           {
-
-            ...withdrawalData,
-
-            createdAt:
-              Date.now()
-
-          }
-        );
-
-
-        await set(
-          ref(
-            rtdb,
-            "transactions/" +
-            firebaseUser.uid +
-            "/" +
-            txRef.id
-          ),
-          {
-
-            id:
-              txRef.id,
 
             uid:
               firebaseUser.uid,
 
-            type:
-              "withdrawal",
-
             withdrawalId:
               withdrawalId,
+
+            type:
+              "withdrawal",
 
             method:
               method,
@@ -3256,22 +2934,98 @@ async function(e) {
               "pending",
 
             createdAt:
-              Date.now()
+              serverTimestamp(),
+
+            createdAtClient:
+              new Date().toISOString()
 
           }
         );
 
-      } catch (error) {
 
-        console.warn(
-          "RTDB withdrawal save failed:",
-          error
-        );
+      if (rtdb) {
+
+        try {
+
+          await set(
+            ref(
+              rtdb,
+              "withdrawals/" +
+              firebaseUser.uid +
+              "/" +
+              withdrawalId
+            ),
+            {
+
+              ...withdrawalData,
+
+              createdAt:
+                Date.now()
+
+            }
+          );
+
+
+          await set(
+            ref(
+              rtdb,
+              "transactions/" +
+              firebaseUser.uid +
+              "/" +
+              txRef.id
+            ),
+            {
+
+              id:
+                txRef.id,
+
+              uid:
+                firebaseUser.uid,
+
+              type:
+                "withdrawal",
+
+              withdrawalId:
+                withdrawalId,
+
+              method:
+                method,
+
+              accountNo:
+                accountNo,
+
+              coins:
+                coinAmount,
+
+              bdtAmount:
+                bdtAmount,
+
+              status:
+                "pending",
+
+              createdAt:
+                Date.now()
+
+            }
+          );
+
+        } catch (error) {
+
+          console.warn(
+            "RTDB withdrawal sync failed:",
+            error
+          );
+
+        }
 
       }
 
     }
 
+
+    /*
+      Balance reduce
+    */
 
     currentUserProfile.coins =
       Number(
@@ -3285,11 +3039,6 @@ async function(e) {
     );
 
 
-    updateDashboardUI(
-      currentUserProfile
-    );
-
-
     await syncUserToFirebase(
       currentUserProfile
     );
@@ -3298,16 +3047,17 @@ async function(e) {
     await loadTransactionHistory();
 
 
-    document
-      .getElementById(
+    const form =
+      document.getElementById(
         "withdraw-form"
-      )
-      .reset();
+      );
 
 
-    updateWithdrawalThreshold(
-      "bKash"
-    );
+    if (form) {
+
+      form.reset();
+
+    }
 
 
     showToast(
@@ -3352,11 +3102,12 @@ async function loadTransactionHistory() {
     !db
   ) {
 
-    container.innerHTML = `
+    container.innerHTML =
+      `
       <div class="text-center py-6 text-slate-500 text-xs">
         Login করলে transaction history দেখা যাবে
       </div>
-    `;
+      `;
 
     return;
 
@@ -3389,11 +3140,12 @@ async function loadTransactionHistory() {
       snapshot.empty
     ) {
 
-      container.innerHTML = `
+      container.innerHTML =
+        `
         <div class="text-center py-6 text-slate-500 text-xs">
           কোনো transaction নেই
         </div>
-      `;
+        `;
 
       return;
 
@@ -3424,16 +3176,13 @@ async function loadTransactionHistory() {
           <div>
 
             <div class="font-bold text-white">
-
               ${escapeHTML(
                 item.method ||
                 "Transaction"
               )}
-
             </div>
 
             <div class="text-[10px] text-slate-400">
-
               ${
                 item.accountNo
                   ? escapeHTML(
@@ -3441,7 +3190,6 @@ async function loadTransactionHistory() {
                     )
                   : ""
               }
-
             </div>
 
           </div>
@@ -3449,47 +3197,45 @@ async function loadTransactionHistory() {
           <div class="text-right">
 
             <div class="font-bold text-amber-300">
-
-              ${Number(
-                item.coins || 0
-              ).toLocaleString()}
-
+              ${
+                Number(
+                  item.coins || 0
+                ).toLocaleString()
+              }
               কয়েন
-
             </div>
 
             <span
               class="inline-block text-[10px] px-2 py-0.5 rounded-full border bg-amber-500/20 text-amber-400 border-amber-500/30"
             >
-
               ${escapeHTML(
                 item.status ||
                 "pending"
               )}
-
             </span>
 
           </div>
 
         </div>
 
-      `
+        `
       ).join("");
 
 
   } catch (error) {
 
     console.warn(
-      "Transaction history error:",
+      "Transaction load error:",
       error
     );
 
 
-    container.innerHTML = `
+    container.innerHTML =
+      `
       <div class="text-center py-6 text-red-400 text-xs">
         Transaction load করা যায়নি।
       </div>
-    `;
+      `;
 
   }
 
@@ -3516,14 +3262,18 @@ async function() {
   }
 
 
+  const inputElement =
+    document.getElementById(
+      "refer-input-code"
+    );
+
+
   const input =
-    document
-      .getElementById(
-        "refer-input-code"
-      )
-      .value
-      .trim()
-      .toUpperCase();
+    inputElement
+      ? inputElement.value
+          .trim()
+          .toUpperCase()
+      : "";
 
 
   if (!input) {
@@ -3581,17 +3331,17 @@ async function() {
     );
 
 
-    document
-      .getElementById(
-        "refer-input-code"
-      )
-      .value = "";
+    if (inputElement) {
+
+      inputElement.value =
+        "";
+
+    }
 
 
     showToast(
       "Referral bonus যোগ হয়েছে!"
     );
-
 
   } catch (error) {
 
@@ -3611,68 +3361,103 @@ async function() {
 
 
 /* =========================================================
-   COPY REFERRAL LINK
+   COPY REFERRAL
 ========================================================= */
 
 window.copyReferralLink =
 function() {
 
+  const codeElement =
+    document.getElementById(
+      "user-ref-code-display"
+    );
+
+
   const code =
-    document
-      .getElementById(
-        "user-ref-code-display"
-      )
-      .innerText;
+    codeElement
+      ? codeElement.innerText
+      : "";
 
 
   const link =
     `${window.location.origin}/?ref=${code}`;
 
 
-  navigator.clipboard
-    .writeText(link)
-    .then(() => {
+  if (
+    navigator.clipboard
+  ) {
 
-      showToast(
-        "Referral link copy হয়েছে!"
+    navigator.clipboard
+      .writeText(
+        link
+      )
+      .then(
+        () => {
+
+          showToast(
+            "Referral link copy হয়েছে!"
+          );
+
+        }
+      )
+      .catch(
+        () => {
+
+          fallbackCopy(
+            link
+          );
+
+        }
       );
 
-    })
-    .catch(() => {
+  } else {
 
-      const input =
-        document.createElement(
-          "input"
-        );
+    fallbackCopy(
+      link
+    );
 
-
-      input.value =
-        link;
-
-
-      document.body.appendChild(
-        input
-      );
-
-
-      input.select();
-
-
-      document.execCommand(
-        "copy"
-      );
-
-
-      input.remove();
-
-
-      showToast(
-        "Referral link copy হয়েছে!"
-      );
-
-    });
+  }
 
 };
+
+
+function fallbackCopy(text) {
+
+  const input =
+    document.createElement(
+      "input"
+    );
+
+
+  input.value =
+    text;
+
+
+  document.body.appendChild(
+    input
+  );
+
+
+  input.select();
+
+
+  try {
+
+    document.execCommand(
+      "copy"
+    );
+
+  } catch (e) {}
+
+
+  input.remove();
+
+
+  showToast(
+    "Referral link copy হয়েছে!"
+  );
+
+}
 
 
 /* =========================================================
@@ -3696,15 +3481,30 @@ async function(coins) {
 
 
   /*
-    Sponsor URL
+    Existing sponsored destination রাখা হয়েছে।
   */
 
-  window.open(
-    "https://asiaso.org/4/bb55e1291be0960bbbcb120dc793c7f3",
-    "_blank",
-    "noopener,noreferrer"
-  );
+  try {
 
+    window.open(
+      "https://asiaso.org/4/bb55e1291be0960bbbcb120dc793c7f3",
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Ad open error:",
+      error
+    );
+
+  }
+
+
+  /*
+    Existing reward system রাখা হয়েছে।
+  */
 
   await window.addCoinsToUser(
     coins,
@@ -3805,14 +3605,17 @@ function(
 
     if (game) {
 
-      setTimeout(() => {
+      setTimeout(
+        () => {
 
-        game.scrollIntoView({
-          behavior:
-            "smooth"
-        });
+          game.scrollIntoView({
+            behavior:
+              "smooth"
+          });
 
-      }, 100);
+        },
+        100
+      );
 
     }
 
@@ -3834,11 +3637,23 @@ function(
 window.convertCoinsToBDT =
 function() {
 
+  const inputElement =
+    document.getElementById(
+      "calc-coins-input"
+    );
+
+
+  const outputElement =
+    document.getElementById(
+      "calc-bdt-output"
+    );
+
+
   const input =
     Number(
-      document.getElementById(
-        "calc-coins-input"
-      ).value
+      inputElement
+        ? inputElement.value
+        : 0
     ) || 0;
 
 
@@ -3848,15 +3663,9 @@ function() {
     ).toFixed(2);
 
 
-  const output =
-    document.getElementById(
-      "calc-bdt-output"
-    );
+  if (outputElement) {
 
-
-  if (output) {
-
-    output.innerText =
+    outputElement.innerText =
       `৳ ${bdt}`;
 
   }
@@ -3894,15 +3703,15 @@ function(method) {
   };
 
 
-  const hint =
+  const element =
     document.getElementById(
       "withdraw-threshold-hint"
     );
 
 
-  if (hint) {
+  if (element) {
 
-    hint.innerText =
+    element.innerText =
       "💡 সর্বনিম্ন উইথড্র লিমিট: " +
       (
         map[method] ||
@@ -3936,10 +3745,6 @@ async function() {
       null;
 
 
-    currentUserProfile =
-      getLocalProfile();
-
-
     currentUserProfile.isLoggedIn =
       false;
 
@@ -3955,9 +3760,8 @@ async function() {
 
 
     showToast(
-      "সফলভাবে লগআউট হয়েছে। এই ডিভাইসে একই account পুনরায় ব্যবহার করা যাবে।"
+      "সফলভাবে লগআউট হয়েছে। একই account আবার login করতে পারবেন।"
     );
-
 
   } catch (error) {
 
@@ -3997,10 +3801,6 @@ function(message) {
 
   if (!toast || !text) {
 
-    console.log(
-      message
-    );
-
     return;
 
   }
@@ -4015,19 +3815,16 @@ function(message) {
   );
 
 
-  clearTimeout(
-    window.__toastTimer
-  );
-
-
-  window.__toastTimer =
-    setTimeout(() => {
+  setTimeout(
+    () => {
 
       toast.classList.add(
         "hidden"
       );
 
-    }, 3500);
+    },
+    3000
+  );
 
 };
 
@@ -4045,7 +3842,11 @@ function playWinSound() {
       window.webkitAudioContext;
 
 
-    if (!AudioContext) return;
+    if (!AudioContext) {
+
+      return;
+
+    }
 
 
     const ctx =
@@ -4144,6 +3945,15 @@ function escapeHTML(value) {
 
 
 /* =========================================================
+   INITIAL UI
+========================================================= */
+
+updateDashboardUI(
+  currentUserProfile
+);
+
+
+/* =========================================================
    URL REFERRAL
 ========================================================= */
 
@@ -4161,40 +3971,27 @@ const refCode =
 
 if (refCode) {
 
-  setTimeout(() => {
+  setTimeout(
+    () => {
 
-    const input =
-      document.getElementById(
-        "refer-input-code"
-      );
+      const input =
+        document.getElementById(
+          "refer-input-code"
+        );
 
 
-    if (input) {
+      if (input) {
 
-      input.value =
-        refCode.toUpperCase();
+        input.value =
+          refCode.toUpperCase();
 
-    }
+      }
 
-  }, 1000);
+    },
+    1000
+  );
 
 }
-
-
-/* =========================================================
-   INITIAL UI
-========================================================= */
-
-updateDashboardUI(
-  currentUserProfile
-);
-
-
-/* =========================================================
-   START FIREBASE
-========================================================= */
-
-initializeFirebase();
 
 
 /* =========================================================
@@ -4202,56 +3999,32 @@ initializeFirebase();
 ========================================================= */
 
 console.log(
-  "TakaEarn Firebase updated version loaded."
+  "TakaEarn Firebase version loaded."
 );
 
 console.log(
-  "Firestore:"
+  "Auth persistence:",
+  authPersistenceReady
 );
 
 console.log(
-  "users/{uid}"
+  "Device installation:",
+  deviceInstallationId
 );
 
 console.log(
-  "users/{uid}/earnings/{earningId}"
+  "Firestore:",
+  !!db
 );
 
 console.log(
-  "users/{uid}/transactions/{transactionId}"
+  "Realtime Database:",
+  !!rtdb
 );
 
 console.log(
-  "withdrawals/{withdrawalId}"
-);
-
-console.log(
-  "deviceBindings/{deviceInstallationId}"
-);
-
-console.log(
-  "Realtime Database:"
-);
-
-console.log(
-  "users/{uid}"
-);
-
-console.log(
-  "earnings/{uid}/{earningId}"
-);
-
-console.log(
-  "transactions/{uid}/{transactionId}"
-);
-
-console.log(
-  "withdrawals/{uid}/{withdrawalId}"
-);
-
-console.log(
-  "deviceBindings/{deviceInstallationId}"
+  "Authentication:",
+  !!auth
 );
 
 </script>
-```
