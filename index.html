@@ -471,30 +471,9 @@
       </h3>
 
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 gap-3">
 
-        <button
-          onclick="switchTab('tab-tasks','quiz')"
-          class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group"
-        >
-
-          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg mb-2">
-
-            <i class="fa-solid fa-calculator"></i>
-
-          </div>
-
-          <h4 class="font-bold text-white text-sm">
-            Math Quiz
-          </h4>
-
-          <p class="text-[11px] text-slate-400 mt-0.5">
-            সহজ অংকের উত্তর
-          </p>
-
-        </button>
-
-
+        <!-- Sponsored Tasks -->
         <button
           onclick="switchTab('tab-tasks','ads')"
           class="glass-card p-4 rounded-2xl hover:border-brand-500/50 transition-all text-right group"
@@ -507,11 +486,11 @@
           </div>
 
           <h4 class="font-bold text-white text-sm">
-            Rewarded Ads
+            Sponsored Tasks
           </h4>
 
           <p class="text-[11px] text-slate-400 mt-0.5">
-            বিজ্ঞাপন দেখে পয়েন্ট
+            Sponsored task সম্পন্ন করে পয়েন্ট নিন
           </p>
 
         </button>
@@ -553,68 +532,7 @@
     </div>
 
 
-    <!-- Math -->
-    <div
-      id="task-quiz-card"
-      class="glass-card rounded-2xl p-5 md:p-6"
-    >
-
-      <div class="flex items-center justify-between mb-4">
-
-        <div class="flex items-center space-x-3 space-x-reverse">
-
-          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg">
-
-            <i class="fa-solid fa-calculator"></i>
-
-          </div>
-
-          <div>
-
-            <h3 class="font-bold text-white text-sm sm:text-base">
-              Math Quiz
-            </h3>
-
-            <p class="text-xs text-slate-400">
-              সঠিক উত্তর দিয়ে পয়েন্ট
-            </p>
-
-          </div>
-
-        </div>
-
-        <span class="text-xs bg-blue-500/20 text-blue-300 px-2.5 py-1 rounded-full font-semibold">
-          +২৫
-        </span>
-
-      </div>
-
-
-      <div class="bg-slate-900/90 rounded-xl p-5 border border-slate-800 text-center">
-
-        <div class="text-xs text-slate-400 mb-2">
-          সঠিক উত্তর বেছে নিন:
-        </div>
-
-        <div
-          id="quiz-question"
-          class="text-2xl sm:text-3xl font-black text-white tracking-wider my-3"
-        >
-          Loading...
-        </div>
-
-        <div
-          id="quiz-options-container"
-          class="grid grid-cols-2 gap-3 max-w-xs mx-auto mt-4"
-        >
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- Ads -->
+    <!-- Sponsored Tasks -->
     <div
       id="task-ads-card"
       class="glass-card rounded-2xl p-5 md:p-6"
@@ -1494,10 +1412,6 @@ const firebaseConfig = {
   appId:
     "1:69804884240:web:2e2ea56642c937b15ae595",
 
-  /* তোমার RTDB যদি এই URL না হয়,
-     Firebase Console → Realtime Database →
-     Data থেকে exact URL বসাবে */
-
   databaseURL:
     "https://erning-344b8-default-rtdb.firebaseio.com"
 
@@ -1545,13 +1459,16 @@ try {
 ========================================================= */
 
 const LOCAL_STORE_KEY =
-  "takaearn_user_profile_v5";
+  "takaearn_user_profile_v6";
 
 const LOCAL_TX_KEY =
-  "takaearn_transactions_v5";
+  "takaearn_transactions_v6";
 
 const DEVICE_LOCK_KEY =
   "takaearn_bound_device_uid";
+
+const DEVICE_ID_KEY =
+  "takaearn_installation_id_v1";
 
 
 /* =========================================================
@@ -1562,22 +1479,81 @@ let currentUserProfile = null;
 
 let firebaseUser = null;
 
+let deviceInstallationId = null;
+
 
 /* =========================================================
-   GENERATE REFERRAL
+   DEVICE ID
 ========================================================= */
 
-function generateReferralCode(uid) {
+function generateRandomId(length = 32) {
 
-  const clean =
-    String(uid || "")
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .slice(-6)
-      .toUpperCase();
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  return "EARN" + clean;
+  let result = "";
+
+  for (let i = 0; i < length; i++) {
+
+    result +=
+      chars.charAt(
+        Math.floor(
+          Math.random() * chars.length
+        )
+      );
+
+  }
+
+  return result;
 
 }
+
+
+/*
+  Browser installation ID.
+
+  এটি server-side device binding-এর key হিসেবে ব্যবহার হবে।
+*/
+
+function getDeviceInstallationId() {
+
+  try {
+
+    let id =
+      localStorage.getItem(
+        DEVICE_ID_KEY
+      );
+
+    if (!id) {
+
+      id =
+        generateRandomId(40);
+
+      localStorage.setItem(
+        DEVICE_ID_KEY,
+        id
+      );
+
+    }
+
+    return id;
+
+  } catch (error) {
+
+    console.warn(
+      "Device ID storage error:",
+      error
+    );
+
+    return generateRandomId(40);
+
+  }
+
+}
+
+
+deviceInstallationId =
+  getDeviceInstallationId();
 
 
 /* =========================================================
@@ -1638,7 +1614,8 @@ function getLocalProfile() {
 
     status: "active",
 
-    createdAt: new Date().toISOString()
+    createdAt:
+      new Date().toISOString()
 
   };
 
@@ -1675,7 +1652,7 @@ function saveLocalProfile(profile) {
 
 
 /* =========================================================
-   DEVICE LOCK
+   DEVICE LOCAL LOCK
 ========================================================= */
 
 function isDeviceLockedToOtherAccount(uid) {
@@ -1695,12 +1672,376 @@ function isDeviceLockedToOtherAccount(uid) {
 
 function lockDeviceToAccount(uid) {
 
-  if (!localStorage.getItem(DEVICE_LOCK_KEY)) {
+  const boundUid =
+    localStorage.getItem(
+      DEVICE_LOCK_KEY
+    );
+
+  if (!boundUid) {
 
     localStorage.setItem(
       DEVICE_LOCK_KEY,
       uid
     );
+
+    return true;
+
+  }
+
+  return boundUid === uid;
+
+}
+
+
+/* =========================================================
+   FIRESTORE DEVICE LOCK
+========================================================= */
+
+async function getFirestoreDeviceBinding() {
+
+  if (!db || !deviceInstallationId) {
+
+    return null;
+
+  }
+
+  try {
+
+    const deviceRef =
+      doc(
+        db,
+        "deviceBindings",
+        deviceInstallationId
+      );
+
+    const snap =
+      await getDoc(deviceRef);
+
+    if (snap.exists()) {
+
+      return snap.data();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Device binding read error:",
+      error
+    );
+
+  }
+
+  return null;
+
+}
+
+
+/* =========================================================
+   RTDB DEVICE LOCK
+========================================================= */
+
+async function getRealtimeDeviceBinding() {
+
+  if (!rtdb || !deviceInstallationId) {
+
+    return null;
+
+  }
+
+  try {
+
+    const deviceRef =
+      ref(
+        rtdb,
+        "deviceBindings/" +
+        deviceInstallationId
+      );
+
+    const snap =
+      await get(deviceRef);
+
+    if (snap.exists()) {
+
+      return snap.val();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "RTDB device binding read error:",
+      error
+    );
+
+  }
+
+  return null;
+
+}
+
+
+/* =========================================================
+   CHECK DEVICE BINDING
+========================================================= */
+
+async function checkDeviceBinding(uid) {
+
+  if (!uid) {
+
+    return {
+      allowed: false,
+      reason: "INVALID_UID"
+    };
+
+  }
+
+
+  /* Local fast check */
+
+  if (
+    isDeviceLockedToOtherAccount(
+      uid
+    )
+  ) {
+
+    return {
+      allowed: false,
+      reason: "LOCAL_OTHER_ACCOUNT"
+    };
+
+  }
+
+
+  /*
+    Firebase authoritative checks
+  */
+
+  const [
+    firestoreBinding,
+    realtimeBinding
+  ] = await Promise.all([
+    getFirestoreDeviceBinding(),
+    getRealtimeDeviceBinding()
+  ]);
+
+
+  const firestoreUid =
+    firestoreBinding?.uid || "";
+
+  const realtimeUid =
+    realtimeBinding?.uid || "";
+
+
+  /*
+    Firestore binding থাকলে
+    সেটিই check করা হবে।
+  */
+
+  if (
+    firestoreUid &&
+    firestoreUid !== uid
+  ) {
+
+    return {
+      allowed: false,
+      reason: "FIRESTORE_OTHER_ACCOUNT",
+      boundUid: firestoreUid
+    };
+
+  }
+
+
+  /*
+    RTDB binding থাকলে সেটিও check করা হবে।
+  */
+
+  if (
+    realtimeUid &&
+    realtimeUid !== uid
+  ) {
+
+    return {
+      allowed: false,
+      reason: "RTDB_OTHER_ACCOUNT",
+      boundUid: realtimeUid
+    };
+
+  }
+
+
+  return {
+    allowed: true,
+    reason: "OK"
+  };
+
+}
+
+
+/* =========================================================
+   CREATE DEVICE BINDING
+========================================================= */
+
+async function bindDeviceToAccount(uid, profile) {
+
+  if (
+    !uid ||
+    !deviceInstallationId
+  ) {
+
+    return false;
+
+  }
+
+
+  /*
+    প্রথমে existing binding check
+  */
+
+  const check =
+    await checkDeviceBinding(
+      uid
+    );
+
+
+  if (!check.allowed) {
+
+    return false;
+
+  }
+
+
+  const bindingData = {
+
+    deviceId:
+      deviceInstallationId,
+
+    uid:
+      uid,
+
+    name:
+      profile?.name ||
+      "ব্যবহারকারী",
+
+    createdAtClient:
+      new Date().toISOString(),
+
+    updatedAt:
+      Date.now(),
+
+    active:
+      true
+
+  };
+
+
+  try {
+
+    /*
+      Firestore
+    */
+
+    if (db) {
+
+      const deviceRef =
+        doc(
+          db,
+          "deviceBindings",
+          deviceInstallationId
+        );
+
+      const existing =
+        await getDoc(
+          deviceRef
+        );
+
+
+      if (
+        existing.exists() &&
+        existing.data()?.uid &&
+        existing.data()?.uid !== uid
+      ) {
+
+        return false;
+
+      }
+
+
+      await setDoc(
+        deviceRef,
+        bindingData,
+        {
+          merge: true
+        }
+      );
+
+    }
+
+
+    /*
+      Realtime Database
+    */
+
+    if (rtdb) {
+
+      const deviceRef =
+        ref(
+          rtdb,
+          "deviceBindings/" +
+          deviceInstallationId
+        );
+
+
+      const existing =
+        await get(
+          deviceRef
+        );
+
+
+      if (
+        existing.exists() &&
+        existing.val()?.uid &&
+        existing.val()?.uid !== uid
+      ) {
+
+        return false;
+
+      }
+
+
+      await set(
+        deviceRef,
+        bindingData
+      );
+
+    }
+
+
+    /*
+      Local backup lock
+    */
+
+    localStorage.setItem(
+      DEVICE_LOCK_KEY,
+      uid
+    );
+
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Device binding create error:",
+      error
+    );
+
+    /*
+      Firebase rules permission না থাকলে
+      server binding সফল হবে না।
+    */
+
+    return false;
 
   }
 
@@ -1769,7 +2110,8 @@ async function saveUserToFirestore(profile) {
           serverTimestamp(),
 
         createdAt:
-          profile.createdAt || new Date().toISOString()
+          profile.createdAt ||
+          new Date().toISOString()
 
       },
 
@@ -1777,10 +2119,6 @@ async function saveUserToFirestore(profile) {
         merge: true
       }
 
-    );
-
-    console.log(
-      "Firestore user saved"
     );
 
     return true;
@@ -1860,14 +2198,11 @@ async function saveUserToRealtimeDB(profile) {
           Date.now(),
 
         createdAt:
-          profile.createdAt || new Date().toISOString()
+          profile.createdAt ||
+          new Date().toISOString()
 
       }
 
-    );
-
-    console.log(
-      "Realtime Database user saved"
     );
 
     return true;
@@ -2030,12 +2365,14 @@ function mergeUserData(
 
   }
 
+
   merged.uid =
     firebaseUserData?.uid ||
     firestoreData?.uid ||
     rtdbData?.uid ||
     localData?.uid ||
     "";
+
 
   merged.coins =
     Number(
@@ -2045,6 +2382,7 @@ function mergeUserData(
       0
     );
 
+
   merged.totalEarned =
     Number(
       firestoreData?.totalEarned ??
@@ -2052,6 +2390,7 @@ function mergeUserData(
       localData?.totalEarned ??
       0
     );
+
 
   merged.referralCount =
     Number(
@@ -2061,12 +2400,15 @@ function mergeUserData(
       0
     );
 
+
   merged.isLoggedIn =
     true;
+
 
   merged.status =
     merged.status ||
     "active";
+
 
   return merged;
 
@@ -2074,27 +2416,68 @@ function mergeUserData(
 
 
 /* =========================================================
-   CREATE / LOAD FIREBASE USER
+   LOAD / CREATE FIREBASE USER
 ========================================================= */
 
 async function loadOrCreateFirebaseProfile(user) {
 
   if (!user) return;
 
-  firebaseUser = user;
+
+  firebaseUser =
+    user;
+
+
+  /*
+    Device lock check BEFORE loading account.
+  */
+
+  const deviceCheck =
+    await checkDeviceBinding(
+      user.uid
+    );
+
+
+  if (!deviceCheck.allowed) {
+
+    console.error(
+      "Device is already bound:",
+      deviceCheck
+    );
+
+
+    try {
+
+      await signOut(auth);
+
+    } catch (e) {}
+
+
+    showToast(
+      "এই ডিভাইসে অন্য একটি account আগে থেকেই যুক্ত আছে!"
+    );
+
+
+    return;
+
+  }
+
 
   const local =
     getLocalProfile();
+
 
   const firestore =
     await loadUserFromFirestore(
       user.uid
     );
 
+
   const realtime =
     await loadUserFromRealtimeDB(
       user.uid
     );
+
 
   const firebaseBasicData = {
 
@@ -2137,9 +2520,9 @@ async function loadOrCreateFirebaseProfile(user) {
     );
 
 
-  /* নতুন user হলে default values */
-
-  if (!currentUserProfile.referralCode) {
+  if (
+    !currentUserProfile.referralCode
+  ) {
 
     currentUserProfile.referralCode =
       generateReferralCode(
@@ -2149,7 +2532,9 @@ async function loadOrCreateFirebaseProfile(user) {
   }
 
 
-  if (!currentUserProfile.createdAt) {
+  if (
+    !currentUserProfile.createdAt
+  ) {
 
     currentUserProfile.createdAt =
       new Date().toISOString();
@@ -2161,8 +2546,49 @@ async function loadOrCreateFirebaseProfile(user) {
     true;
 
 
-  lockDeviceToAccount(
-    user.uid
+  /*
+    Firebase device binding
+  */
+
+  const bound =
+    await bindDeviceToAccount(
+      user.uid,
+      currentUserProfile
+    );
+
+
+  if (!bound) {
+
+    try {
+
+      await signOut(auth);
+
+    } catch (e) {}
+
+
+    currentUserProfile.isLoggedIn =
+      false;
+
+    saveLocalProfile(
+      currentUserProfile
+    );
+
+    updateDashboardUI(
+      currentUserProfile
+    );
+
+
+    showToast(
+      "এই ডিভাইসটি অন্য account-এর সাথে যুক্ত!"
+    );
+
+    return;
+
+  }
+
+
+  saveLocalProfile(
+    currentUserProfile
   );
 
 
@@ -2212,6 +2638,10 @@ if (auth) {
             error
           );
 
+          showToast(
+            "Account load করতে সমস্যা হয়েছে!"
+          );
+
         }
 
       } else {
@@ -2256,6 +2686,7 @@ function(profile) {
     document.getElementById(
       "header-user-coins"
     );
+
 
   const dashCoinEl =
     document.getElementById(
@@ -2384,6 +2815,7 @@ function(profile) {
     ).src =
       profile.photoURL;
 
+
     document.getElementById(
       "profile-page-avatar"
     ).src =
@@ -2396,11 +2828,17 @@ function(profile) {
 
     document.getElementById(
       "login-btn"
-    ).classList.add("hidden");
+    ).classList.add(
+      "hidden"
+    );
+
 
     document.getElementById(
       "user-avatar-btn"
-    ).classList.remove("hidden");
+    ).classList.remove(
+      "hidden"
+    );
+
 
     document.getElementById(
       "account-status-label"
@@ -2411,11 +2849,17 @@ function(profile) {
 
     document.getElementById(
       "login-btn"
-    ).classList.remove("hidden");
+    ).classList.remove(
+      "hidden"
+    );
+
 
     document.getElementById(
       "user-avatar-btn"
-    ).classList.add("hidden");
+    ).classList.add(
+      "hidden"
+    );
+
 
     document.getElementById(
       "account-status-label"
@@ -2438,6 +2882,7 @@ function(profile) {
       "daily-checkin-btn"
     );
 
+
   const dailyText =
     document.getElementById(
       "daily-btn-text"
@@ -2452,8 +2897,10 @@ function(profile) {
     dailyBtn.disabled =
       true;
 
+
     dailyBtn.className =
       "shrink-0 bg-slate-800 text-slate-500 font-bold px-5 py-3 rounded-xl flex items-center justify-center space-x-2 space-x-reverse cursor-not-allowed border border-slate-700";
+
 
     dailyText.innerText =
       "আজকের বোনাস নেওয়া হয়েছে";
@@ -2463,8 +2910,10 @@ function(profile) {
     dailyBtn.disabled =
       false;
 
+
     dailyBtn.className =
       "shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-slate-950 font-bold px-5 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 space-x-reverse cursor-pointer";
+
 
     dailyText.innerText =
       "ডেইলি চেক-ইন (+১০০ পয়েন্ট)";
@@ -2482,8 +2931,12 @@ window.openLoginModal =
 function() {
 
   document
-    .getElementById("login-modal")
-    .classList.remove("hidden");
+    .getElementById(
+      "login-modal"
+    )
+    .classList.remove(
+      "hidden"
+    );
 
 };
 
@@ -2492,8 +2945,12 @@ window.closeLoginModal =
 function() {
 
   document
-    .getElementById("login-modal")
-    .classList.add("hidden");
+    .getElementById(
+      "login-modal"
+    )
+    .classList.add(
+      "hidden"
+    );
 
 };
 
@@ -2509,6 +2966,50 @@ async function() {
 
     showToast(
       "Firebase চালু হয়নি!"
+    );
+
+    return;
+
+  }
+
+
+  /*
+    যদি device আগে থেকেই অন্য account-এর
+    সাথে bind থাকে, login শুরুই করা হবে না।
+  */
+
+  const localBoundUid =
+    localStorage.getItem(
+      DEVICE_LOCK_KEY
+    );
+
+
+  if (localBoundUid) {
+
+    /*
+      বর্তমানে একই account Firebase session
+      থাকলে auth state সেটা handle করবে।
+    */
+
+    if (
+      auth.currentUser &&
+      auth.currentUser.uid ===
+      localBoundUid
+    ) {
+
+      showToast(
+        "এই account ইতিমধ্যেই লগইন আছে!"
+      );
+
+      closeLoginModal();
+
+      return;
+
+    }
+
+
+    showToast(
+      "এই ডিভাইসে অন্য account খোলা যাবে না!"
     );
 
     return;
@@ -2533,16 +3034,58 @@ async function() {
       result.user;
 
 
-    if (
-      isDeviceLockedToOtherAccount(
+    const check =
+      await checkDeviceBinding(
         user.uid
-      )
-    ) {
+      );
+
+
+    if (!check.allowed) {
 
       await signOut(auth);
 
       showToast(
-        "এই ডিভাইসে অন্য account যুক্ত আছে!"
+        "এই ডিভাইসে অন্য account আগে থেকেই যুক্ত আছে!"
+      );
+
+      return;
+
+    }
+
+
+    const profileForBinding = {
+
+      uid:
+        user.uid,
+
+      name:
+        user.displayName ||
+        "ব্যবহারকারী",
+
+      email:
+        user.email ||
+        "",
+
+      photoURL:
+        user.photoURL ||
+        ""
+
+    };
+
+
+    const bound =
+      await bindDeviceToAccount(
+        user.uid,
+        profileForBinding
+      );
+
+
+    if (!bound) {
+
+      await signOut(auth);
+
+      showToast(
+        "এই ডিভাইসটি অন্য account-এর সাথে যুক্ত!"
       );
 
       return;
@@ -2582,7 +3125,58 @@ window.loginWithGuest =
 async function(e) {
 
   if (e) {
+
     e.preventDefault();
+
+  }
+
+
+  /*
+    Local device already bound?
+  */
+
+  const localBoundUid =
+    localStorage.getItem(
+      DEVICE_LOCK_KEY
+    );
+
+
+  if (localBoundUid) {
+
+    showToast(
+      "এই ডিভাইসে ইতিমধ্যে একটি account যুক্ত আছে!"
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Firebase server binding check
+    নতুন UID এখনো জানা নেই, তাই
+    installation ID-এর binding সরাসরি check করা হবে।
+  */
+
+  const firestoreBinding =
+    await getFirestoreDeviceBinding();
+
+
+  const realtimeBinding =
+    await getRealtimeDeviceBinding();
+
+
+  if (
+    firestoreBinding?.uid ||
+    realtimeBinding?.uid
+  ) {
+
+    showToast(
+      "এই ডিভাইসে আগে থেকেই একটি account যুক্ত আছে!"
+    );
+
+    return;
+
   }
 
 
@@ -2629,16 +3223,67 @@ async function(e) {
       result.user;
 
 
-    if (
-      isDeviceLockedToOtherAccount(
-        user.uid
-      )
-    ) {
+    /*
+      UID পাওয়া গেছে।
+      এবার device binding তৈরি হবে।
+    */
+
+    const profile = {
+
+      uid:
+        user.uid,
+
+      name:
+        input,
+
+      email:
+        input
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          + "@erning.com",
+
+      photoURL:
+        "https://api.dicebear.com/7.x/bottts/svg?seed=" +
+        encodeURIComponent(input),
+
+      coins: 0,
+
+      totalEarned: 0,
+
+      referralCode:
+        generateReferralCode(
+          user.uid
+        ),
+
+      referredBy: "",
+
+      referralCount: 0,
+
+      lastCheckinDate: "",
+
+      isLoggedIn: true,
+
+      status: "active",
+
+      createdAt:
+        new Date().toISOString()
+
+    };
+
+
+    const bound =
+      await bindDeviceToAccount(
+        user.uid,
+        profile
+      );
+
+
+    if (!bound) {
 
       await signOut(auth);
 
       showToast(
-        "এই ডিভাইসে অন্য account সক্রিয় আছে!"
+        "এই ডিভাইসে অন্য account আগে থেকেই যুক্ত!"
       );
 
       return;
@@ -2646,42 +3291,8 @@ async function(e) {
     }
 
 
-    /* Name Firebase profile-এ save হবে */
-
     currentUserProfile =
-      getLocalProfile();
-
-
-    currentUserProfile.uid =
-      user.uid;
-
-    currentUserProfile.name =
-      input;
-
-    currentUserProfile.email =
-      input
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        + "@erning.com";
-
-    currentUserProfile.photoURL =
-      "https://api.dicebear.com/7.x/bottts/svg?seed=" +
-      encodeURIComponent(input);
-
-    currentUserProfile.isLoggedIn =
-      true;
-
-
-    if (
-      !currentUserProfile.referralCode
-    ) {
-
-      currentUserProfile.referralCode =
-        generateReferralCode(
-          user.uid
-        );
-
-    }
+      profile;
 
 
     saveLocalProfile(
@@ -2741,8 +3352,6 @@ async function saveEarning(
 
   try {
 
-    /* Firestore */
-
     const earningRef =
       await addDoc(
         collection(
@@ -2771,8 +3380,6 @@ async function saveEarning(
         }
       );
 
-
-    /* Realtime Database */
 
     if (rtdb) {
 
@@ -2879,14 +3486,10 @@ async function(
   );
 
 
-  /* Firebase user */
-
   await syncUserToFirebase(
     currentUserProfile
   );
 
-
-  /* Earnings collection */
 
   await saveEarning(
     numVal,
@@ -3107,9 +3710,7 @@ async function(e) {
 
   try {
 
-    /* =====================================================
-       FIRESTORE WITHDRAWALS
-    ===================================================== */
+    /* Firestore withdrawal */
 
     await setDoc(
       doc(
@@ -3128,9 +3729,7 @@ async function(e) {
     );
 
 
-    /* =====================================================
-       FIRESTORE TRANSACTION
-    ===================================================== */
+    /* Firestore transaction */
 
     const txRef =
       await addDoc(
@@ -3176,9 +3775,7 @@ async function(e) {
       );
 
 
-    /* =====================================================
-       RTDB WITHDRAWAL
-    ===================================================== */
+    /* RTDB withdrawal */
 
     if (rtdb) {
 
@@ -3247,9 +3844,7 @@ async function(e) {
     }
 
 
-    /* =====================================================
-       BALANCE REDUCE
-    ===================================================== */
+    /* Balance reduce */
 
     currentUserProfile.coins =
       Number(
@@ -3578,20 +4173,26 @@ function() {
           "input"
         );
 
+
       input.value =
         link;
+
 
       document.body.appendChild(
         input
       );
 
+
       input.select();
+
 
       document.execCommand(
         "copy"
       );
 
+
       input.remove();
+
 
       showToast(
         "Referral link copy হয়েছে!"
@@ -3603,7 +4204,7 @@ function() {
 
 
 /* =========================================================
-   SMARTLINK
+   SPONSORED TASK
 ========================================================= */
 
 window.triggerSmartlinkAd =
@@ -3622,164 +4223,28 @@ async function(coins) {
   }
 
 
-  /* Sponsored URL */
+  /*
+    Sponsored URL
+
+    শুধুমাত্র বৈধ/অনুমোদিত sponsor destination
+    ব্যবহার করবে।
+  */
 
   window.open(
     "https://asiaso.org/4/bb55e1291be0960bbbcb120dc793c7f3",
-    "_blank"
+    "_blank",
+    "noopener,noreferrer"
   );
 
 
   /*
-    গুরুত্বপূর্ণ:
-    এখানে reward system Firebase-এ save হবে।
+    Reward
   */
 
   await window.addCoinsToUser(
     coins,
     "Sponsored task reward"
   );
-
-};
-
-
-/* =========================================================
-   QUIZ
-========================================================= */
-
-function generateMathQuiz() {
-
-  const num1 =
-    Math.floor(
-      Math.random() * 20
-    ) + 5;
-
-
-  const num2 =
-    Math.floor(
-      Math.random() * 15
-    ) + 5;
-
-
-  const isAdd =
-    Math.random() > 0.4;
-
-
-  const ans =
-    isAdd
-      ? num1 + num2
-      : Math.max(
-          1,
-          num1 - num2
-        );
-
-
-  document
-    .getElementById(
-      "quiz-question"
-    )
-    .innerText =
-      `${num1} ${isAdd ? "+" : "-"} ${num2} = ?`;
-
-
-  const optionsSet =
-    new Set([ans]);
-
-
-  while (
-    optionsSet.size < 4
-  ) {
-
-    const offset =
-      Math.floor(
-        Math.random() * 8
-      ) + 1;
-
-
-    const wrong =
-      Math.max(
-        0,
-        ans +
-        (
-          Math.random() > 0.5
-            ? offset
-            : -offset
-        )
-      );
-
-
-    if (
-      wrong !== ans
-    ) {
-
-      optionsSet.add(
-        wrong
-      );
-
-    }
-
-  }
-
-
-  const options =
-    Array.from(
-      optionsSet
-    ).sort(
-      () =>
-        Math.random() -
-        0.5
-    );
-
-
-  const container =
-    document.getElementById(
-      "quiz-options-container"
-    );
-
-
-  container.innerHTML =
-    options.map(
-      opt => `
-
-        <button
-          onclick="checkQuizAnswer(${opt},${ans})"
-          class="bg-slate-800 hover:bg-brand-600 text-white font-bold py-2 px-3 rounded-xl text-xs sm:text-sm transition-all border border-slate-700"
-        >
-          ${opt}
-        </button>
-
-      `
-    ).join("");
-
-}
-
-
-window.checkQuizAnswer =
-async function(
-  selected,
-  correct
-) {
-
-  if (
-    selected ===
-    correct
-  ) {
-
-    await window.addCoinsToUser(
-      25,
-      "Math quiz reward"
-    );
-
-  } else {
-
-    showToast(
-      "ভুল উত্তর!"
-    );
-
-  }
-
-
-  generateMathQuiz();
 
 };
 
@@ -3861,6 +4326,11 @@ function(
   }
 
 
+  /*
+    আগের gameTarget support রাখা হয়েছে,
+    যাতে পুরোনো onclick ভেঙে না যায়।
+  */
+
   if (gameTarget) {
 
     const game =
@@ -3869,6 +4339,7 @@ function(
         gameTarget +
         "-card"
       );
+
 
     if (game) {
 
@@ -3970,6 +4441,14 @@ async function() {
 
   try {
 
+    /*
+      IMPORTANT:
+      Device lock ইচ্ছাকৃতভাবে remove করা হচ্ছে না।
+
+      তাই logout করার পরেও এই device-এ
+      অন্য account login করা যাবে না।
+    */
+
     if (auth) {
 
       await signOut(
@@ -3994,7 +4473,7 @@ async function() {
 
 
     showToast(
-      "সফলভাবে লগআউট হয়েছে!"
+      "সফলভাবে লগআউট হয়েছে। এই ডিভাইসে একই account-ই পুনরায় ব্যবহার করা যাবে।"
     );
 
 
@@ -4004,6 +4483,7 @@ async function() {
       "Logout error:",
       error
     );
+
 
     showToast(
       "Logout error!"
@@ -4156,13 +4636,6 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   INITIAL QUIZ
-========================================================= */
-
-generateMathQuiz();
-
-
-/* =========================================================
    INITIAL UI
 ========================================================= */
 
@@ -4196,6 +4669,7 @@ if (refCode) {
         "refer-input-code"
       );
 
+
     if (input) {
 
       input.value =
@@ -4217,44 +4691,69 @@ console.log(
   "TakaEarn Firebase version loaded."
 );
 
+
+console.log(
+  "Math Quiz removed."
+);
+
+
 console.log(
   "Firestore collections:"
 );
 
+
 console.log(
   "users/{uid}"
 );
+
 
 console.log(
   "users/{uid}/earnings/{earningId}"
 );
 
+
 console.log(
   "users/{uid}/transactions/{transactionId}"
 );
+
 
 console.log(
   "withdrawals/{withdrawalId}"
 );
 
+
+console.log(
+  "deviceBindings/{deviceInstallationId}"
+);
+
+
 console.log(
   "Realtime Database paths:"
 );
+
 
 console.log(
   "users/{uid}"
 );
 
+
 console.log(
   "earnings/{uid}/{earningId}"
 );
+
 
 console.log(
   "transactions/{uid}/{transactionId}"
 );
 
+
 console.log(
   "withdrawals/{uid}/{withdrawalId}"
+);
+
+
+console.log(
+  "deviceBindings/{deviceInstallationId}"
 );
 
 </script>
