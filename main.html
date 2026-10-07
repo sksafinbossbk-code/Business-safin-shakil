@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TakaEarn - এডমিন কন্ট্রোল প্যানেল</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            accent: '#f59e0b',
+            danger: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      font-family: 'Hind Siliguri', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glow-effect {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen select-none flex flex-col md:flex-row overflow-x-hidden">
+
+  <!-- Sidebar Navigation for Desktop -->
+  <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 shrink-0 z-30">
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-user-shield text-slate-950 text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-white leading-none">TakaEarn</h1>
+          <span class="text-[10px] text-amber-400 font-semibold uppercase tracking-wider">এডমিন প্যানেল v3.0</span>
+        </div>
+      </div>
+      <button onclick="resetSystemData()" class="md:hidden text-slate-400 hover:text-white p-2">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <nav class="p-3 space-y-1 flex md:flex-col overflow-x-auto md:overflow-x-visible">
+      <button onclick="switchAdminTab('dashboard')" id="adm-nav-dashboard" class="adm-nav-btn flex items-center space-x-3 space-x-reverse w-full p-3 rounded-xl font-medium text-xs sm:text-sm text-brand-400 bg-slate-800/80 transition-all cursor-pointer whitespace-nowrap">
+        <i class="fa-solid fa-chart-pie text-base"></i>
+        <span>ওভারভিউ ড্যাশবোর্ড</span>
+      </button>
+
+      <button onclick="switchAdminTab('users')" id="adm-nav-users" class="adm-nav-btn flex items-center space-x-3 space-x-reverse w-full p-3 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer whitespace-nowrap">
+        <i class="fa-solid fa-users text-base"></i>
+        <span>ইউজার ম্যানেজমেন্ট</span>
+        <span id="badge-user-count" class="mr-auto bg-brand-500/20 text-brand-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+      </button>
+
+      <button onclick="switchAdminTab('withdrawals')" id="adm-nav-withdrawals" class="adm-nav-btn flex items-center space-x-3 space-x-reverse w-full p-3 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer whitespace-nowrap">
+        <i class="fa-solid fa-money-bill-transfer text-base"></i>
+        <span>উইথড্রয়াল প্যানেল</span>
+        <span id="badge-pending-count" class="mr-auto bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+      </button>
+
+      <button onclick="switchAdminTab('notices')" id="adm-nav-notices" class="adm-nav-btn flex items-center space-x-3 space-x-reverse w-full p-3 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer whitespace-nowrap">
+        <i class="fa-solid fa-bullhorn text-base"></i>
+        <span>নোটিশ পাঠান</span>
+      </button>
+
+      <button onclick="switchAdminTab('settings')" id="adm-nav-settings" class="adm-nav-btn flex items-center space-x-3 space-x-reverse w-full p-3 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer whitespace-nowrap">
+        <i class="fa-solid fa-sliders text-base"></i>
+        <span>পেমেন্ট ও টাস্ক সেটিংস</span>
+      </button>
+    </nav>
+
+    <!-- System Status Widget -->
+    <div class="hidden md:block p-4 m-3 bg-slate-950/60 rounded-2xl border border-slate-800 mt-auto">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs text-slate-400 font-semibold">লাইভ স্ট্যাটাস</span>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+      </div>
+      <p class="text-[11px] text-slate-300">সকল সার্ভিস সক্রিয় আছে। ডাটাবেস রিয়েল-টাইমে আপডেট হচ্ছে।</p>
+      <button onclick="resetSystemData()" class="mt-3 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 rounded-lg border border-slate-700 transition-all cursor-pointer">
+        <i class="fa-solid fa-arrows-rotate ml-1"></i> ডেমো ডাটা রিসেট করুন
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Admin Workspace Container -->
+  <main class="flex-1 p-4 md:p-6 overflow-y-auto max-w-7xl">
+
+    <!-- Top Admin Header Bar -->
+    <div class="flex items-center justify-between mb-6 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 glass-card">
+      <div>
+        <h2 id="adm-page-title" class="text-xl md:text-2xl font-bold text-white">ওভারভিউ ড্যাশবোর্ড</h2>
+        <p class="text-xs text-slate-400">প্ল্যাটফর্মের লাইভ ডাটা ও ব্যবহারকারীর বিবরণ নিয়ন্ত্রণ করুন</p>
+      </div>
+
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-slate-700 text-right">
+          <span class="text-[10px] text-slate-400 block leading-tight">এডমিন মোড</span>
+          <span class="text-xs font-bold text-emerald-400 flex items-center space-x-1 space-x-reverse">
+            <i class="fa-solid fa-shield-check text-xs"></i>
+            <span>অপারেটর (Superadmin)</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: OVERVIEW DASHBOARD -->
+    <section id="adm-tab-dashboard" class="adm-tab-content space-y-6">
+      
+      <!-- Key Statistics Metric Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-semibold">মোট রেজিস্টার্ড ইউজার</span>
+            <div class="p-2 bg-blue-500/20 text-blue-400 rounded-xl">
+              <i class="fa-solid fa-users text-lg"></i>
+            </div>
+          </div>
+          <div id="stat-total-users" class="text-2xl md:text-3xl font-black text-white mt-2">0</div>
+          <span class="text-[10px] text-emerald-400 mt-1 inline-block"><i class="fa-solid fa-arrow-up"></i> সক্রিয় মেম্বার</span>
+        </div>
+
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-semibold">মোট ডিস্ট্রিবিউট কয়েন</span>
+            <div class="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
+              <i class="fa-solid fa-coins text-lg"></i>
+            </div>
+          </div>
+          <div id="stat-total-coins" class="text-2xl md:text-3xl font-black text-amber-300 mt-2">0</div>
+          <span id="stat-total-bdt-val" class="text-[10px] text-slate-400 mt-1 block">≈ ৳0.00 BDT</span>
+        </div>
+
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-semibold">পেন্ডিং উইথড্রয়াল</span>
+            <div class="p-2 bg-pink-500/20 text-pink-400 rounded-xl">
+              <i class="fa-solid fa-clock text-lg"></i>
+            </div>
+          </div>
+          <div id="stat-pending-requests" class="text-2xl md:text-3xl font-black text-pink-400 mt-2">0</div>
+          <span id="stat-pending-bdt" class="text-[10px] text-amber-400 mt-1 block">প্রসেসিং এর অপেক্ষায়</span>
+        </div>
+
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-semibold">মোট পরিশোধিত টাকা</span>
+            <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
+              <i class="fa-solid fa-circle-check text-lg"></i>
+            </div>
+          </div>
+          <div id="stat-total-paid" class="text-2xl md:text-3xl font-black text-emerald-400 mt-2">৳0</div>
+          <span class="text-[10px] text-slate-400 mt-1 inline-block">বিকাশ/নগদ এর মাধ্যমে</span>
+        </div>
+
+      </div>
+
+      <!-- Analytics Charts & Quick Activity Log -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Chart Canvas -->
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-white text-sm sm:text-base flex items-center space-x-2 space-x-reverse">
+              <i class="fa-solid fa-chart-line text-brand-400"></i>
+              <span>দৈনিক পেমেন্ট ও ইনকাম গ্রাফ</span>
+            </h3>
+            <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">গত ৭ দিন</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="payoutChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-white text-sm sm:text-base mb-3 flex items-center space-x-2 space-x-reverse">
+              <i class="fa-solid fa-list-check text-amber-400"></i>
+              <span>সাম্প্রতিক কার্যক্রম</span>
+            </h3>
+            
+            <div id="activity-log-container" class="space-y-3 text-xs">
+              <!-- Dynamic activity items -->
+            </div>
+          </div>
+
+          <button onclick="switchAdminTab('withdrawals')" class="mt-4 w-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold py-2 rounded-xl text-xs transition-all shadow-lg shadow-brand-500/20 cursor-pointer">
+            সকল পেন্ডিং পেমেন্ট দেখুন <i class="fa-solid fa-arrow-left mr-1"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- TAB 2: USER MANAGEMENT -->
+    <section id="adm-tab-users" class="adm-tab-content hidden space-y-5">
+      
+      <!-- User Search & Filter Header -->
+      <div class="glass-card p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        
+        <div class="relative w-full sm:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="user-search-input" oninput="filterUsersList()" placeholder="নাম, ইমেইল বা UID দিয়ে খুঁজুন..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="flex items-center space-x-2 space-x-reverse w-full sm:w-auto justify-end">
+          <button onclick="openAddUserModal()" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center space-x-1.5 space-x-reverse cursor-pointer shadow-lg shadow-brand-600/20">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>নতুন ইউজার তৈরি করুন</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Users Table -->
+      <div class="glass-card rounded-2xl overflow-hidden border border-slate-800">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 font-semibold border-b border-slate-800 uppercase tracking-wider">
+              <tr>
+                <th class="p-3.5">ইউজার তথ্য</th>
+                <th class="p-3.5">UID / রেফার কোড</th>
+                <th class="p-3.5">কয়েন ব্যালেন্স</th>
+                <th class="p-3.5">সমপরিমাণ টাকা</th>
+                <th class="p-3.5">স্ট্যাটাস</th>
+                <th class="p-3.5 text-center">অ্যাকশন / অ্যাকশনস</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body" class="divide-y divide-slate-800/60">
+              <!-- Dynamic user rows populated here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 3: WITHDRAWAL REQUESTS -->
+    <section id="adm-tab-withdrawals" class="adm-tab-content hidden space-y-5">
+      
+      <!-- Filter Badges -->
+      <div class="flex items-center space-x-2 space-x-reverse overflow-x-auto pb-1">
+        <button onclick="filterWithdrawals('all')" id="tx-filter-all" class="tx-filter-btn bg-brand-600 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs cursor-pointer transition-all">
+          সব রিকোয়েস্ট (<span id="tx-cnt-all">0</span>)
+        </button>
+        <button onclick="filterWithdrawals('pending')" id="tx-filter-pending" class="tx-filter-btn bg-slate-800 text-slate-300 font-bold px-4 py-1.5 rounded-xl text-xs hover:bg-slate-700 cursor-pointer transition-all">
+          পেন্ডিং (<span id="tx-cnt-pending">0</span>)
+        </button>
+        <button onclick="filterWithdrawals('approved')" id="tx-filter-approved" class="tx-filter-btn bg-slate-800 text-slate-300 font-bold px-4 py-1.5 rounded-xl text-xs hover:bg-slate-700 cursor-pointer transition-all">
+          অনুমোদিত (<span id="tx-cnt-approved">0</span>)
+        </button>
+        <button onclick="filterWithdrawals('rejected')" id="tx-filter-rejected" class="tx-filter-btn bg-slate-800 text-slate-300 font-bold px-4 py-1.5 rounded-xl text-xs hover:bg-slate-700 cursor-pointer transition-all">
+          বাতিল (<span id="tx-cnt-rejected">0</span>)
+        </button>
+      </div>
+
+      <!-- Withdrawals Table -->
+      <div class="glass-card rounded-2xl overflow-hidden border border-slate-800">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 font-semibold border-b border-slate-800">
+              <tr>
+                <th class="p-3.5">তারিখ ও আইডি</th>
+                <th class="p-3.5">ইউজার তথ্য</th>
+                <th class="p-3.5">পেমেন্ট মেথড</th>
+                <th class="p-3.5">অ্যাকাউন্ট নম্বর</th>
+                <th class="p-3.5">কয়েন ও টাকা</th>
+                <th class="p-3.5">স্ট্যাটাস</th>
+                <th class="p-3.5 text-center">অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="withdrawals-table-body" class="divide-y divide-slate-800/60">
+              <!-- Dynamic withdrawal rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 4: NOTICES BROADCAST -->
+    <section id="adm-tab-notices" class="adm-tab-content hidden space-y-5">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Notice Composer Form -->
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 md:col-span-2">
+          <h3 class="font-bold text-white text-base mb-3 flex items-center space-x-2 space-x-reverse">
+            <i class="fa-solid fa-paper-plane text-amber-400"></i>
+            <span>লাইভ নোটিশ ও স্ক্রোলিং বিজ্ঞপ্তি মেসেজ পোস্ট করুন</span>
+          </h3>
+
+          <form onsubmit="handleSendNotice(event)" class="space-y-4">
+            
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">নোটিশের বিষয় / টাইটেল</label>
+              <input type="text" id="notice-title" required placeholder="যেমন: নতুন বোনাস অফার চালু হয়েছে!" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">নোটিশ বার্তা (User App এর স্ক্রোলিং টেক্সটে দেখাবে)</label>
+              <textarea id="notice-body" rows="4" required placeholder="আপনার কাঙ্ক্ষিত বার্তা এখানে লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+            </div>
+
+            <div class="flex items-center space-x-3 space-x-reverse">
+              <label class="flex items-center space-x-2 space-x-reverse text-xs text-slate-300 cursor-pointer">
+                <input type="checkbox" id="notice-is-popup" class="rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-0">
+                <span>অ্যাপ খোলার পর পপ-আপ মেসেজ হিসেবে দেখাবে</span>
+              </label>
+            </div>
+
+            <button type="submit" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 space-x-reverse cursor-pointer">
+              <i class="fa-solid fa-bullhorn"></i>
+              <span>অবিলম্বে নোটিশ আপডেট করুন</span>
+            </button>
+
+          </form>
+        </div>
+
+        <!-- Current Active Notice Preview -->
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-white text-sm mb-3">বর্তমান সক্রিয় নোটিশ প্রিভিউ</h3>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+              <span id="preview-notice-title" class="text-xs font-bold text-amber-400 block">📢 বিশেষ বিজ্ঞপ্তি</span>
+              <p id="preview-notice-body" class="text-xs text-slate-300 mt-2 leading-relaxed">
+                প্রতিদিন ডেইলি চেক-ইন করুন, গেম খেলে পয়েন্ট ইনকাম করুন! বিকাশ ও নগদে দ্রুত পেমেন্ট নিন।
+              </p>
+              <span id="preview-notice-time" class="text-[10px] text-slate-500 block mt-3">আপডেট সময়: লাইভ</span>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-400 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20 mt-4">
+            💡 এখানে নোটিশ আপডেট করার সাথে সাথে টিাকা-ইনকাম ইউজার অ্যাপের সকল সক্রিয় ব্যবহারকারী এটি সরাসরি দেখতে পাবেন।
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- TAB 5: SYSTEM SETTINGS -->
+    <section id="adm-tab-settings" class="adm-tab-content hidden space-y-5">
+      
+      <div class="glass-card p-5 rounded-2xl border border-slate-800 max-w-3xl">
+        <h3 class="font-bold text-white text-base mb-4 flex items-center space-x-2 space-x-reverse">
+          <i class="fa-solid fa-sliders text-brand-400"></i>
+          <span>প্ল্যাটফর্ম রিওয়ার্ড ও হেল্পলাইন সেটিংস</span>
+        </h3>
+
+        <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">কয়েন কনভার্সন রেট (১,০০০ কয়েন = ? টাকা)</label>
+              <input type="number" id="setting-bdt-rate" value="10" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">হোয়াটসঅ্যাপ সাপোর্ট নম্বর</label>
+              <input type="text" id="setting-whatsapp" value="01301927094" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">ডেইলি চেক-ইন বোনাস কয়েন</label>
+              <input type="number" id="setting-daily-coins" value="100" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">রেফার বোনাস কয়েন</label>
+              <input type="number" id="setting-refer-coins" value="200" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">সর্বনিম্ন বিকাশ/নগদ উইথড্র (কয়েন)</label>
+              <input type="number" id="setting-min-withdraw" value="5000" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">সর্বনিম্ন মোবাইল রিচার্জ (কয়েন)</label>
+              <input type="number" id="setting-min-recharge" value="2000" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800 flex justify-end">
+            <button type="submit" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-brand-600/30 flex items-center space-x-2 space-x-reverse cursor-pointer">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>সেটিংস সংরক্ষণ করুন</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: Adjust User Coins -->
+  <div id="modal-adjust-coins" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full p-6 rounded-2xl border border-brand-500/30 relative">
+      <button onclick="closeAdjustModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h3 class="font-bold text-base text-white mb-1">ইউজার কয়েন সমন্বয় করুন</h3>
+      <p id="adjust-user-name-label" class="text-xs text-brand-400 mb-4">ব্যবহারকারী: -</p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">কয়েন পরিমাণ</label>
+          <input type="number" id="adjust-amount-input" placeholder="যেমন: 500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="applyCoinAdjustment('add')" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center space-x-1 space-x-reverse cursor-pointer">
+            <i class="fa-solid fa-plus"></i>
+            <span>কয়েন যোগ করুন</span>
+          </button>
+
+          <button onclick="applyCoinAdjustment('subtract')" class="bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center space-x-1 space-x-reverse cursor-pointer">
+            <i class="fa-solid fa-minus"></i>
+            <span>কয়েন কাটুন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add New User -->
+  <div id="modal-add-user" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-brand-500/30 relative">
+      <button onclick="closeAddUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h3 class="font-bold text-base text-white mb-1">নতুন ইউজার যোগ করুন</h3>
+      <p class="text-xs text-slate-400 mb-4">ম্যানুয়ালি নতুন ইউজারের তথ্য লিখুন</p>
+
+      <form onsubmit="handleCreateUser(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">ইউজারের নাম</label>
+          <input type="text" id="new-user-name" required placeholder="যেমন: শামীম আহমেদ" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">ইমেইল</label>
+          <input type="email" id="new-user-email" required placeholder="shamim@gmail.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">প্রাথমিক বোনাস কয়েন</label>
+          <input type="number" id="new-user-coins" value="500" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-brand-600/30 cursor-pointer">
+          তৈরি করুন
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Bar -->
+  <div id="admin-toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white border border-brand-500/40 px-5 py-2.5 rounded-full shadow-2xl text-xs font-semibold flex items-center space-x-2 space-x-reverse pointer-events-none">
+    <i class="fa-solid fa-circle-check text-brand-400"></i>
+    <span id="admin-toast-text">বার্তা</span>
+  </div>
+
+  <!-- Admin Script Logic -->
+  <script>
+    const STORAGE_KEY_USERS = 'takaearn_all_users_v3';
+    const STORAGE_KEY_TX = 'takaearn_transactions_v3';
+    const STORAGE_KEY_USER_PROFILE = 'takaearn_user_profile_v3';
+    const STORAGE_KEY_NOTICE = 'takaearn_active_notice';
+    const STORAGE_KEY_SETTINGS = 'takaearn_admin_settings';
+
+    let globalUsers = [];
+    let globalTransactions = [];
+    let selectedUserForAdjust = null;
+    let currentTxFilter = 'all';
+    let chartInstance = null;
+
+    function seedInitialDataIfEmpty() {
+      if (!localStorage.getItem(STORAGE_KEY_USERS)) {
+        const mockUsers = [
+          { uid: 'usr_101', name: 'আব্দুর রহমান', email: 'rahman@gmail.com', coins: 12500, totalEarned: 15000, referralCode: 'EARN1001', isBanned: false, createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
+          { uid: 'usr_102', name: 'তানজিলা আক্তার', email: 'tanjila@gmail.com', coins: 6200, totalEarned: 8000, referralCode: 'EARN1002', isBanned: false, createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+          { uid: 'usr_103', name: 'মোঃ সাকিব হোসেন', email: 'sakib@gmail.com', coins: 1800, totalEarned: 2500, referralCode: 'EARN1003', isBanned: false, createdAt: new Date(Date.now() - 86400000 * 1).toISOString() },
+          { uid: 'usr_104', name: 'কামরুল ইসলাম', email: 'kamrul@gmail.com', coins: 550, totalEarned: 550, referralCode: 'EARN1004', isBanned: true, createdAt: new Date().toISOString() }
+        ];
+        localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(mockUsers));
+      }
+
+      if (!localStorage.getItem(STORAGE_KEY_TX)) {
+        const mockTx = [
+          { id: 'TX9901', uid: 'usr_101', userName: 'আব্দুর রহমান', method: 'bKash', accountNo: '01712345678', coins: 5000, bdtAmount: '50.00', status: 'pending', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
+          { id: 'TX9902', uid: 'usr_102', userName: 'তানজিলা আক্তার', method: 'Nagad', accountNo: '01898765432', coins: 5000, bdtAmount: '50.00', status: 'approved', createdAt: new Date(Date.now() - 3600000 * 12).toISOString() },
+          { id: 'TX9903', uid: 'usr_101', userName: 'আব্দুর রহমান', method: 'Recharge', accountNo: '01712345678', coins: 2000, bdtAmount: '20.00', status: 'approved', createdAt: new Date(Date.now() - 3600000 * 24).toISOString() }
+        ];
+        localStorage.setItem(STORAGE_KEY_TX, JSON.stringify(mockTx));
+      }
+    }
+
+    function loadDataFromStorage() {
+      try {
+        globalUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS)) || [];
+      } catch(e) { globalUsers = []; }
+
+      try {
+        globalTransactions = JSON.parse(localStorage.getItem(STORAGE_KEY_TX)) || [];
+      } catch(e) { globalTransactions = []; }
+
+      // Also incorporate current user profile if logged into user app
+      try {
+        const activeUserProf = JSON.parse(localStorage.getItem(STORAGE_KEY_USER_PROFILE));
+        if (activeUserProf && activeUserProf.uid) {
+          const idx = globalUsers.findIndex(u => u.uid === activeUserProf.uid);
+          if (idx >= 0) {
+            globalUsers[idx] = { ...globalUsers[idx], ...activeUserProf };
+          } else {
+            globalUsers.unshift(activeUserProf);
+          }
+        }
+      } catch(e) {}
+    }
+
+    function saveUsersToStorage() {
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(globalUsers));
+      
+      // Update single active user profile if matched
+      try {
+        const activeUserProf = JSON.parse(localStorage.getItem(STORAGE_KEY_USER_PROFILE));
+        if (activeUserProf) {
+          const match = globalUsers.find(u => u.uid === activeUserProf.uid);
+          if (match) {
+            localStorage.setItem(STORAGE_KEY_USER_PROFILE, JSON.stringify({ ...activeUserProf, ...match }));
+          }
+        }
+      } catch(e) {}
+    }
+
+    function saveTxToStorage() {
+      localStorage.setItem(STORAGE_KEY_TX, JSON.stringify(globalTransactions));
+    }
+
+    function renderOverviewStats() {
+      const totalUsers = globalUsers.length;
+      const totalCoins = globalUsers.reduce((sum, u) => sum + (parseInt(u.coins) || 0), 0);
+      const pendingTxs = globalTransactions.filter(t => t.status === 'pending');
+      const approvedTxs = globalTransactions.filter(t => t.status === 'approved');
+      
+      const totalPaidBDT = approvedTxs.reduce((sum, t) => sum + (parseFloat(t.bdtAmount) || 0), 0);
+
+      document.getElementById('stat-total-users').innerText = totalUsers;
+      document.getElementById('stat-total-coins').innerText = totalCoins.toLocaleString();
+      document.getElementById('stat-total-bdt-val').innerText = `≈ ৳${(totalCoins / 100).toFixed(2)} BDT`;
+      
+      document.getElementById('stat-pending-requests').innerText = pendingTxs.length;
+      document.getElementById('stat-total-paid').innerText = `৳${totalPaidBDT.toFixed(2)}`;
+
+      document.getElementById('badge-user-count').innerText = totalUsers;
+      document.getElementById('badge-pending-count').innerText = pendingTxs.length;
+
+      // Render recent activity log
+      const activityContainer = document.getElementById('activity-log-container');
+      const recentTxs = globalTransactions.slice(0, 4);
+
+      if (recentTxs.length === 0) {
+        activityContainer.innerHTML = `<div class="text-slate-500 text-center py-4">কোনো সাম্প্রতিক কার্যকলাপ পাওয়া যায়নি</div>`;
+      } else {
+        activityContainer.innerHTML = recentTxs.map(tx => `
+          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-white">${tx.userName || 'ইউজার'}</div>
+              <div class="text-[10px] text-slate-400">${tx.method} (${tx.accountNo})</div>
+            </div>
+            <div class="text-left">
+              <span class="font-bold text-amber-300 block">৳${tx.bdtAmount}</span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full ${tx.status === 'pending' ? 'bg-amber-500/20 text-amber-400' : tx.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                ${tx.status === 'pending' ? 'পেন্ডিং' : tx.status === 'approved' ? 'অনুমোদিত' : 'বাতিল'}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      renderAnalyticsChart();
+    }
+
+    function renderAnalyticsChart() {
+      const ctx = document.getElementById('payoutChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['শনিবার', 'রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার'],
+          datasets: [
+            {
+              label: 'পরিশোধিত টাকা (BDT)',
+              data: [150, 300, 250, 450, 200, 600, 500],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'নতুন নিবন্ধিত পয়েন্ট (কয়েন / ১০)',
+              data: [200, 400, 350, 500, 300, 700, 650],
+              borderColor: '#f59e0b',
+              borderDash: [5, 5],
+              fill: false,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { family: 'Hind Siliguri' } } }
+          },
+          scales: {
+            x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
+
+    function renderUsersList(usersToRender) {
+      const tbody = document.getElementById('users-table-body');
+      const list = usersToRender || globalUsers;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">কোনো ইউজার পাওয়া যায়নি</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(u => `
+        <tr class="hover:bg-slate-900/50 transition-colors">
+          <td class="p-3.5">
+            <div class="font-bold text-white text-xs sm:text-sm">${u.name || 'ব্যবহারকারী'}</div>
+            <div class="text-[10px] text-slate-400">${u.email || 'N/A'}</div>
+          </td>
+          <td class="p-3.5 font-mono text-[11px] text-slate-300">
+            <div>${u.uid}</div>
+            <div class="text-amber-400 text-[10px]">রেফার: ${u.referralCode || '-'}</div>
+          </td>
+          <td class="p-3.5 font-bold text-amber-300 text-xs sm:text-sm">
+            ${(parseInt(u.coins) || 0).toLocaleString()} কয়েন
+          </td>
+          <td class="p-3.5 text-emerald-400 font-medium">
+            ৳${((parseInt(u.coins) || 0) / 100).toFixed(2)}
+          </td>
+          <td class="p-3.5">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.isBanned ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+              ${u.isBanned ? 'ব্যানড' : 'সক্রিয়'}
+            </span>
+          </td>
+          <td class="p-3.5 text-center">
+            <div class="flex items-center justify-center space-x-1.5 space-x-reverse">
+              <button onclick="openAdjustModal('${u.uid}')" title="কয়েন পরিবর্তন" class="p-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs cursor-pointer">
+                <i class="fa-solid fa-coins"></i>
+              </button>
+
+              <button onclick="toggleUserBanStatus('${u.uid}')" title="${u.isBanned ? 'আনব্যান করুন' : 'ব্যান করুন'}" class="p-1.5 ${u.isBanned ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'} hover:opacity-80 rounded-lg text-xs cursor-pointer">
+                <i class="fa-solid ${u.isBanned ? 'fa-user-check' : 'fa-user-slash'}"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterUsersList() {
+      const q = document.getElementById('user-search-input').value.toLowerCase().trim();
+      if (!q) {
+        renderUsersList(globalUsers);
+        return;
+      }
+      const filtered = globalUsers.filter(u => 
+        (u.name && u.name.toLowerCase().includes(q)) ||
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.uid && u.uid.toLowerCase().includes(q)) ||
+        (u.referralCode && u.referralCode.toLowerCase().includes(q))
+      );
+      renderUsersList(filtered);
+    }
+
+    function openAdjustModal(uid) {
+      const u = globalUsers.find(item => item.uid === uid);
+      if (!u) return;
+      selectedUserForAdjust = u;
+      document.getElementById('adjust-user-name-label').innerText = `ব্যবহারকারী: ${u.name} (বর্তমান: ${(u.coins||0).toLocaleString()} কয়েন)`;
+      document.getElementById('adjust-amount-input').value = '';
+      document.getElementById('modal-adjust-coins').classList.remove('hidden');
+    }
+
+    function closeAdjustModal() {
+      document.getElementById('modal-adjust-coins').classList.add('hidden');
+      selectedUserForAdjust = null;
+    }
+
+    function applyCoinAdjustment(type) {
+      if (!selectedUserForAdjust) return;
+      const amt = parseInt(document.getElementById('adjust-amount-input').value) || 0;
+      if (amt <= 0) return showToast('সঠিক কয়েন পরিমাণ লিখুন!');
+
+      if (type === 'add') {
+        selectedUserForAdjust.coins = (parseInt(selectedUserForAdjust.coins) || 0) + amt;
+        selectedUserForAdjust.totalEarned = (parseInt(selectedUserForAdjust.totalEarned) || 0) + amt;
+        showToast(`+${amt} কয়েন যোগ করা হয়েছে`);
+      } else {
+        selectedUserForAdjust.coins = Math.max(0, (parseInt(selectedUserForAdjust.coins) || 0) - amt);
+        showToast(`-${amt} কয়েন কেটে নেওয়া হয়েছে`);
+      }
+
+      saveUsersToStorage();
+      renderUsersList();
+      renderOverviewStats();
+      closeAdjustModal();
+    }
+
+    function toggleUserBanStatus(uid) {
+      const u = globalUsers.find(item => item.uid === uid);
+      if (!u) return;
+      u.isBanned = !u.isBanned;
+      saveUsersToStorage();
+      renderUsersList();
+      showToast(u.isBanned ? `${u.name} কে ব্যান করা হয়েছে` : `${u.name} কে আনব্যান করা হয়েছে`);
+    }
+
+    function openAddUserModal() {
+      document.getElementById('modal-add-user').classList.remove('hidden');
+    }
+
+    function closeAddUserModal() {
+      document.getElementById('modal-add-user').classList.add('hidden');
+    }
+
+    function handleCreateUser(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-user-name').value.trim();
+      const email = document.getElementById('new-user-email').value.trim();
+      const coins = parseInt(document.getElementById('new-user-coins').value) || 0;
+
+      const newUid = 'usr_' + Math.floor(1000 + Math.random() * 9000);
+      const newRef = 'EARN' + Math.floor(1000 + Math.random() * 9000);
+
+      const newUser = {
+        uid: newUid,
+        name: name,
+        email: email,
+        coins: coins,
+        totalEarned: coins,
+        referralCode: newRef,
+        isBanned: false,
+        createdAt: new Date().toISOString()
+      };
+
+      globalUsers.unshift(newUser);
+      saveUsersToStorage();
+      renderUsersList();
+      renderOverviewStats();
+      closeAddUserModal();
+      showToast('নতুন ইউজার সফলভাবে যুক্ত হয়েছে!');
+    }
+
+    function renderWithdrawalsList() {
+      const tbody = document.getElementById('withdrawals-table-body');
+      
+      let list = globalTransactions;
+      if (currentTxFilter !== 'all') {
+        list = globalTransactions.filter(t => t.status === currentTxFilter);
+      }
+
+      // Update filter counters
+      document.getElementById('tx-cnt-all').innerText = globalTransactions.length;
+      document.getElementById('tx-cnt-pending').innerText = globalTransactions.filter(t => t.status === 'pending').length;
+      document.getElementById('tx-cnt-approved').innerText = globalTransactions.filter(t => t.status === 'approved').length;
+      document.getElementById('tx-cnt-rejected').innerText = globalTransactions.filter(t => t.status === 'rejected').length;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">কোনো উইথড্রয়াল রিকোয়েস্ট পাওয়া যায়নি</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(tx => `
+        <tr class="hover:bg-slate-900/50 transition-colors">
+          <td class="p-3.5">
+            <div class="font-bold text-white font-mono text-[11px]">${tx.id}</div>
+            <div class="text-[10px] text-slate-400">${new Date(tx.createdAt).toLocaleDateString('bn-BD')}</div>
+          </td>
+          <td class="p-3.5">
+            <div class="font-bold text-white text-xs">${tx.userName || 'ইউজার'}</div>
+            <div class="text-[10px] text-slate-400">UID: ${tx.uid}</div>
+          </td>
+          <td class="p-3.5">
+            <span class="font-bold text-xs ${tx.method === 'bKash' ? 'text-pink-400' : tx.method === 'Nagad' ? 'text-orange-400' : 'text-purple-400'}">
+              ${tx.method}
+            </span>
+          </td>
+          <td class="p-3.5 font-mono text-xs text-slate-200 select-all font-bold">
+            ${tx.accountNo}
+          </td>
+          <td class="p-3.5">
+            <div class="font-bold text-amber-300 text-xs">${(tx.coins||0).toLocaleString()} কয়েন</div>
+            <div class="text-emerald-400 font-bold text-xs">৳${tx.bdtAmount} BDT</div>
+          </td>
+          <td class="p-3.5">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${tx.status === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : tx.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+              ${tx.status === 'pending' ? 'পেন্ডিং' : tx.status === 'approved' ? 'অনুমোদিত' : 'বাতিল'}
+            </span>
+          </td>
+          <td class="p-3.5 text-center">
+            ${tx.status === 'pending' ? `
+              <div class="flex items-center justify-center space-x-1.5 space-x-reverse">
+                <button onclick="updateTxStatus('${tx.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-slate-950 font-bold px-2.5 py-1 rounded-lg text-[11px] cursor-pointer shadow">
+                  <i class="fa-solid fa-check ml-1"></i> পে করুন
+                </button>
+                <button onclick="updateTxStatus('${tx.id}', 'rejected')" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white font-bold px-2 py-1 rounded-lg text-[11px] cursor-pointer border border-red-500/30">
+                  বাতিল
+                </button>
+              </div>
+            ` : `<span class="text-[10px] text-slate-500">সম্পন্ন হয়েছে</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterWithdrawals(status) {
+      currentTxFilter = status;
+      document.querySelectorAll('.tx-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-600', 'text-slate-950');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
+      });
+      const targetBtn = document.getElementById('tx-filter-' + status);
+      if (targetBtn) {
+        targetBtn.classList.add('bg-brand-600', 'text-slate-950');
+        targetBtn.classList.remove('bg-slate-800', 'text-slate-300');
+      }
+      renderWithdrawalsList();
+    }
+
+    function updateTxStatus(txId, newStatus) {
+      const tx = globalTransactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      tx.status = newStatus;
+
+      // If rejected, refund coins back to user
+      if (newStatus === 'rejected') {
+        const u = globalUsers.find(item => item.uid === tx.uid);
+        if (u) {
+          u.coins = (parseInt(u.coins) || 0) + (parseInt(tx.coins) || 0);
+          saveUsersToStorage();
+        }
+      }
+
+      saveTxToStorage();
+      renderWithdrawalsList();
+      renderOverviewStats();
+      showToast(newStatus === 'approved' ? 'পেমেন্ট সফলভাবে এপ্রুভ হয়েছে!' : 'উইথড্র রিকোয়েস্ট বাতিল করা হয়েছে');
+    }
+
+    function handleSendNotice(e) {
+      e.preventDefault();
+      const title = document.getElementById('notice-title').value.trim();
+      const body = document.getElementById('notice-body').value.trim();
+      const isPopup = document.getElementById('notice-is-popup').checked;
+
+      const noticeObj = {
+        title: title,
+        body: body,
+        isPopup: isPopup,
+        updatedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(STORAGE_KEY_NOTICE, JSON.stringify(noticeObj));
+
+      document.getElementById('preview-notice-title').innerText = title;
+      document.getElementById('preview-notice-body').innerText = body;
+      document.getElementById('preview-notice-time').innerText = `আপডেট সময়: ${new Date().toLocaleTimeString('bn-BD')}`;
+
+      showToast('নতুন নোটিশ ইউজার অ্যাপে লাইভ পাঠানো হয়েছে!');
+    }
+
+    function loadSavedNoticePreview() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_NOTICE));
+        if (saved) {
+          document.getElementById('preview-notice-title').innerText = saved.title || '📢 বিশেষ বিজ্ঞপ্তি';
+          document.getElementById('preview-notice-body').innerText = saved.body || '';
+          document.getElementById('notice-title').value = saved.title || '';
+          document.getElementById('notice-body').value = saved.body || '';
+        }
+      } catch(e) {}
+    }
+
+    function handleSaveSettings(e) {
+      e.preventDefault();
+      const settings = {
+        bdtRate: document.getElementById('setting-bdt-rate').value,
+        whatsapp: document.getElementById('setting-whatsapp').value,
+        dailyCoins: document.getElementById('setting-daily-coins').value,
+        referCoins: document.getElementById('setting-refer-coins').value,
+        minWithdraw: document.getElementById('setting-min-withdraw').value,
+        minRecharge: document.getElementById('setting-min-recharge').value
+      };
+
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+      showToast('প্ল্যাটফর্ম সেটিংস সফলভাবে আপডেট করা হয়েছে!');
+    }
+
+    function resetSystemData() {
+      localStorage.removeItem(STORAGE_KEY_USERS);
+      localStorage.removeItem(STORAGE_KEY_TX);
+      seedInitialDataIfEmpty();
+      loadDataFromStorage();
+      renderOverviewStats();
+      renderUsersList();
+      renderWithdrawalsList();
+      showToast('সকল ডেমো ডাটা রিসেট সম্পূর্ণ হয়েছে');
+    }
+
+    window.switchAdminTab = function(tabName) {
+      document.querySelectorAll('.adm-tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('adm-tab-' + tabName).classList.remove('hidden');
+
+      document.querySelectorAll('.adm-nav-btn').forEach(btn => {
+        btn.classList.remove('text-brand-400', 'bg-slate-800/80');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeBtn = document.getElementById('adm-nav-' + tabName);
+      if (activeBtn) {
+        activeBtn.classList.add('text-brand-400', 'bg-slate-800/80');
+        activeBtn.classList.remove('text-slate-400');
+      }
+
+      const titles = {
+        dashboard: 'ওভারভিউ ড্যাশবোর্ড',
+        users: 'ইউজার ম্যানেজমেন্ট ও একাউন্ট কন্ট্রোল',
+        withdrawals: 'উইথড্রয়াল প্রসেসিং প্যানেল',
+        notices: 'লাইভ নোটিশ ও ব্রডকাস্ট ম্যানেজার',
+        settings: 'প্ল্যাটফর্ম ও পেমেন্ট সেটিংস'
+      };
+      document.getElementById('adm-page-title').innerText = titles[tabName] || 'এডমিন প্যানেল';
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('admin-toast');
+      document.getElementById('admin-toast-text').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    window.onload = function() {
+      seedInitialDataIfEmpty();
+      loadDataFromStorage();
+      renderOverviewStats();
+      renderUsersList();
+      renderWithdrawalsList();
+      loadSavedNoticePreview();
+    };
+  </script>
+
+</body>
+</html>
