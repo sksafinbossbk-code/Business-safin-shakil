@@ -1,5 +1,3152 @@
 <!DOCTYPE html>
-<html lang="bn" class="dark">
+<html lang="bn" class="dark"><!-- =====================================================
+     FIREBASE
+===================================================== -->
+
+<script type="module">
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInAnonymously,
+  signOut,
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  addDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+import {
+  getDatabase,
+  ref,
+  set,
+  update,
+  get
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+
+/* =====================================================
+   FIREBASE CONFIG
+===================================================== */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc4",
+
+  authDomain: "erning-344b8.firebaseapp.com",
+
+  projectId: "erning-344b8",
+
+  storageBucket: "erning-344b8.firebasestorage.app",
+
+  messagingSenderId: "69804884240",
+
+  appId: "1:69804884240:web:2e2ea56642c937b15ae595",
+
+  databaseURL: "https://erning-344b8-default-rtdb.firebaseio.com"
+};
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let app = null;
+let auth = null;
+let db = null;
+let rtdb = null;
+
+let currentUserProfile = null;
+let firebaseUser = null;
+
+
+/*
+  IMPORTANT:
+
+  Device Lock সম্পূর্ণভাবে সরানো হয়েছে।
+
+  আগের:
+  DEVICE_LOCK_KEY
+  DEVICE_ID_KEY
+  deviceBindings
+  checkDeviceBinding()
+  bindDeviceToAccount()
+
+  আর ব্যবহার করা হচ্ছে না।
+
+  ফলে একই মোবাইল/ব্রাউজারে একাধিক account
+  login/create করা যাবে।
+*/
+
+
+const LOCAL_STORE_KEY = "takaearn_user_profile_v8";
+
+
+/* =====================================================
+   RANDOM ID
+===================================================== */
+
+function generateRandomId(length = 32) {
+
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  let result = "";
+
+  for (let i = 0; i < length; i++) {
+
+    result += chars.charAt(
+      Math.floor(
+        Math.random() * chars.length
+      )
+    );
+
+  }
+
+  return result;
+}
+
+
+/* =====================================================
+   LOCAL PROFILE
+===================================================== */
+
+function getLocalProfile() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        LOCAL_STORE_KEY
+      );
+
+    if (saved) {
+
+      const data =
+        JSON.parse(saved);
+
+      if (
+        data &&
+        typeof data === "object"
+      ) {
+
+        return data;
+      }
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "Local profile load failed:",
+      error
+    );
+  }
+
+
+  return {
+
+    uid: "",
+
+    name: "ব্যবহারকারী",
+
+    email: "user@erning.com",
+
+    photoURL:
+      "https://api.dicebear.com/7.x/bottts/svg?seed=user",
+
+    coins: 0,
+
+    totalEarned: 0,
+
+    referralCode: "",
+
+    referredBy: "",
+
+    referralCount: 0,
+
+    lastCheckinDate: "",
+
+    isLoggedIn: false,
+
+    status: "active",
+
+    createdAt:
+      new Date().toISOString()
+  };
+}
+
+
+currentUserProfile =
+  getLocalProfile();
+
+
+/* =====================================================
+   SAVE LOCAL
+===================================================== */
+
+function saveLocalProfile(profile) {
+
+  try {
+
+    localStorage.setItem(
+
+      LOCAL_STORE_KEY,
+
+      JSON.stringify(profile)
+
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Local save failed:",
+      error
+    );
+  }
+}
+
+
+/* =====================================================
+   FIREBASE INITIALIZATION
+===================================================== */
+
+async function initializeFirebase() {
+
+  try {
+
+    app =
+      initializeApp(
+        firebaseConfig
+      );
+
+    auth =
+      getAuth(app);
+
+    db =
+      getFirestore(app);
+
+    rtdb =
+      getDatabase(app);
+
+
+    /*
+      Firebase Auth persistence চালু থাকবে।
+      Browser বন্ধ/খোলার পরও current account
+      logged-in থাকতে পারবে।
+    */
+
+    await setPersistence(
+      auth,
+      browserLocalPersistence
+    );
+
+
+    console.log(
+      "Firebase initialized successfully"
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Firebase initialization error:",
+      error
+    );
+
+    showToast(
+      "Firebase initialize হতে সমস্যা হয়েছে!"
+    );
+
+    return false;
+  }
+}
+
+
+/* =====================================================
+   FIRESTORE USER SAVE
+===================================================== */
+
+async function saveUserToFirestore(profile) {
+
+  if (
+    !db ||
+    !profile?.uid
+  ) {
+
+    return false;
+  }
+
+
+  try {
+
+    await setDoc(
+
+      doc(
+        db,
+        "users",
+        profile.uid
+      ),
+
+      {
+
+        uid:
+          profile.uid,
+
+        name:
+          profile.name ||
+          "ব্যবহারকারী",
+
+        email:
+          profile.email ||
+          "",
+
+        photoURL:
+          profile.photoURL ||
+          "",
+
+        coins:
+          Number(
+            profile.coins || 0
+          ),
+
+        totalEarned:
+          Number(
+            profile.totalEarned || 0
+          ),
+
+        referralCode:
+          profile.referralCode ||
+          "",
+
+        referredBy:
+          profile.referredBy ||
+          "",
+
+        referralCount:
+          Number(
+            profile.referralCount || 0
+          ),
+
+        lastCheckinDate:
+          profile.lastCheckinDate ||
+          "",
+
+        status:
+          profile.status ||
+          "active",
+
+        createdAt:
+          profile.createdAt ||
+          new Date().toISOString(),
+
+        updatedAt:
+          serverTimestamp()
+      },
+
+      {
+        merge: true
+      }
+    );
+
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Firestore user save error:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =====================================================
+   RTDB USER SAVE
+===================================================== */
+
+async function saveUserToRealtimeDB(profile) {
+
+  if (
+    !rtdb ||
+    !profile?.uid
+  ) {
+
+    return false;
+  }
+
+
+  try {
+
+    await update(
+
+      ref(
+        rtdb,
+        "users/" +
+        profile.uid
+      ),
+
+      {
+
+        uid:
+          profile.uid,
+
+        name:
+          profile.name ||
+          "ব্যবহারকারী",
+
+        email:
+          profile.email ||
+          "",
+
+        photoURL:
+          profile.photoURL ||
+          "",
+
+        coins:
+          Number(
+            profile.coins || 0
+          ),
+
+        totalEarned:
+          Number(
+            profile.totalEarned || 0
+          ),
+
+        referralCode:
+          profile.referralCode ||
+          "",
+
+        referredBy:
+          profile.referredBy ||
+          "",
+
+        referralCount:
+          Number(
+            profile.referralCount || 0
+          ),
+
+        lastCheckinDate:
+          profile.lastCheckinDate ||
+          "",
+
+        status:
+          profile.status ||
+          "active",
+
+        createdAt:
+          profile.createdAt ||
+          new Date().toISOString(),
+
+        updatedAt:
+          Date.now()
+      }
+    );
+
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "RTDB user save error:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =====================================================
+   SYNC USER
+===================================================== */
+
+async function syncUserToFirebase(profile) {
+
+  saveLocalProfile(profile);
+
+
+  await Promise.allSettled([
+
+    saveUserToFirestore(
+      profile
+    ),
+
+    saveUserToRealtimeDB(
+      profile
+    )
+
+  ]);
+}
+
+
+/* =====================================================
+   LOAD USER FROM FIRESTORE
+===================================================== */
+
+async function loadUserFromFirestore(uid) {
+
+  if (
+    !db ||
+    !uid
+  ) {
+
+    return null;
+  }
+
+
+  try {
+
+    const snap =
+      await getDoc(
+
+        doc(
+          db,
+          "users",
+          uid
+        )
+
+      );
+
+
+    return snap.exists()
+      ? snap.data()
+      : null;
+
+  } catch (error) {
+
+    console.error(
+      "Firestore load error:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =====================================================
+   LOAD USER FROM RTDB
+===================================================== */
+
+async function loadUserFromRealtimeDB(uid) {
+
+  if (
+    !rtdb ||
+    !uid
+  ) {
+
+    return null;
+  }
+
+
+  try {
+
+    const snap =
+      await get(
+
+        ref(
+          rtdb,
+          "users/" +
+          uid
+        )
+
+      );
+
+
+    return snap.exists()
+      ? snap.val()
+      : null;
+
+  } catch (error) {
+
+    console.error(
+      "RTDB load error:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =====================================================
+   MERGE USER DATA
+===================================================== */
+
+function mergeUserData(
+  localData,
+  firestoreData,
+  rtdbData,
+  basicData
+) {
+
+  const merged = {
+
+    ...(localData || {}),
+
+    ...(firestoreData || {}),
+
+    ...(rtdbData || {}),
+
+    ...(basicData || {})
+
+  };
+
+
+  merged.uid =
+
+    basicData?.uid ||
+
+    firestoreData?.uid ||
+
+    rtdbData?.uid ||
+
+    localData?.uid ||
+
+    "";
+
+
+  merged.coins =
+
+    Number(
+
+      firestoreData?.coins ??
+
+      rtdbData?.coins ??
+
+      localData?.coins ??
+
+      0
+
+    );
+
+
+  merged.totalEarned =
+
+    Number(
+
+      firestoreData?.totalEarned ??
+
+      rtdbData?.totalEarned ??
+
+      localData?.totalEarned ??
+
+      0
+
+    );
+
+
+  merged.referralCount =
+
+    Number(
+
+      firestoreData?.referralCount ??
+
+      rtdbData?.referralCount ??
+
+      localData?.referralCount ??
+
+      0
+
+    );
+
+
+  merged.isLoggedIn = true;
+
+
+  merged.status =
+    merged.status ||
+    "active";
+
+
+  return merged;
+}
+
+
+/* =====================================================
+   REFERRAL CODE
+===================================================== */
+
+function generateReferralCode(uid) {
+
+  if (!uid) {
+
+    return (
+      "EARN" +
+      Date.now()
+    );
+  }
+
+
+  return (
+
+    "EARN" +
+
+    uid
+      .replace(
+        /[^a-zA-Z0-9]/g,
+        ""
+      )
+      .substring(
+        0,
+        8
+      )
+      .toUpperCase()
+
+  );
+}
+
+
+/* =====================================================
+   LOAD / CREATE FIREBASE PROFILE
+===================================================== */
+
+async function loadOrCreateFirebaseProfile(user) {
+
+  if (!user) {
+
+    return;
+  }
+
+
+  firebaseUser =
+    user;
+
+
+  const local =
+    getLocalProfile();
+
+
+  const [
+    firestore,
+    realtime
+  ] = await Promise.all([
+
+    loadUserFromFirestore(
+      user.uid
+    ),
+
+    loadUserFromRealtimeDB(
+      user.uid
+    )
+
+  ]);
+
+
+  const basic = {
+
+    uid:
+      user.uid,
+
+    name:
+
+      user.displayName ||
+
+      firestore?.name ||
+
+      realtime?.name ||
+
+      local.name ||
+
+      "ব্যবহারকারী",
+
+    email:
+
+      user.email ||
+
+      firestore?.email ||
+
+      realtime?.email ||
+
+      local.email ||
+
+      "",
+
+    photoURL:
+
+      user.photoURL ||
+
+      firestore?.photoURL ||
+
+      realtime?.photoURL ||
+
+      local.photoURL ||
+
+      (
+        "https://api.dicebear.com/7.x/bottts/svg?seed=" +
+        user.uid
+      )
+
+  };
+
+
+  currentUserProfile =
+
+    mergeUserData(
+
+      local,
+
+      firestore,
+
+      realtime,
+
+      basic
+
+    );
+
+
+  if (
+    !currentUserProfile.referralCode
+  ) {
+
+    currentUserProfile.referralCode =
+
+      generateReferralCode(
+        user.uid
+      );
+  }
+
+
+  if (
+    !currentUserProfile.createdAt
+  ) {
+
+    currentUserProfile.createdAt =
+
+      new Date().toISOString();
+  }
+
+
+  /*
+    Device binding check আর নেই।
+    তাই যে কোনো valid Firebase account
+    এই device/browser থেকে login করতে পারবে।
+  */
+
+
+  await syncUserToFirebase(
+    currentUserProfile
+  );
+
+
+  updateDashboardUI(
+    currentUserProfile
+  );
+
+
+  await loadTransactionHistory();
+
+
+  console.log(
+    "User loaded:",
+    currentUserProfile
+  );
+}
+
+
+/* =====================================================
+   UI
+===================================================== */
+
+window.updateDashboardUI =
+function(profile) {
+
+  if (!profile) {
+
+    return;
+  }
+
+
+  const coins =
+    Number(
+      profile.coins || 0
+    );
+
+
+  const headerCoins =
+    document.getElementById(
+      "header-user-coins"
+    );
+
+
+  const dashCoins =
+    document.getElementById(
+      "dash-coins"
+    );
+
+
+  if (headerCoins) {
+
+    headerCoins.innerText =
+      coins.toLocaleString();
+  }
+
+
+  if (dashCoins) {
+
+    dashCoins.innerText =
+      coins.toLocaleString();
+  }
+
+
+  const dashBdt =
+    document.getElementById(
+      "dash-bdt"
+    );
+
+
+  if (dashBdt) {
+
+    dashBdt.innerText =
+      "≈ ৳" +
+      (coins / 100).toFixed(2) +
+      " BDT";
+  }
+
+
+  const total =
+    Number(
+      profile.totalEarned || 0
+    );
+
+
+  const totalEl =
+    document.getElementById(
+      "dash-total-earned"
+    );
+
+
+  if (totalEl) {
+
+    totalEl.innerText =
+      total.toLocaleString();
+  }
+
+
+  const refEl =
+    document.getElementById(
+      "dash-referrals"
+    );
+
+
+  if (refEl) {
+
+    refEl.innerText =
+      Number(
+        profile.referralCount || 0
+      ).toLocaleString();
+  }
+
+
+  const name =
+    profile.name ||
+    "ব্যবহারকারী";
+
+
+  const dashName =
+    document.getElementById(
+      "dash-user-name"
+    );
+
+
+  if (dashName) {
+
+    dashName.innerText =
+      name;
+  }
+
+
+  const headerName =
+    document.getElementById(
+      "header-user-name"
+    );
+
+
+  if (headerName) {
+
+    headerName.innerText =
+      name;
+  }
+
+
+  const profileName =
+    document.getElementById(
+      "profile-page-name"
+    );
+
+
+  if (profileName) {
+
+    profileName.innerText =
+      name;
+  }
+
+
+  const email =
+    document.getElementById(
+      "profile-page-email"
+    );
+
+
+  if (email) {
+
+    email.innerText =
+      profile.email ||
+      "user@erning.com";
+  }
+
+
+  const uidEl =
+    document.getElementById(
+      "profile-user-id"
+    );
+
+
+  if (uidEl) {
+
+    uidEl.innerText =
+      "UID: " +
+      (
+        profile.uid ||
+        "loading"
+      );
+  }
+
+
+  const refCode =
+    document.getElementById(
+      "user-ref-code-display"
+    );
+
+
+  if (refCode) {
+
+    refCode.innerText =
+      profile.referralCode ||
+      "EARN000000";
+  }
+
+
+  if (profile.photoURL) {
+
+    const avatar =
+      document.getElementById(
+        "user-avatar-img"
+      );
+
+
+    const profileAvatar =
+      document.getElementById(
+        "profile-page-avatar"
+      );
+
+
+    if (avatar) {
+
+      avatar.src =
+        profile.photoURL;
+    }
+
+
+    if (profileAvatar) {
+
+      profileAvatar.src =
+        profile.photoURL;
+    }
+  }
+
+
+  const loginBtn =
+    document.getElementById(
+      "login-btn"
+    );
+
+
+  const avatarBtn =
+    document.getElementById(
+      "user-avatar-btn"
+    );
+
+
+  const status =
+    document.getElementById(
+      "account-status-label"
+    );
+
+
+  if (profile.isLoggedIn) {
+
+    loginBtn?.classList.add(
+      "hidden"
+    );
+
+
+    avatarBtn?.classList.remove(
+      "hidden"
+    );
+
+
+    if (status) {
+
+      status.innerText =
+        "লগইন সক্রিয়";
+    }
+
+  } else {
+
+    loginBtn?.classList.remove(
+      "hidden"
+    );
+
+
+    avatarBtn?.classList.add(
+      "hidden"
+    );
+
+
+    if (status) {
+
+      status.innerText =
+        "মেহমান মোড";
+    }
+  }
+
+
+  const today =
+
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+
+  const dailyBtn =
+    document.getElementById(
+      "daily-checkin-btn"
+    );
+
+
+  const dailyText =
+    document.getElementById(
+      "daily-btn-text"
+    );
+
+
+  if (
+    profile.lastCheckinDate ===
+    today
+  ) {
+
+    if (dailyBtn) {
+
+      dailyBtn.disabled =
+        true;
+
+      dailyBtn.className =
+        "shrink-0 bg-slate-800 text-slate-500 font-bold px-5 py-3 rounded-xl flex items-center justify-center space-x-2 space-x-reverse cursor-not-allowed border border-slate-700";
+    }
+
+
+    if (dailyText) {
+
+      dailyText.innerText =
+        "আজকের বোনাস নেওয়া হয়েছে";
+    }
+
+  } else {
+
+    if (dailyBtn) {
+
+      dailyBtn.disabled =
+        false;
+
+      dailyBtn.className =
+        "shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-slate-950 font-bold px-5 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 space-x-reverse cursor-pointer";
+    }
+
+
+    if (dailyText) {
+
+      dailyText.innerText =
+        "ডেইলি চেক-ইন (+১০০ পয়েন্ট)";
+    }
+  }
+};
+
+
+/* =====================================================
+   LOGIN MODAL
+===================================================== */
+
+window.openLoginModal =
+function() {
+
+  const modal =
+    document.getElementById(
+      "login-modal"
+    );
+
+
+  if (!modal) {
+
+    console.error(
+      "login-modal পাওয়া যায়নি"
+    );
+
+    return;
+  }
+
+
+  modal.classList.remove(
+    "hidden"
+  );
+
+
+  modal.classList.add(
+    "flex"
+  );
+
+
+  document.body.style.overflow =
+    "hidden";
+};
+
+
+window.closeLoginModal =
+function() {
+
+  const modal =
+    document.getElementById(
+      "login-modal"
+    );
+
+
+  if (!modal) {
+
+    return;
+  }
+
+
+  modal.classList.add(
+    "hidden"
+  );
+
+
+  modal.classList.remove(
+    "flex"
+  );
+
+
+  document.body.style.overflow =
+    "";
+};
+
+
+/* =====================================================
+   GOOGLE LOGIN
+===================================================== */
+
+window.handleGoogleLogin =
+async function() {
+
+  if (!auth) {
+
+    showToast(
+      "Firebase চালু হয়নি!"
+    );
+
+    return;
+  }
+
+
+  try {
+
+    const provider =
+      new GoogleAuthProvider();
+
+
+    /*
+      select_account দিলে Google
+      account chooser দেখাবে।
+
+      ফলে একই device/browser থেকে
+      অন্য Google account-ও নির্বাচন
+      করা যাবে।
+    */
+
+    provider.setCustomParameters({
+
+      prompt:
+        "select_account"
+
+    });
+
+
+    showToast(
+      "Google login চালু হচ্ছে..."
+    );
+
+
+    const result =
+
+      await signInWithPopup(
+
+        auth,
+
+        provider
+
+      );
+
+
+    if (result?.user) {
+
+      firebaseUser =
+        result.user;
+    }
+
+
+    window.closeLoginModal();
+
+
+    showToast(
+      "Google login সফল হয়েছে!"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Google login error:",
+      error
+    );
+
+
+    let message =
+      "Google login ব্যর্থ হয়েছে!";
+
+
+    if (
+      error.code ===
+      "auth/popup-blocked"
+    ) {
+
+      message =
+        "Browser popup বন্ধ করেছে। Popup allow করুন।";
+
+    } else if (
+
+      error.code ===
+      "auth/popup-closed-by-user"
+
+    ) {
+
+      message =
+        "Login window বন্ধ করা হয়েছে।";
+
+    } else if (
+
+      error.code ===
+      "auth/unauthorized-domain"
+
+    ) {
+
+      message =
+        "Firebase Authentication-এর Authorized Domain ঠিক করুন।";
+
+    } else if (
+
+      error.code ===
+      "auth/operation-not-allowed"
+
+    ) {
+
+      message =
+        "Firebase Console-এ Google Sign-in চালু করুন।";
+
+    } else if (
+
+      error.code ===
+      "auth/network-request-failed"
+
+    ) {
+
+      message =
+        "Internet connection পরীক্ষা করুন।";
+    }
+
+
+    showToast(message);
+  }
+};
+
+
+/* =====================================================
+   GUEST LOGIN
+===================================================== */
+
+async function doGuestLogin() {
+
+  const input =
+    document.getElementById(
+      "quick-login-name"
+    );
+
+
+  const name =
+    input?.value.trim();
+
+
+  if (!name) {
+
+    showToast(
+      "আপনার নাম লিখুন!"
+    );
+
+    return;
+  }
+
+
+  if (!auth) {
+
+    showToast(
+      "Firebase Authentication পাওয়া যায়নি!"
+    );
+
+    return;
+  }
+
+
+  try {
+
+    showToast(
+      "Account তৈরি হচ্ছে..."
+    );
+
+
+    /*
+      Device restriction নেই।
+
+      তাই একই device থেকে যতবার
+      Anonymous account তৈরি করা হবে,
+      Firebase নতুন UID দিতে পারবে।
+    */
+
+    const result =
+
+      await signInAnonymously(
+        auth
+      );
+
+
+    const user =
+      result.user;
+
+
+    const profile = {
+
+      uid:
+        user.uid,
+
+      name:
+        name,
+
+      email:
+
+        name
+          .toLowerCase()
+          .replace(
+            /\s+/g,
+            ""
+          ) +
+        "@erning.com",
+
+      photoURL:
+
+        "https://api.dicebear.com/7.x/bottts/svg?seed=" +
+        encodeURIComponent(
+          name
+        ),
+
+      coins: 0,
+
+      totalEarned: 0,
+
+      referralCode:
+
+        generateReferralCode(
+          user.uid
+        ),
+
+      referredBy: "",
+
+      referralCount: 0,
+
+      lastCheckinDate: "",
+
+      isLoggedIn: true,
+
+      status: "active",
+
+      createdAt:
+        new Date().toISOString()
+    };
+
+
+    currentUserProfile =
+      profile;
+
+
+    firebaseUser =
+      user;
+
+
+    saveLocalProfile(
+      profile
+    );
+
+
+    await syncUserToFirebase(
+      profile
+    );
+
+
+    updateDashboardUI(
+      profile
+    );
+
+
+    window.closeLoginModal();
+
+
+    showToast(
+      "সফলভাবে নতুন account তৈরি হয়েছে!"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Anonymous login error:",
+      error
+    );
+
+
+    let message =
+      "Login ব্যর্থ হয়েছে।";
+
+
+    if (
+      error.code ===
+      "auth/operation-not-allowed"
+    ) {
+
+      message =
+        "Firebase Console-এ Anonymous Authentication চালু করুন।";
+
+    } else if (
+
+      error.code ===
+      "auth/network-request-failed"
+
+    ) {
+
+      message =
+        "Internet connection পরীক্ষা করুন।";
+    }
+
+
+    showToast(message);
+  }
+}
+
+
+/* =====================================================
+   FORM EVENT
+===================================================== */
+
+document
+  .getElementById(
+    "guest-login-form"
+  )
+  .addEventListener(
+
+    "submit",
+
+    function(event) {
+
+      event.preventDefault();
+
+      doGuestLogin();
+    }
+  );
+
+
+/* =====================================================
+   ADD EARNING
+===================================================== */
+
+async function saveEarning(
+  amount,
+  reason
+) {
+
+  if (
+    !firebaseUser ||
+    !db
+  ) {
+
+    return null;
+  }
+
+
+  try {
+
+    const earningRef =
+
+      await addDoc(
+
+        collection(
+          db,
+          "users",
+          firebaseUser.uid,
+          "earnings"
+        ),
+
+        {
+
+          uid:
+            firebaseUser.uid,
+
+          amount:
+            Number(amount),
+
+          reason:
+            reason ||
+            "Reward",
+
+          createdAt:
+            serverTimestamp(),
+
+          createdAtClient:
+            new Date().toISOString()
+        }
+      );
+
+
+    if (rtdb) {
+
+      await set(
+
+        ref(
+
+          rtdb,
+
+          "earnings/" +
+          firebaseUser.uid +
+          "/" +
+          earningRef.id
+
+        ),
+
+        {
+
+          id:
+            earningRef.id,
+
+          uid:
+            firebaseUser.uid,
+
+          amount:
+            Number(amount),
+
+          reason:
+            reason ||
+            "Reward",
+
+          createdAt:
+            Date.now()
+        }
+      );
+    }
+
+
+    return earningRef.id;
+
+  } catch (error) {
+
+    console.error(
+      "Earning save error:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+/* =====================================================
+   ADD COINS
+===================================================== */
+
+window.addCoinsToUser =
+async function(
+  amount,
+  reason
+) {
+
+  if (!firebaseUser) {
+
+    showToast(
+      "আগে Login করুন!"
+    );
+
+    window.openLoginModal();
+
+    return;
+  }
+
+
+  const value =
+    Number(amount) || 0;
+
+
+  if (value <= 0) {
+
+    return;
+  }
+
+
+  currentUserProfile.coins =
+
+    Number(
+      currentUserProfile.coins || 0
+    ) +
+    value;
+
+
+  currentUserProfile.totalEarned =
+
+    Number(
+      currentUserProfile.totalEarned || 0
+    ) +
+    value;
+
+
+  saveLocalProfile(
+    currentUserProfile
+  );
+
+
+  updateDashboardUI(
+    currentUserProfile
+  );
+
+
+  await syncUserToFirebase(
+    currentUserProfile
+  );
+
+
+  await saveEarning(
+    value,
+    reason
+  );
+
+
+  playWinSound();
+
+
+  showToast(
+
+    "+" +
+    value.toLocaleString() +
+    " কয়েন যোগ হয়েছে!"
+
+  );
+};
+
+
+/* =====================================================
+   DAILY CHECK-IN
+===================================================== */
+
+window.claimDailyCheckin =
+async function() {
+
+  if (!firebaseUser) {
+
+    showToast(
+      "ডেইলি বোনাস নিতে Login করুন!"
+    );
+
+    window.openLoginModal();
+
+    return;
+  }
+
+
+  const today =
+
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+
+  if (
+
+    currentUserProfile.lastCheckinDate ===
+    today
+
+  ) {
+
+    showToast(
+      "আজকের bonus নেওয়া হয়েছে!"
+    );
+
+    return;
+  }
+
+
+  currentUserProfile.lastCheckinDate =
+    today;
+
+
+  await window.addCoinsToUser(
+
+    100,
+
+    "ডেইলি চেক-ইন বোনাস"
+
+  );
+
+
+  await syncUserToFirebase(
+    currentUserProfile
+  );
+};
+
+
+/* =====================================================
+   WITHDRAW
+===================================================== */
+
+window.handleWithdrawalSubmit =
+async function(event) {
+
+  event.preventDefault();
+
+
+  if (!firebaseUser) {
+
+    showToast(
+      "উইথড্র করতে Login করুন!"
+    );
+
+    window.openLoginModal();
+
+    return;
+  }
+
+
+  const method =
+
+    document.querySelector(
+
+      'input[name="pay_method"]:checked'
+
+    )?.value;
+
+
+  const accountNo =
+
+    document
+      .getElementById(
+        "withdraw-account-no"
+      )
+      .value
+      .trim();
+
+
+  const coinAmount =
+
+    Number(
+
+      document.getElementById(
+        "withdraw-coin-amount"
+      ).value
+
+    ) || 0;
+
+
+  const minCoinsMap = {
+
+    Recharge: 2000,
+
+    bKash: 5000,
+
+    Nagad: 5000,
+
+    Rocket: 5000,
+
+    Crypto: 50000,
+
+    Payoneer: 50000
+
+  };
+
+
+  const minRequired =
+
+    minCoinsMap[method] ||
+    5000;
+
+
+  if (
+    coinAmount <
+    minRequired
+  ) {
+
+    showToast(
+
+      "সর্বনিম্ন " +
+      minRequired.toLocaleString() +
+      " কয়েন প্রয়োজন!"
+
+    );
+
+    return;
+  }
+
+
+  if (
+
+    coinAmount >
+    Number(
+      currentUserProfile.coins || 0
+    )
+
+  ) {
+
+    showToast(
+      "আপনার পর্যাপ্ত balance নেই!"
+    );
+
+    return;
+  }
+
+
+  const bdtAmount =
+
+    (coinAmount / 100)
+      .toFixed(2);
+
+
+  const withdrawalId =
+
+    "WD" +
+    Date.now();
+
+
+  try {
+
+    const withdrawalData = {
+
+      id:
+        withdrawalId,
+
+      uid:
+        firebaseUser.uid,
+
+      method:
+        method,
+
+      accountNo:
+        accountNo,
+
+      coins:
+        coinAmount,
+
+      bdtAmount:
+        bdtAmount,
+
+      status:
+        "pending",
+
+      createdAtClient:
+        new Date().toISOString()
+    };
+
+
+    await setDoc(
+
+      doc(
+        db,
+        "withdrawals",
+        withdrawalId
+      ),
+
+      {
+
+        ...withdrawalData,
+
+        createdAt:
+          serverTimestamp()
+
+      }
+
+    );
+
+
+    const txRef =
+
+      await addDoc(
+
+        collection(
+
+          db,
+
+          "users",
+
+          firebaseUser.uid,
+
+          "transactions"
+
+        ),
+
+        {
+
+          ...withdrawalData,
+
+          createdAt:
+            serverTimestamp()
+
+        }
+
+      );
+
+
+    if (rtdb) {
+
+      await set(
+
+        ref(
+
+          rtdb,
+
+          "withdrawals/" +
+          firebaseUser.uid +
+          "/" +
+          withdrawalId
+
+        ),
+
+        {
+
+          ...withdrawalData,
+
+          createdAt:
+            Date.now()
+
+        }
+
+      );
+
+
+      await set(
+
+        ref(
+
+          rtdb,
+
+          "transactions/" +
+          firebaseUser.uid +
+          "/" +
+          txRef.id
+
+        ),
+
+        {
+
+          ...withdrawalData,
+
+          id:
+            txRef.id,
+
+          createdAt:
+            Date.now()
+
+        }
+
+      );
+    }
+
+
+    currentUserProfile.coins =
+
+      Number(
+        currentUserProfile.coins || 0
+      ) -
+      coinAmount;
+
+
+    saveLocalProfile(
+      currentUserProfile
+    );
+
+
+    await syncUserToFirebase(
+      currentUserProfile
+    );
+
+
+    await loadTransactionHistory();
+
+
+    document
+      .getElementById(
+        "withdraw-form"
+      )
+      .reset();
+
+
+    showToast(
+      "উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে!"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Withdrawal error:",
+      error
+    );
+
+
+    showToast(
+      "Withdrawal save হয়নি। Firebase Rules পরীক্ষা করুন।"
+    );
+  }
+};
+
+
+/* =====================================================
+   TRANSACTION HISTORY
+===================================================== */
+
+async function loadTransactionHistory() {
+
+  const container =
+
+    document.getElementById(
+      "transaction-history-list"
+    );
+
+
+  if (!container) {
+
+    return;
+  }
+
+
+  if (
+    !firebaseUser ||
+    !db
+  ) {
+
+    container.innerHTML = `
+
+      <div class="text-center py-6 text-slate-500 text-xs">
+
+        Login করলে transaction history দেখা যাবে
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  try {
+
+    const q =
+
+      query(
+
+        collection(
+
+          db,
+
+          "users",
+
+          firebaseUser.uid,
+
+          "transactions"
+
+        ),
+
+        orderBy(
+          "createdAtClient",
+          "desc"
+        ),
+
+        limit(50)
+
+      );
+
+
+    const snapshot =
+      await getDocs(q);
+
+
+    if (snapshot.empty) {
+
+      container.innerHTML = `
+
+        <div class="text-center py-6 text-slate-500 text-xs">
+
+          কোনো transaction নেই
+
+        </div>
+
+      `;
+
+      return;
+    }
+
+
+    const list =
+
+      snapshot.docs.map(
+
+        d => ({
+
+          id:
+            d.id,
+
+          ...d.data()
+
+        })
+
+      );
+
+
+    container.innerHTML =
+
+      list.map(item => `
+
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+
+          <div>
+
+            <div class="font-bold text-white">
+
+              ${escapeHTML(
+                item.method ||
+                "Transaction"
+              )}
+
+            </div>
+
+            <div class="text-[10px] text-slate-400">
+
+              ${
+                item.accountNo
+                  ? escapeHTML(
+                      item.accountNo
+                    )
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+          <div class="text-right">
+
+            <div class="font-bold text-amber-300">
+
+              ${Number(
+                item.coins || 0
+              ).toLocaleString()}
+
+              কয়েন
+
+            </div>
+
+            <span class="inline-block text-[10px] px-2 py-0.5 rounded-full border bg-amber-500/20 text-amber-400 border-amber-500/30">
+
+              ${escapeHTML(
+                item.status ||
+                "pending"
+              )}
+
+            </span>
+
+          </div>
+
+        </div>
+
+      `).join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "Transaction error:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="text-center py-6 text-red-400 text-xs">
+
+        Transaction load করা যায়নি।
+
+      </div>
+
+    `;
+  }
+}
+
+
+/* =====================================================
+   REFERRAL
+===================================================== */
+
+window.submitReferralCode =
+async function() {
+
+  if (!firebaseUser) {
+
+    showToast(
+      "আগে Login করুন!"
+    );
+
+    window.openLoginModal();
+
+    return;
+  }
+
+
+  const input =
+
+    document
+      .getElementById(
+        "refer-input-code"
+      )
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  if (!input) {
+
+    showToast(
+      "Referral code লিখুন!"
+    );
+
+    return;
+  }
+
+
+  if (
+    currentUserProfile.referredBy
+  ) {
+
+    showToast(
+      "আপনি ইতিমধ্যে referral ব্যবহার করেছেন!"
+    );
+
+    return;
+  }
+
+
+  if (
+    input ===
+    currentUserProfile.referralCode
+  ) {
+
+    showToast(
+      "নিজের referral code ব্যবহার করা যাবে না!"
+    );
+
+    return;
+  }
+
+
+  currentUserProfile.referredBy =
+    input;
+
+
+  await window.addCoinsToUser(
+
+    200,
+
+    "Referral bonus"
+
+  );
+
+
+  await syncUserToFirebase(
+    currentUserProfile
+  );
+
+
+  document
+    .getElementById(
+      "refer-input-code"
+    )
+    .value = "";
+
+
+  showToast(
+    "Referral bonus যোগ হয়েছে!"
+  );
+};
+
+
+/* =====================================================
+   COPY REFERRAL
+===================================================== */
+
+window.copyReferralLink =
+function() {
+
+  const code =
+
+    document
+      .getElementById(
+        "user-ref-code-display"
+      )
+      .innerText;
+
+
+  const link =
+
+    window.location.origin +
+    "/?ref=" +
+    code;
+
+
+  navigator.clipboard
+    .writeText(link)
+    .then(() => {
+
+      showToast(
+        "Referral link copy হয়েছে!"
+      );
+
+    })
+    .catch(() => {
+
+      const input =
+        document.createElement(
+          "input"
+        );
+
+
+      input.value =
+        link;
+
+
+      document.body.appendChild(
+        input
+      );
+
+
+      input.select();
+
+
+      document.execCommand(
+        "copy"
+      );
+
+
+      input.remove();
+
+
+      showToast(
+        "Referral link copy হয়েছে!"
+      );
+    });
+};
+
+
+/* =====================================================
+   SPONSORED TASK
+===================================================== */
+
+window.triggerSmartlinkAd =
+async function(coins) {
+
+  if (!firebaseUser) {
+
+    showToast(
+      "আগে Login করুন!"
+    );
+
+    window.openLoginModal();
+
+    return;
+  }
+
+
+  window.open(
+
+    "https://asiaso.org/4/bb55e1291be0960bbbcb120dc793c7f3",
+
+    "_blank",
+
+    "noopener,noreferrer"
+
+  );
+
+
+  /*
+    Production app-এ sponsor visit সত্যিই complete
+    হয়েছে কিনা server-side verify করা উচিত।
+  */
+
+
+  await window.addCoinsToUser(
+
+    coins,
+
+    "Sponsored task reward"
+
+  );
+};
+
+
+/* =====================================================
+   SWITCH TAB
+===================================================== */
+
+window.switchTab =
+function(
+  tabId,
+  gameTarget
+) {
+
+  document
+    .querySelectorAll(
+      ".tab-content"
+    )
+    .forEach(
+      el =>
+        el.classList.add(
+          "hidden"
+        )
+    );
+
+
+  const target =
+    document.getElementById(
+      tabId
+    );
+
+
+  if (target) {
+
+    target.classList.remove(
+      "hidden"
+    );
+  }
+
+
+  document
+    .querySelectorAll(
+      ".nav-tab-item"
+    )
+    .forEach(el => {
+
+      el.classList.remove(
+        "text-brand-500"
+      );
+
+      el.classList.add(
+        "text-slate-400"
+      );
+
+    });
+
+
+  const nav =
+
+    document.getElementById(
+
+      "nav-btn-" +
+
+      tabId.replace(
+        "tab-",
+        ""
+      )
+
+    );
+
+
+  if (nav) {
+
+    nav.classList.add(
+      "text-brand-500"
+    );
+
+    nav.classList.remove(
+      "text-slate-400"
+    );
+  }
+
+
+  if (gameTarget) {
+
+    const game =
+
+      document.getElementById(
+
+        "task-" +
+        gameTarget +
+        "-card"
+
+      );
+
+
+    if (game) {
+
+      setTimeout(() => {
+
+        game.scrollIntoView({
+
+          behavior:
+            "smooth"
+
+        });
+
+      }, 100);
+    }
+  }
+
+
+  window.scrollTo({
+
+    top: 0,
+
+    behavior:
+      "smooth"
+
+  });
+};
+
+
+/* =====================================================
+   CONVERTER
+===================================================== */
+
+window.convertCoinsToBDT =
+function() {
+
+  const input =
+
+    Number(
+
+      document
+        .getElementById(
+          "calc-coins-input"
+        )
+        .value
+
+    ) || 0;
+
+
+  const bdt =
+
+    (input / 100)
+      .toFixed(2);
+
+
+  document.getElementById(
+    "calc-bdt-output"
+  ).innerText =
+
+    "৳ " +
+    bdt;
+};
+
+
+/* =====================================================
+   WITHDRAWAL LIMIT
+===================================================== */
+
+window.updateWithdrawalThreshold =
+function(method) {
+
+  const map = {
+
+    bKash:
+      "বিকাশ: ৫,০০০ কয়েন = ৳৫০",
+
+    Nagad:
+      "নগদ: ৫,০০০ কয়েন = ৳৫০",
+
+    Rocket:
+      "রকেট: ৫,০০০ কয়েন = ৳৫০",
+
+    Recharge:
+      "রিচার্জ: ২,০০০ কয়েন = ৳২০",
+
+    Crypto:
+      "ক্রিপ্টো: ৫০,০০০ কয়েন = ৳৫০০",
+
+    Payoneer:
+      "Payoneer: ৫০,০০০ কয়েন = ৳৫০০"
+
+  };
+
+
+  document.getElementById(
+    "withdraw-threshold-hint"
+  ).innerText =
+
+    "💡 সর্বনিম্ন উইথড্র লিমিট: " +
+
+    (
+      map[method] ||
+      ""
+    );
+};
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+window.handleLogout =
+async function() {
+
+  try {
+
+    if (auth) {
+
+      await signOut(auth);
+    }
+
+
+    firebaseUser =
+      null;
+
+
+    currentUserProfile =
+      getLocalProfile();
+
+
+    currentUserProfile.isLoggedIn =
+      false;
+
+
+    saveLocalProfile(
+      currentUserProfile
+    );
+
+
+    updateDashboardUI(
+      currentUserProfile
+    );
+
+
+    await loadTransactionHistory();
+
+
+    showToast(
+      "সফলভাবে লগআউট হয়েছে।"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Logout error:",
+      error
+    );
+
+
+    showToast(
+      "Logout error!"
+    );
+  }
+};
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+window.showToast =
+function(message) {
+
+  const toast =
+    document.getElementById(
+      "toast-msg"
+    );
+
+
+  const text =
+    document.getElementById(
+      "toast-text"
+    );
+
+
+  if (
+    !toast ||
+    !text
+  ) {
+
+    return;
+  }
+
+
+  text.innerText =
+    message;
+
+
+  toast.classList.remove(
+    "hidden"
+  );
+
+
+  clearTimeout(
+    window.__toastTimer
+  );
+
+
+  window.__toastTimer =
+
+    setTimeout(() => {
+
+      toast.classList.add(
+        "hidden"
+      );
+
+    }, 3000);
+};
+
+
+/* =====================================================
+   SOUND
+===================================================== */
+
+function playWinSound() {
+
+  try {
+
+    const AudioContext =
+
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+
+    const ctx =
+      new AudioContext();
+
+
+    const osc =
+      ctx.createOscillator();
+
+
+    const gain =
+      ctx.createGain();
+
+
+    osc.connect(gain);
+
+    gain.connect(
+      ctx.destination
+    );
+
+
+    osc.type =
+      "triangle";
+
+
+    osc.frequency.setValueAtTime(
+
+      440,
+
+      ctx.currentTime
+
+    );
+
+
+    osc.frequency.exponentialRampToValueAtTime(
+
+      880,
+
+      ctx.currentTime +
+      0.3
+
+    );
+
+
+    gain.gain.setValueAtTime(
+
+      0.15,
+
+      ctx.currentTime
+
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+
+      0.01,
+
+      ctx.currentTime +
+      0.3
+
+    );
+
+
+    osc.start();
+
+
+    osc.stop(
+
+      ctx.currentTime +
+      0.3
+
+    );
+
+  } catch (error) {}
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(value) {
+
+  return String(
+    value ?? ""
+  )
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
+
+
+/* =====================================================
+   INITIAL UI
+===================================================== */
+
+updateDashboardUI(
+  currentUserProfile
+);
+
+
+/* =====================================================
+   REFERRAL URL
+===================================================== */
+
+const urlParams =
+
+  new URLSearchParams(
+    window.location.search
+  );
+
+
+const refCode =
+  urlParams.get(
+    "ref"
+  );
+
+
+if (refCode) {
+
+  setTimeout(() => {
+
+    const input =
+
+      document.getElementById(
+        "refer-input-code"
+      );
+
+
+    if (input) {
+
+      input.value =
+        refCode.toUpperCase();
+    }
+
+  }, 500);
+}
+
+
+/* =====================================================
+   FIREBASE START
+===================================================== */
+
+(async function() {
+
+  const ready =
+    await initializeFirebase();
+
+
+  if (!ready) {
+
+    return;
+  }
+
+
+  /*
+    Persistence আগে সেট হয়েছে।
+    এরপর Auth State Listener চালু হচ্ছে।
+  */
+
+  onAuthStateChanged(
+
+    auth,
+
+    async user => {
+
+      console.log(
+
+        "Auth state:",
+
+        user
+          ? user.uid
+          : "No user"
+
+      );
+
+
+      if (user) {
+
+        try {
+
+          await loadOrCreateFirebaseProfile(
+            user
+          );
+
+
+        } catch (error) {
+
+          console.error(
+
+            "Profile load error:",
+
+            error
+
+          );
+
+
+          showToast(
+
+            "Account load করতে সমস্যা হয়েছে!"
+
+          );
+        }
+
+
+      } else {
+
+        firebaseUser =
+          null;
+
+
+        currentUserProfile =
+          getLocalProfile();
+
+
+        currentUserProfile.isLoggedIn =
+          false;
+
+
+        saveLocalProfile(
+          currentUserProfile
+        );
+
+
+        updateDashboardUI(
+          currentUserProfile
+        );
+
+
+        await loadTransactionHistory();
+      }
+
+    }
+
+  );
+
+})();
+
+
+console.log(
+  "TakaEarn Firebase version loaded successfully."
+);
+
+
+console.log(
+  "Firestore + RTDB + Firebase Auth enabled."
+);
+
+
+console.log(
+  "Device Lock: DISABLED"
+);
+
+
+console.log(
+  "Multiple Account Login: ENABLED"
+);
+
+</script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
@@ -3849,19 +6996,3 @@ console.log(
 </html>
 ```
 
-### এই ভার্সনে যে Login সমস্যাগুলো ঠিক করেছি
-
-1. **Login button-এ `window.openLoginModal()` ব্যবহার করেছি** — তাই `type="module"` script-এর scope-এর কারণে function না পাওয়ার সমস্যা হবে না।
-2. Login modal-কে `z-[9999]` দেওয়া হয়েছে, তাই অন্য UI-এর নিচে চলে যাবে না।
-3. Modal খোলার সময় `hidden` সরিয়ে `flex` যোগ হচ্ছে।
-4. Modal বন্ধ হলে আবার `hidden` হচ্ছে।
-5. **Firebase `browserLocalPersistence` আগে `await` করে সেট হচ্ছে**, তারপর `onAuthStateChanged()` শুরু হচ্ছে।
-6. Google Login-এর popup error আলাদা করে দেখাবে।
-7. Anonymous Login-এর জন্য Firebase-এ Anonymous Auth বন্ধ থাকলে সরাসরি কারণ দেখাবে।
-8. Google provider বন্ধ থাকলে সেটাও error message-এ বোঝাবে।
-9. Login করার পর Firebase Auth session local browser-এ থাকবে।
-10. Firestore + Realtime Database—দুই জায়গাতেই user data sync করার ব্যবস্থা রাখা হয়েছে।
-
-**একটা গুরুত্বপূর্ণ কথা:** এই কোড বসানোর পর Firebase Console-এ `Authentication → Sign-in method` থেকে **Google** এবং **Anonymous** যেটা ব্যবহার করবে সেটা Enabled থাকতে হবে। Google ব্যবহার করলে `Authentication → Settings → Authorized domains`-এ তোমার app-এর domain-ও থাকতে হবে।
-
-আর browser-এ আগের `localStorage`-এর পুরোনো device lock থাকলে সেটার কারণে নতুন account ঢুকতে না-ও পারে। টেস্ট করার সময় browser-এর site data/local storage একবার clear করে নতুন করে চেষ্টা করো।
