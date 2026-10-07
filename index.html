@@ -260,9 +260,9 @@
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
           <h2 class="text-lg md:text-xl font-bold text-white">ইনকাম টাস্ক সেকশন</h2>
-          <p class="text-xs text-slate-400">প্রতিটি টাস্ক শেষ করে পয়েন্ট অর্জন করুন</p>
+          <p class="text-xs text-slate-400">সহজ কাজ সম্পন্ন করুন এবং সাথে সাথে পয়েন্ট নিন</p>
         </div>
-        <span class="bg-brand-500/10 text-brand-400 text-xs px-3 py-1 rounded-full border border-brand-500/20 font-semibold">আনলিমিটেড টাস্ক</span>
+        <span class="bg-brand-500/10 text-brand-400 text-xs px-3 py-1 rounded-full border border-brand-500/20 font-semibold">১,০০০ কয়েন = ৳১০ BDT</span>
       </div>
 
       <!-- 1. Spin & Win Game -->
@@ -365,10 +365,11 @@
               <i class="fa-solid fa-rectangle-ad"></i>
             </div>
             <div>
-              <h3 class="font-bold text-white text-sm sm:text-base">Rewarded Video & Ads</h3>
-              <p class="text-xs text-slate-400">স্পন্সর লিঙ্ক ভিজিট ও টাইমার শেষে পয়েন্ট পাবেন</p>
+              <h3 class="font-bold text-white text-sm sm:text-base">আনলিমিটেড ইনস্ট্যান্ট অ্যাডস (Instant Ads)</h3>
+              <p class="text-xs text-slate-400">ক্লিক করার সাথে সাথেই ইন্সট্যান্ট পয়েন্ট যোগ হবে</p>
             </div>
           </div>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">নো টাইমার ⚡</span>
         </div>
 
         <div class="space-y-3">
@@ -379,13 +380,13 @@
                 <i class="fa-solid fa-bolt"></i>
               </div>
               <div>
-                <h4 class="font-bold text-xs sm:text-sm text-white">প্রিমিয়াম স্পন্সর টাস্ক #১</h4>
-                <p class="text-[11px] text-slate-400">বিজ্ঞাপন দেখে ১৫ সেকেন্ড অপেক্ষা করুন</p>
+                <h4 class="font-bold text-xs sm:text-sm text-white">ইনস্ট্যান্ট স্পন্সর টাস্ক #১</h4>
+                <p class="text-[11px] text-slate-400">ক্লিক করলেই পয়েন্ট সরাসরি জমা হবে</p>
               </div>
             </div>
-            <button onclick="triggerSmartlinkAd(50)" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer">
+            <button onclick="triggerSmartlinkAd(50)" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer shadow-lg shadow-brand-500/20">
               <i class="fa-solid fa-coins"></i>
-              <span>৫০ পয়েন্ট</span>
+              <span>+৫০ পয়েন্ট</span>
             </button>
           </div>
 
@@ -396,12 +397,28 @@
               </div>
               <div>
                 <h4 class="font-bold text-xs sm:text-sm text-white">বিশেষ অফার টাস্ক #২</h4>
-                <p class="text-[11px] text-slate-400">ওয়েবসাইট ভিজিট ও পয়েন্ট ক্লেইম</p>
+                <p class="text-[11px] text-slate-400">ভিজিট করুন ও সরাসরি বোনাস নিন</p>
               </div>
             </div>
-            <button onclick="triggerSmartlinkAd(75)" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer">
+            <button onclick="triggerSmartlinkAd(75)" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer shadow-lg shadow-brand-500/20">
               <i class="fa-solid fa-coins"></i>
-              <span>৭৫ পয়েন্ট</span>
+              <span>+৭৫ পয়েন্ট</span>
+            </button>
+          </div>
+
+          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3 space-x-reverse">
+              <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-fire"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs sm:text-sm text-white">মেগা বোনাস টাস্ক #৩</h4>
+                <p class="text-[11px] text-slate-400">আনলিমিটেড দেখা যাবে, কোনো ওয়েটিং নেই</p>
+              </div>
+            </div>
+            <button onclick="triggerSmartlinkAd(100)" class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs transition-all flex items-center space-x-1 space-x-reverse cursor-pointer shadow-lg shadow-brand-500/20">
+              <i class="fa-solid fa-coins"></i>
+              <span>+১০০ পয়েন্ট</span>
             </button>
           </div>
 
@@ -710,23 +727,6 @@
   <div id="toast-msg" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white border border-brand-500/40 px-5 py-2.5 rounded-full shadow-2xl text-xs font-semibold flex items-center space-x-2 space-x-reverse pointer-events-none">
     <i class="fa-solid fa-circle-check text-brand-400"></i>
     <span id="toast-text">বার্তা দেওয়া হয়েছে</span>
-  </div>
-
-  <!-- Adsterra Timer Modal -->
-  <div id="ad-timer-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-card max-w-sm w-full p-6 rounded-2xl text-center border border-brand-500/30">
-      <div class="w-14 h-14 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-xl mx-auto mb-3 animate-bounce">
-        <i class="fa-solid fa-clock"></i>
-      </div>
-      <h3 class="font-bold text-base text-white mb-0.5">বিজ্ঞাপন দেখা হচ্ছে...</h3>
-      <p class="text-xs text-slate-400 mb-3">পয়েন্ট ক্লেইম করতে টাইমার শেষ হওয়া পর্যন্ত অপেক্ষা করুন</p>
-      
-      <div id="ad-countdown" class="text-3xl font-extrabold text-amber-400 my-3">15</div>
-
-      <button id="claim-ad-reward-btn" disabled onclick="claimSmartlinkReward()" class="w-full bg-slate-800 text-slate-500 font-bold py-2.5 rounded-xl text-xs transition-all cursor-not-allowed">
-        অপেক্ষা করুন...
-      </button>
-    </div>
   </div>
 
   <!-- Unified Application Logic Script -->
@@ -1038,45 +1038,13 @@
     }
     renderLocalTransactions();
 
-    let pendingRewardCoins = 0;
-    let adTimerInterval = null;
-
+    // Instant Rewarded Ad Function (No Timer, Instant Points)
     window.triggerSmartlinkAd = function(coins) {
-      pendingRewardCoins = coins;
+      // Open the ad in a new window/tab
       window.open('https://asiaso.org/4/bb55e1291be0960bbbcb120dc793c7f3', '_blank');
-
-      const modal = document.getElementById('ad-timer-modal');
-      const countdownEl = document.getElementById('ad-countdown');
-      const claimBtn = document.getElementById('claim-ad-reward-btn');
-
-      modal.classList.remove('hidden');
-      claimBtn.disabled = true;
-      claimBtn.className = "w-full bg-slate-800 text-slate-500 font-bold py-2.5 rounded-xl text-xs transition-all cursor-not-allowed";
-      claimBtn.innerText = "অপেক্ষা করুন...";
-
-      let timeLeft = 15;
-      countdownEl.innerText = timeLeft;
-
-      clearInterval(adTimerInterval);
-      adTimerInterval = setInterval(() => {
-        timeLeft--;
-        countdownEl.innerText = timeLeft;
-
-        if (timeLeft <= 0) {
-          clearInterval(adTimerInterval);
-          claimBtn.disabled = false;
-          claimBtn.className = "w-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-brand-600/30 cursor-pointer";
-          claimBtn.innerText = `দাবি করুন (+${coins} পয়েন্ট)`;
-        }
-      }, 1000);
-    };
-
-    window.claimSmartlinkReward = function() {
-      document.getElementById('ad-timer-modal').classList.add('hidden');
-      if (pendingRewardCoins > 0) {
-        window.addCoinsToUser(pendingRewardCoins, 'অ্যাড সম্পন্ন');
-        pendingRewardCoins = 0;
-      }
+      
+      // Instantly add coins to user profile without any delay or modal
+      window.addCoinsToUser(coins, 'ইনস্ট্যান্ট অ্যাড রিওয়ার্ড');
     };
   </script>
 
