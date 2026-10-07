@@ -1,7 +1,5 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
-<html lang="bn" class="dark">
+<!DOCTYPE html>
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,277 +7,228 @@ html = r'''<!DOCTYPE html>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-*{font-family:'Hind Siliguri',sans-serif}body{background:#020617}
-.card{background:rgba(15,23,42,.9);border:1px solid #1e293b}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>*{font-family:'Hind Siliguri',sans-serif}body{background:#020617}.glass{background:rgba(15,23,42,.88);border:1px solid #1e293b}.active{background:#059669!important;color:#fff!important}</style>
 </head>
 <body class="text-slate-100 min-h-screen">
 
-<!-- LOGIN -->
-<div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
-  <div class="card rounded-2xl p-7 w-full max-w-sm shadow-2xl">
-    <div class="text-center mb-6">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center text-slate-950 text-2xl">
-        <i class="fa-solid fa-user-shield"></i>
-      </div>
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="glass rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+    <div class="text-center mb-5">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center text-2xl">⚙️</div>
       <h1 class="text-2xl font-bold mt-3">TakaEarn Admin</h1>
-      <p class="text-xs text-slate-400">সুরক্ষিত প্রশাসনিক প্যানেল</p>
+      <p class="text-slate-400 text-sm">অ্যাডমিন প্যানেলে প্রবেশ করুন</p>
     </div>
-    <input id="adminPassword" type="password" placeholder="Admin Password"
-      class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-emerald-500">
-    <button onclick="adminLogin()" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl py-3">
-      <i class="fa-solid fa-right-to-bracket mr-1"></i> প্রবেশ করুন
-    </button>
-    <p id="loginError" class="text-red-400 text-xs text-center mt-3"></p>
+    <input id="adminPass" type="password" placeholder="Admin Password" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
+    <button onclick="adminLogin()" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl p-3 font-bold">লগইন</button>
+    <p id="loginError" class="text-red-400 text-xs mt-3 text-center"></p>
   </div>
 </div>
 
-<!-- APP -->
-<div id="adminApp" class="hidden">
-<header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
- <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-   <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center"><i class="fa-solid fa-sack-dollar"></i></div>
-    <div><b class="text-lg">TakaEarn Admin</b><div class="text-[10px] text-emerald-400">REAL-TIME CONTROL PANEL</div></div>
-   </div>
-   <button onclick="logoutAdmin()" class="text-red-400 border border-red-500/30 px-3 py-2 rounded-xl text-xs">Logout</button>
- </div>
+<div id="app" class="hidden">
+<header class="sticky top-0 z-20 bg-slate-950/95 backdrop-blur border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div><h1 class="font-bold text-xl">TakaEarn Admin</h1><p class="text-xs text-emerald-400">Firebase Realtime Dashboard</p></div>
+    <div class="flex gap-2">
+      <span id="connection" class="text-xs px-3 py-2 rounded-full bg-slate-800 text-slate-400">Connecting...</span>
+      <button onclick="location.reload()" class="px-3 py-2 rounded-lg bg-slate-800 text-xs">Logout</button>
+    </div>
+  </div>
 </header>
 
-<main class="max-w-7xl mx-auto p-4 space-y-5">
- <div id="toast" class="hidden fixed top-20 right-4 z-50 bg-slate-900 border border-emerald-500/40 px-4 py-3 rounded-xl shadow-xl text-sm"></div>
-
- <!-- STATS -->
- <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
-  <div class="card rounded-2xl p-4"><span class="text-xs text-slate-400">মোট ইউজার</span><div id="statUsers" class="text-2xl font-bold text-blue-400">0</div></div>
-  <div class="card rounded-2xl p-4"><span class="text-xs text-slate-400">মোট কয়েন</span><div id="statCoins" class="text-2xl font-bold text-amber-400">0</div></div>
-  <div class="card rounded-2xl p-4"><span class="text-xs text-slate-400">মোট BDT</span><div id="statBDT" class="text-2xl font-bold text-emerald-400">৳0</div></div>
-  <div class="card rounded-2xl p-4"><span class="text-xs text-slate-400">Pending Withdraw</span><div id="statPending" class="text-2xl font-bold text-orange-400">0</div></div>
-  <div class="card rounded-2xl p-4"><span class="text-xs text-slate-400">Notice</span><div id="statNotice" class="text-2xl font-bold text-purple-400">0</div></div>
- </section>
-
- <!-- TABS -->
- <div class="flex gap-2 overflow-x-auto pb-1">
-  <button class="tab bg-emerald-600 px-4 py-2 rounded-xl text-sm" onclick="showTab('dashboard')">Dashboard</button>
-  <button class="tab bg-slate-800 px-4 py-2 rounded-xl text-sm" onclick="showTab('users')">Users</button>
-  <button class="tab bg-slate-800 px-4 py-2 rounded-xl text-sm" onclick="showTab('withdrawals')">Withdrawals</button>
-  <button class="tab bg-slate-800 px-4 py-2 rounded-xl text-sm" onclick="showTab('notice')">Notice</button>
-  <button class="tab bg-slate-800 px-4 py-2 rounded-xl text-sm" onclick="showTab('settings')">Settings</button>
- </div>
-
- <section id="dashboard" class="tabContent space-y-4">
-  <div class="card rounded-2xl p-5">
-   <h2 class="font-bold text-lg mb-3">রিয়েল-টাইম সারাংশ</h2>
-   <p class="text-sm text-slate-400">Firebase Realtime Database-এর <b>users</b>, <b>withdrawals</b>, <b>notices</b> এবং <b>settings</b> path থেকে data আসবে।</p>
+<main class="max-w-7xl mx-auto p-4">
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">মোট ইউজার</p><b id="statUsers" class="text-2xl">0</b></div>
+    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">মোট কয়েন</p><b id="statCoins" class="text-2xl text-amber-400">0</b></div>
+    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">মোট আয়</p><b id="statEarned" class="text-2xl text-emerald-400">0</b></div>
+    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">Withdrawals</p><b id="statWithdrawals" class="text-2xl text-blue-400">0</b></div>
+    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">Pending</p><b id="statPending" class="text-2xl text-orange-400">0</b></div>
   </div>
- </section>
 
- <section id="users" class="tabContent hidden">
-  <div class="card rounded-2xl p-4">
-   <div class="flex flex-col md:flex-row gap-3 justify-between mb-4">
-    <h2 class="font-bold text-lg">সকল ইউজার</h2>
-    <input id="userSearch" oninput="renderUsers()" placeholder="নাম / UID / email খুঁজুন"
-      class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none">
-   </div>
-   <div class="overflow-auto">
-    <table class="w-full text-sm min-w-[850px]">
-     <thead class="text-slate-400 border-b border-slate-800"><tr>
-      <th class="text-left p-3">User</th><th class="text-left p-3">UID</th><th class="text-left p-3">Coins</th>
-      <th class="text-left p-3">BDT</th><th class="text-left p-3">Referral</th><th class="text-left p-3">Action</th>
-     </tr></thead>
-     <tbody id="usersBody"></tbody>
-    </table>
-   </div>
+  <div class="flex flex-wrap gap-2 mb-5">
+    <button class="nav active px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('dashboard',this)">Dashboard</button>
+    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('users',this)">Users</button>
+    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('withdrawals',this)">Withdrawals</button>
+    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('notices',this)">Notices</button>
+    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('settings',this)">Settings</button>
   </div>
- </section>
 
- <section id="withdrawals" class="tabContent hidden">
-  <div class="card rounded-2xl p-4">
-   <h2 class="font-bold text-lg mb-4">উইথড্র রিকোয়েস্ট</h2>
-   <div class="overflow-auto">
-    <table class="w-full text-sm min-w-[900px]">
-     <thead class="text-slate-400 border-b border-slate-800"><tr>
-      <th class="text-left p-3">User UID</th><th class="text-left p-3">Method</th><th class="text-left p-3">Account</th>
-      <th class="text-left p-3">Coins</th><th class="text-left p-3">BDT</th><th class="text-left p-3">Status</th><th class="text-left p-3">Action</th>
-     </tr></thead>
-     <tbody id="withdrawalsBody"></tbody>
-    </table>
-   </div>
-  </div>
- </section>
+  <section id="dashboard" class="tab">
+    <div class="glass rounded-2xl p-5">
+      <h2 class="text-lg font-bold mb-3">রিয়েল-টাইম স্ট্যাটাস</h2>
+      <p class="text-sm text-slate-400">Firebase Realtime Database-এর <b class="text-white">users</b>, <b class="text-white">withdrawals</b>, <b class="text-white">notices</b> এবং <b class="text-white">settings</b> path থেকে ডাটা লাইভ আপডেট হবে।</p>
+      <div id="lastUpdate" class="text-xs text-slate-500 mt-3">অপেক্ষা করছে...</div>
+    </div>
+  </section>
 
- <section id="notice" class="tabContent hidden">
-  <div class="grid md:grid-cols-2 gap-4">
-   <div class="card rounded-2xl p-5">
-    <h2 class="font-bold text-lg mb-3">নতুন Notice পাঠান</h2>
-    <input id="noticeTitle" placeholder="Notice title" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3">
-    <textarea id="noticeText" rows="5" placeholder="সব ইউজারকে যে বার্তা দেখাতে চান..."
-      class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3"></textarea>
-    <button onclick="sendNotice()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl py-3">
-      <i class="fa-solid fa-bullhorn mr-1"></i> ইউজার অ্যাপে পাঠান
-    </button>
-   </div>
-   <div class="card rounded-2xl p-5">
-    <h2 class="font-bold text-lg mb-3">Notice History</h2>
-    <div id="noticeList" class="space-y-2"></div>
-   </div>
-  </div>
- </section>
+  <section id="users" class="tab hidden">
+    <div class="glass rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row gap-3 justify-between mb-4">
+        <h2 class="font-bold text-lg">Users</h2>
+        <input id="userSearch" oninput="renderUsers()" placeholder="নাম / email / UID খুঁজুন..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm md:w-80">
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-slate-400 border-b border-slate-800">
+      <th class="p-3 text-left">User</th><th class="p-3">UID</th><th class="p-3">Coins</th><th class="p-3">Total Earned</th><th class="p-3">Referrals</th><th class="p-3">Action</th>
+      </tr></thead><tbody id="usersBody"></tbody></table></div>
+    </div>
+  </section>
 
- <section id="settings" class="tabContent hidden">
-  <div class="grid md:grid-cols-2 gap-4">
-   <div class="card rounded-2xl p-5">
-    <h2 class="font-bold text-lg mb-4">কয়েন / পেমেন্ট Settings</h2>
-    <label class="text-xs text-slate-400">100 কয়েনের মূল্য (BDT)</label>
-    <input id="coinRate" type="number" step="0.01" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mt-1">
-    <label class="text-xs text-slate-400 block mt-3">Minimum Withdraw Coins</label>
-    <input id="minWithdraw" type="number" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mt-1">
-    <button onclick="saveSettings()" class="mt-4 w-full bg-emerald-600 text-slate-950 font-bold rounded-xl py-3">Settings Save</button>
-   </div>
-   <div class="card rounded-2xl p-5">
-    <h2 class="font-bold text-lg mb-4">Admin Password পরিবর্তন</h2>
-    <input id="oldPass" type="password" placeholder="বর্তমান Password" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-2">
-    <input id="newPass" type="password" placeholder="নতুন Password" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-2">
-    <input id="newPass2" type="password" placeholder="নতুন Password আবার" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3">
-    <button onclick="changePassword()" class="mt-4 w-full bg-orange-500 text-slate-950 font-bold rounded-xl py-3">Password Change</button>
-    <p class="text-[11px] text-red-400 mt-3">নোট: এই demo login client-side। Production-এ Firebase Authentication + Security Rules ব্যবহার করুন।</p>
-   </div>
-  </div>
- </section>
+  <section id="withdrawals" class="tab hidden">
+    <div class="glass rounded-2xl p-4">
+      <h2 class="font-bold text-lg mb-4">Withdrawal Requests</h2>
+      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-slate-400 border-b border-slate-800">
+      <th class="p-3">ID</th><th class="p-3">User</th><th class="p-3">Method</th><th class="p-3">Account</th><th class="p-3">Coins</th><th class="p-3">BDT</th><th class="p-3">Status</th><th class="p-3">Action</th>
+      </tr></thead><tbody id="withdrawalsBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="notices" class="tab hidden">
+    <div class="glass rounded-2xl p-5 max-w-2xl">
+      <h2 class="font-bold text-lg mb-4">Notice</h2>
+      <textarea id="noticeText" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3" placeholder="ইউজার অ্যাপে দেখানোর বিজ্ঞপ্তি..."></textarea>
+      <button onclick="saveNotice()" class="mt-3 bg-emerald-600 px-5 py-2 rounded-xl font-bold">Save Notice</button>
+      <p id="noticeCurrent" class="text-xs text-slate-400 mt-4"></p>
+    </div>
+  </section>
+
+  <section id="settings" class="tab hidden">
+    <div class="glass rounded-2xl p-5 max-w-2xl">
+      <h2 class="font-bold text-lg mb-4">App Settings</h2>
+      <div class="grid gap-3">
+        <label class="text-sm">Coin to BDT rate<input id="coinRate" type="number" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"></label>
+        <label class="text-sm">Daily check-in coins<input id="dailyCoins" type="number" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"></label>
+        <label class="text-sm">Minimum withdrawal coins<input id="minWithdraw" type="number" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"></label>
+      </div>
+      <button onclick="saveSettings()" class="mt-4 bg-emerald-600 px-5 py-2 rounded-xl font-bold">Save Settings</button>
+    </div>
+  </section>
 </main>
 </div>
 
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import {getDatabase, ref, onValue, set, update, push} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-const firebaseConfig={
- apiKey:"AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
- authDomain:"erning-344b8.firebaseapp.com",
- databaseURL:"https://erning-344b8-default-rtdb.firebaseio.com",
- projectId:"erning-344b8",
- storageBucket:"erning-344b8.firebasestorage.app",
- messagingSenderId:"69804884240",
- appId:"1:69804884240:web:2e2ea56642c937b15ae595"
+const firebaseConfig = {
+  apiKey: "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
+  authDomain: "erning-344b8.firebaseapp.com",
+  databaseURL: "https://erning-344b8-default-rtdb.firebaseio.com",
+  projectId: "erning-344b8",
+  storageBucket: "erning-344b8.firebasestorage.app",
+  messagingSenderId: "69804884240",
+  appId: "1:69804884240:web:2e2ea56642c937b15ae595",
+  measurementId: "G-1JG8GHJF7Z"
 };
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
 
-let users={}, withdrawals={}, notices={}, settings={};
-let password=localStorage.getItem("takaearn_admin_password")||"Safin@098";
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-window.adminLogin=()=>{
- const p=document.getElementById("adminPassword").value;
- if(p===password){
-  sessionStorage.setItem("admin_ok","1");
-  document.getElementById("loginPage").classList.add("hidden");
-  document.getElementById("adminApp").classList.remove("hidden");
-  startRealtime();
- }else document.getElementById("loginError").textContent="Password ভুল!";
+let users = {}, withdrawals = {}, notices = {}, settings = {};
+
+window.adminLogin = function(){
+  const pass = document.getElementById('adminPass').value;
+  if(pass === 'Safin@098'){
+    sessionStorage.setItem('takaearn_admin','1');
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    startFirebase();
+  } else document.getElementById('loginError').textContent='ভুল Admin Password';
 };
-window.logoutAdmin=()=>{sessionStorage.removeItem("admin_ok");location.reload()};
-if(sessionStorage.getItem("admin_ok")==="1"){
- document.getElementById("loginPage").classList.add("hidden");
- document.getElementById("adminApp").classList.remove("hidden");
- startRealtime();
+
+if(sessionStorage.getItem('takaearn_admin')==='1'){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  startFirebase();
 }
 
-function startRealtime(){
- onValue(ref(db,"users"),s=>{users=s.val()||{};renderUsers();updateStats()});
- onValue(ref(db,"withdrawals"),s=>{withdrawals=s.val()||{};renderWithdrawals();updateStats()});
- onValue(ref(db,"notices"),s=>{notices=s.val()||{};renderNotices();updateStats()});
- onValue(ref(db,"settings"),s=>{settings=s.val()||{};document.getElementById("coinRate").value=settings.coinRate??10;document.getElementById("minWithdraw").value=settings.minWithdraw??5000});
+function startFirebase(){
+  onValue(ref(db,'.'), snap=>{
+    const root=snap.val()||{};
+    users=root.users||{};
+    withdrawals=root.withdrawals||{};
+    notices=root.notices||{};
+    settings=root.settings||{};
+    document.getElementById('connection').textContent='● Firebase Connected';
+    document.getElementById('connection').className='text-xs px-3 py-2 rounded-full bg-emerald-900/50 text-emerald-400';
+    renderAll();
+  },err=>{
+    document.getElementById('connection').textContent='Firebase Error';
+    document.getElementById('connection').className='text-xs px-3 py-2 rounded-full bg-red-900/50 text-red-400';
+    console.error(err);
+  });
 }
 
-function toast(x){const t=document.getElementById("toast");t.textContent=x;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),2200)}
-function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-
-function updateStats(){
- let arr=Object.values(users), coins=arr.reduce((s,u)=>s+(Number(u.coins)||0),0);
- let pending=Object.values(withdrawals).filter(x=>x.status==="pending").length;
- document.getElementById("statUsers").textContent=arr.length.toLocaleString();
- document.getElementById("statCoins").textContent=coins.toLocaleString();
- document.getElementById("statBDT").textContent="৳"+(coins*(Number(settings.coinRate??10)/100)).toFixed(2);
- document.getElementById("statPending").textContent=pending;
- document.getElementById("statNotice").textContent=Object.keys(notices).length;
+function renderAll(){
+  const ul=Object.values(users), wl=Object.values(withdrawals);
+  document.getElementById('statUsers').textContent=ul.length.toLocaleString();
+  document.getElementById('statCoins').textContent=ul.reduce((s,u)=>s+(+u.coins||0),0).toLocaleString();
+  document.getElementById('statEarned').textContent=ul.reduce((s,u)=>s+(+u.totalEarned||0),0).toLocaleString();
+  document.getElementById('statWithdrawals').textContent=wl.length.toLocaleString();
+  document.getElementById('statPending').textContent=wl.filter(x=>(x.status||'pending')==='pending').length.toLocaleString();
+  document.getElementById('lastUpdate').textContent='সর্বশেষ আপডেট: '+new Date().toLocaleString('bn-BD');
+  renderUsers(); renderWithdrawals();
+  const n=notices.current || notices.text || '';
+  document.getElementById('noticeCurrent').textContent=n?'বর্তমান: '+n:'কোনো notice নেই';
+  document.getElementById('noticeText').value=n;
+  document.getElementById('coinRate').value=settings.coinRate??100;
+  document.getElementById('dailyCoins').value=settings.dailyCoins??100;
+  document.getElementById('minWithdraw').value=settings.minWithdraw??5000;
 }
 
-window.renderUsers=()=>{
- const q=(document.getElementById("userSearch")?.value||"").toLowerCase();
- document.getElementById("usersBody").innerHTML=Object.entries(users).filter(([uid,u])=>
-  !q || [uid,u.name,u.email].some(v=>String(v||"").toLowerCase().includes(q))
- ).map(([uid,u])=>`<tr class="border-b border-slate-800">
- <td class="p-3"><b>${esc(u.name||"ব্যবহারকারী")}</b><div class="text-[10px] text-slate-500">${esc(u.email||"")}</div></td>
- <td class="p-3 font-mono text-xs">${esc(uid)}</td>
- <td class="p-3 text-amber-400 font-bold">${(Number(u.coins)||0).toLocaleString()}</td>
- <td class="p-3">৳${((Number(u.coins)||0)*(Number(settings.coinRate??10)/100)).toFixed(2)}</td>
- <td class="p-3">${Number(u.referralCount)||0}</td>
- <td class="p-3"><button onclick="editUser('${esc(uid)}')" class="bg-blue-500/15 text-blue-300 px-3 py-1.5 rounded-lg">Edit</button></td>
- </tr>`).join("")||`<tr><td colspan="6" class="p-6 text-center text-slate-500">কোনো user নেই</td></tr>`;
+window.renderUsers=function(){
+  const q=(document.getElementById('userSearch').value||'').toLowerCase();
+  const list=Object.entries(users).filter(([id,u])=>
+    !q || id.toLowerCase().includes(q) || String(u.name||'').toLowerCase().includes(q) || String(u.email||'').toLowerCase().includes(q)
+  );
+  document.getElementById('usersBody').innerHTML=list.map(([id,u])=>`
+    <tr class="border-b border-slate-800">
+      <td class="p-3"><b>${esc(u.name||'ব্যবহারকারী')}</b><div class="text-xs text-slate-500">${esc(u.email||'')}</div></td>
+      <td class="p-3 text-xs text-slate-400">${esc(id)}</td>
+      <td class="p-3 text-amber-400 font-bold">${(+u.coins||0).toLocaleString()}</td>
+      <td class="p-3 text-emerald-400">${(+u.totalEarned||0).toLocaleString()}</td>
+      <td class="p-3">${u.referralCount||0}</td>
+      <td class="p-3"><button onclick="editUser('${encodeURIComponent(id)}')" class="bg-slate-700 px-3 py-1.5 rounded-lg text-xs">Edit</button></td>
+    </tr>`).join('') || `<tr><td colspan="6" class="p-6 text-center text-slate-500">কোনো Firebase user পাওয়া যায়নি</td></tr>`;
 };
 
-window.editUser=async(uid)=>{
- const u=users[uid]||{};
- const coins=prompt("নতুন Coins দিন:",u.coins??0);
- if(coins===null)return;
- const name=prompt("নাম:",u.name??"");
- if(name===null)return;
- await update(ref(db,"users/"+uid),{coins:Number(coins)||0,name});
- toast("User data আপডেট হয়েছে");
+window.editUser=function(encoded){
+  const id=decodeURIComponent(encoded),u=users[id]; if(!u)return;
+  const coins=prompt('নতুন Coins:',u.coins??0); if(coins===null)return;
+  const earned=prompt('নতুন Total Earned:',u.totalEarned??0); if(earned===null)return;
+  update(ref(db,'users/'+id),{coins:Number(coins)||0,totalEarned:Number(earned)||0,updatedAt:new Date().toISOString()})
+    .then(()=>alert('User updated')).catch(e=>alert('Update failed: '+e.message));
 };
 
-window.renderWithdrawals=()=>{
- document.getElementById("withdrawalsBody").innerHTML=Object.entries(withdrawals).sort((a,b)=>(b[1].createdAt||"").localeCompare(a[1].createdAt||"")).map(([id,x])=>`
- <tr class="border-b border-slate-800">
- <td class="p-3 font-mono text-xs">${esc(x.uid||x.userUid||"")}</td><td class="p-3">${esc(x.method)}</td><td class="p-3">${esc(x.accountNo)}</td>
- <td class="p-3 text-amber-400">${Number(x.coins||0).toLocaleString()}</td><td class="p-3">৳${esc(x.bdtAmount)}</td>
- <td class="p-3">${esc(x.status)}</td><td class="p-3 space-x-1">
- ${x.status==="pending"?`<button onclick="withdrawAction('${id}','approved')" class="bg-emerald-600 px-2 py-1 rounded-lg text-xs">Approve</button>
- <button onclick="withdrawAction('${id}','rejected')" class="bg-red-600 px-2 py-1 rounded-lg text-xs">Reject</button>`:"—"}</td>
- </tr>`).join("")||`<tr><td colspan="7" class="p-6 text-center text-slate-500">কোনো withdrawal নেই</td></tr>`;
+function renderWithdrawals(){
+  document.getElementById('withdrawalsBody').innerHTML=Object.entries(withdrawals).sort((a,b)=>
+    String(b[1].createdAt||'').localeCompare(String(a[1].createdAt||''))).map(([id,w])=>`
+    <tr class="border-b border-slate-800">
+      <td class="p-3 text-xs">${esc(id)}</td><td class="p-3">${esc(w.userName||w.uid||'')}</td>
+      <td class="p-3">${esc(w.method||'')}</td><td class="p-3">${esc(w.accountNo||'')}</td>
+      <td class="p-3 text-amber-400">${(+w.coins||0).toLocaleString()}</td><td class="p-3">৳${esc(w.bdtAmount||'0')}</td>
+      <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${w.status==='approved'?'bg-emerald-900 text-emerald-300':w.status==='rejected'?'bg-red-900 text-red-300':'bg-orange-900 text-orange-300'}">${esc(w.status||'pending')}</span></td>
+      <td class="p-3 flex gap-1"><button onclick="setWithdrawal('${encodeURIComponent(id)}','approved')" class="bg-emerald-700 px-2 py-1 rounded text-xs">Approve</button><button onclick="setWithdrawal('${encodeURIComponent(id)}','rejected')" class="bg-red-700 px-2 py-1 rounded text-xs">Reject</button></td>
+    </tr>`).join('') || `<tr><td colspan="8" class="p-6 text-center text-slate-500">কোনো withdrawal নেই</td></tr>`;
+}
+window.setWithdrawal=function(encoded,status){
+  const id=decodeURIComponent(encoded);
+  update(ref(db,'withdrawals/'+id),{status,processedAt:new Date().toISOString()}).then(()=>alert('Status updated')).catch(e=>alert(e.message));
 };
-
-window.withdrawAction=async(id,status)=>{
- await update(ref(db,"withdrawals/"+id),{status,processedAt:new Date().toISOString()});
- toast(status==="approved"?"Approved":"Rejected");
+window.saveNotice=function(){
+  const text=document.getElementById('noticeText').value.trim();
+  set(ref(db,'notices/current'),text).then(()=>alert('Notice saved')).catch(e=>alert(e.message));
 };
-
-window.sendNotice=async()=>{
- const title=document.getElementById("noticeTitle").value.trim(),text=document.getElementById("noticeText").value.trim();
- if(!text)return toast("Notice লিখুন");
- const n=push(ref(db,"notices"));
- await set(n,{title:title||"বিশেষ বিজ্ঞপ্তি",text,active:true,createdAt:new Date().toISOString()});
- document.getElementById("noticeTitle").value="";document.getElementById("noticeText").value="";
- toast("Notice পাঠানো হয়েছে");
+window.saveSettings=function(){
+  const data={coinRate:Number(document.getElementById('coinRate').value)||100,dailyCoins:Number(document.getElementById('dailyCoins').value)||100,minWithdraw:Number(document.getElementById('minWithdraw').value)||5000,updatedAt:new Date().toISOString()};
+  set(ref(db,'settings'),data).then(()=>alert('Settings saved')).catch(e=>alert(e.message));
 };
-window.renderNotices=()=>{
- document.getElementById("noticeList").innerHTML=Object.entries(notices).sort((a,b)=>(b[1].createdAt||"").localeCompare(a[1].createdAt||"")).map(([id,n])=>`
- <div class="bg-slate-950 rounded-xl p-3 border border-slate-800"><b>${esc(n.title)}</b><p class="text-xs text-slate-400 mt-1">${esc(n.text)}</p>
- <button onclick="deleteNotice('${id}')" class="text-red-400 text-xs mt-2">Delete</button></div>`).join("")||`<p class="text-slate-500 text-sm">কোনো notice নেই</p>`;
+window.showTab=function(id,btn){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
 };
-window.deleteNotice=async(id)=>{await set(ref(db,"notices/"+id),null);toast("Notice deleted")};
-window.saveSettings=async()=>{
- await update(ref(db,"settings"),{coinRate:Number(document.getElementById("coinRate").value)||10,minWithdraw:Number(document.getElementById("minWithdraw").value)||5000});
- toast("Settings saved");
-};
-window.changePassword=()=>{
- const old=document.getElementById("oldPass").value,n=document.getElementById("newPass").value,n2=document.getElementById("newPass2").value;
- if(old!==password)return toast("বর্তমান password ভুল");
- if(!n||n!==n2)return toast("নতুন password মিলছে না");
- password=n;localStorage.setItem("takaearn_admin_password",n);toast("Password পরিবর্তন হয়েছে");
-};
-
-window.showTab=(id)=>{
- document.querySelectorAll(".tabContent").forEach(x=>x.classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
-};
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 </script>
 </body>
 </html>
-'''
-p=Path("/mnt/data/takaearn_admin.html")
-p.write_text(html,encoding="utf-8")
-print(f"Created: {p}")
