@@ -1,2533 +1,4258 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" class="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#020617">
+
 <title>TakaEarn Admin Panel</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
 *{
-  font-family:'Hind Siliguri',sans-serif
+    font-family:'Hind Siliguri',sans-serif;
+    -webkit-tap-highlight-color:transparent;
 }
 
 body{
-  background:#020617
+    background:#020617;
 }
 
-.glass{
-  background:rgba(15,23,42,.90);
-  border:1px solid #1e293b
+.card{
+    background:rgba(15,23,42,.92);
+    border:1px solid #1e293b;
 }
 
-.active{
-  background:#059669!important;
-  color:#fff!important
+.input{
+    width:100%;
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:12px;
+    padding:11px 13px;
+    outline:none;
+    color:white;
 }
 
-button:disabled{
-  opacity:.5;
-  cursor:not-allowed
+.input:focus{
+    border-color:#10b981;
+}
+
+.btn{
+    border-radius:12px;
+    padding:10px 15px;
+    font-weight:600;
+}
+
+.hidden-force{
+    display:none!important;
+}
+
+.modal-bg{
+    background:rgba(0,0,0,.75);
+    backdrop-filter:blur(5px);
 }
 
 ::-webkit-scrollbar{
-  width:7px;
-  height:7px
-}
-
-::-webkit-scrollbar-track{
-  background:#020617
+    width:6px;
 }
 
 ::-webkit-scrollbar-thumb{
-  background:#334155;
-  border-radius:10px
+    background:#334155;
+    border-radius:10px;
 }
 </style>
 </head>
 
 <body class="text-slate-100 min-h-screen">
 
+<!-- =========================================================
+     LOGIN
+========================================================= -->
 
-<!-- ==================================================
-     PASSWORD LOGIN
-================================================== -->
+<div id="loginPage"
+class="min-h-screen flex items-center justify-center p-4">
 
-<div id="loginScreen"
-     class="min-h-screen flex items-center justify-center p-4">
+    <div class="card rounded-3xl p-7 w-full max-w-md shadow-2xl">
 
-  <div class="glass rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <div class="text-center mb-7">
 
-    <div class="text-center mb-5">
+            <div class="w-16 h-16 mx-auto rounded-2xl
+            bg-emerald-500 text-slate-950
+            flex items-center justify-center text-3xl">
 
-      <div class="w-14 h-14 mx-auto rounded-2xl
-                  bg-emerald-500 flex items-center
-                  justify-center text-2xl">
-        ⚙️
-      </div>
+                <i class="fa-solid fa-user-shield"></i>
 
-      <h1 class="text-2xl font-bold mt-3">
-        TakaEarn Admin
-      </h1>
+            </div>
 
-      <p class="text-slate-400 text-sm">
-        Admin Panel
-      </p>
+            <h1 class="text-2xl font-bold mt-4">
+                TakaEarn Admin
+            </h1>
+
+            <p class="text-xs text-slate-400 mt-1">
+                Secure Administrator Panel
+            </p>
+
+        </div>
+
+        <label class="text-xs text-slate-400">
+            Admin Email
+        </label>
+
+        <input
+            id="adminEmail"
+            type="email"
+            value=""
+            placeholder="Admin email"
+            class="input mt-1 mb-3"
+        >
+
+        <label class="text-xs text-slate-400">
+            Admin Password
+        </label>
+
+        <input
+            id="adminPassword"
+            type="password"
+            placeholder="Admin Password"
+            class="input mt-1"
+        >
+
+        <button
+            id="loginButton"
+            onclick="adminLogin()"
+            class="w-full mt-4 bg-emerald-600
+            hover:bg-emerald-500
+            text-slate-950 rounded-xl py-3 font-bold">
+
+            <i class="fa-solid fa-right-to-bracket mr-1"></i>
+            Login
+        </button>
+
+        <p
+            id="loginError"
+            class="text-red-400 text-xs text-center mt-3">
+        </p>
+
+        <div class="mt-5 p-3 rounded-xl
+        bg-amber-500/10 border border-amber-500/20">
+
+            <p class="text-[11px] text-amber-300">
+                প্রথম Admin account Firebase Authentication-এ
+                তৈরি করার সময় initial password হিসেবে
+                <b>Safin@098</b> ব্যবহার করবে।
+            </p>
+
+        </div>
 
     </div>
-
-
-    <input
-      id="adminPassword"
-      type="password"
-      placeholder="Admin Password"
-      autocomplete="off"
-      class="w-full bg-slate-900 border border-slate-700
-             rounded-xl p-3 outline-none
-             focus:border-emerald-500"
-      onkeydown="if(event.key==='Enter') adminLogin()"
-    >
-
-
-    <button
-      id="loginBtn"
-      onclick="adminLogin()"
-      class="w-full mt-3 bg-emerald-600
-             hover:bg-emerald-500 rounded-xl
-             p-3 font-bold"
-    >
-      প্রবেশ করুন
-    </button>
-
-
-    <p
-      id="loginError"
-      class="text-red-400 text-xs mt-3 text-center"
-    ></p>
-
-  </div>
 
 </div>
 
 
-
-<!-- ==================================================
+<!-- =========================================================
      ADMIN APP
-================================================== -->
+========================================================= -->
 
-<div id="app" class="hidden">
-
+<div id="adminApp" class="hidden">
 
 <header
-  class="sticky top-0 z-20
-         bg-slate-950/95 backdrop-blur
-         border-b border-slate-800">
+class="sticky top-0 z-50
+bg-slate-950/95 backdrop-blur
+border-b border-slate-800">
 
-  <div
-    class="max-w-7xl mx-auto px-4 py-3
-           flex items-center justify-between">
+<div class="max-w-7xl mx-auto px-4 py-3
+flex items-center justify-between">
 
-    <div>
+<div class="flex items-center gap-3">
 
-      <h1 class="font-bold text-xl">
-        TakaEarn Admin
-      </h1>
+<div class="w-10 h-10 rounded-xl
+bg-emerald-500 text-slate-950
+flex items-center justify-center">
 
-      <p class="text-xs text-emerald-400">
-        Firebase Realtime + Firestore Dashboard
-      </p>
+<i class="fa-solid fa-sack-dollar"></i>
 
-    </div>
+</div>
 
+<div>
 
-    <div class="flex gap-2 items-center">
+<h1 class="font-bold text-lg">
+TakaEarn Admin
+</h1>
 
-      <span
-        id="connection"
-        class="text-xs px-3 py-2 rounded-full
-               bg-slate-800 text-slate-400">
-        Connecting...
-      </span>
+<p class="text-[10px] text-emerald-400">
+REAL-TIME CONTROL PANEL
+</p>
 
+</div>
 
-      <button
-        onclick="adminLogout()"
-        class="px-3 py-2 rounded-lg
-               bg-red-900/60 text-xs">
-        Logout
-      </button>
+</div>
 
-    </div>
+<div class="flex items-center gap-2">
 
-  </div>
+<span
+id="connectionStatus"
+class="text-[10px]
+px-3 py-1.5 rounded-full
+bg-slate-800 text-slate-400">
 
+Connecting...
+
+</span>
+
+<button
+onclick="logoutAdmin()"
+class="text-red-400
+border border-red-500/30
+px-3 py-2 rounded-xl text-xs">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+Logout
+
+</button>
+
+</div>
+
+</div>
 </header>
-
 
 
 <main class="max-w-7xl mx-auto p-4">
 
-
-<!-- ==================================================
-     STATS
-================================================== -->
+<!-- Toast -->
 
 <div
-  class="grid grid-cols-2 md:grid-cols-6
-         gap-3 mb-5">
+id="toast"
+class="hidden fixed top-20 right-4 z-[100]
+bg-slate-900
+border border-emerald-500/40
+px-4 py-3 rounded-xl shadow-2xl
+text-sm">
+</div>
 
 
-  <div class="glass rounded-xl p-4">
+<!-- =====================================================
+     DASHBOARD STATS
+===================================================== -->
 
-    <p class="text-xs text-slate-400">
-      মোট ইউজার
-    </p>
+<section
+class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-5">
 
-    <b
-      id="statUsers"
-      class="text-2xl">
-      0
-    </b>
+<div class="card rounded-2xl p-4">
 
-  </div>
+<p class="text-xs text-slate-400">
+মোট User
+</p>
 
-
-  <div class="glass rounded-xl p-4">
-
-    <p class="text-xs text-slate-400">
-      মোট কয়েন
-    </p>
-
-    <b
-      id="statCoins"
-      class="text-2xl text-amber-400">
-      0
-    </b>
-
-  </div>
-
-
-  <div class="glass rounded-xl p-4">
-
-    <p class="text-xs text-slate-400">
-      মোট আয়
-    </p>
-
-    <b
-      id="statEarned"
-      class="text-2xl text-emerald-400">
-      0
-    </b>
-
-  </div>
-
-
-  <div class="glass rounded-xl p-4">
-
-    <p class="text-xs text-slate-400">
-      Withdrawals
-    </p>
-
-    <b
-      id="statWithdrawals"
-      class="text-2xl text-blue-400">
-      0
-    </b>
-
-  </div>
-
-
-  <div class="glass rounded-xl p-4">
-
-    <p class="text-xs text-slate-400">
-      Pending
-    </p>
-
-    <b
-      id="statPending"
-      class="text-2xl text-orange-400">
-      0
-    </b>
-
-  </div>
-
-
-  <div class="glass rounded-xl p-4">
-
-    <p class="text-xs text-slate-400">
-      Firestore Users
-    </p>
-
-    <b
-      id="statFirestoreUsers"
-      class="text-2xl text-purple-400">
-      0
-    </b>
-
-  </div>
+<div
+id="statUsers"
+class="text-2xl font-bold text-blue-400">
+0
+</div>
 
 </div>
 
 
+<div class="card rounded-2xl p-4">
 
-<!-- ==================================================
+<p class="text-xs text-slate-400">
+Active User
+</p>
+
+<div
+id="statActive"
+class="text-2xl font-bold text-emerald-400">
+0
+</div>
+
+</div>
+
+
+<div class="card rounded-2xl p-4">
+
+<p class="text-xs text-slate-400">
+Total Coins
+</p>
+
+<div
+id="statCoins"
+class="text-2xl font-bold text-amber-400">
+0
+</div>
+
+</div>
+
+
+<div class="card rounded-2xl p-4">
+
+<p class="text-xs text-slate-400">
+Total Balance
+</p>
+
+<div
+id="statBalance"
+class="text-2xl font-bold text-green-400">
+৳0
+</div>
+
+</div>
+
+
+<div class="card rounded-2xl p-4">
+
+<p class="text-xs text-slate-400">
+Pending Withdraw
+</p>
+
+<div
+id="statPending"
+class="text-2xl font-bold text-orange-400">
+0
+</div>
+
+</div>
+
+
+<div class="card rounded-2xl p-4">
+
+<p class="text-xs text-slate-400">
+Tasks Completed
+</p>
+
+<div
+id="statTasks"
+class="text-2xl font-bold text-purple-400">
+0
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
      NAVIGATION
-================================================== -->
+===================================================== -->
 
-<div class="flex flex-wrap gap-2 mb-5">
+<div
+class="flex gap-2 overflow-x-auto pb-3 mb-4">
 
+<button class="navBtn active"
+onclick="showSection('dashboard')">
 
-  <button
-    class="nav active px-4 py-2 rounded-lg bg-slate-800"
-    onclick="showTab('dashboard',this)">
-    Dashboard
-  </button>
+<i class="fa-solid fa-chart-pie"></i>
+Dashboard
 
+</button>
 
-  <button
-    class="nav px-4 py-2 rounded-lg bg-slate-800"
-    onclick="showTab('users',this)">
-    Users
-  </button>
+<button class="navBtn"
+onclick="showSection('users')">
 
+<i class="fa-solid fa-users"></i>
+Users
 
-  <button
-    class="nav px-4 py-2 rounded-lg bg-slate-800"
-    onclick="showTab('withdrawals',this)">
-    Withdrawals
-  </button>
+</button>
 
+<button class="navBtn"
+onclick="showSection('withdrawals')">
 
-  <button
-    class="nav px-4 py-2 rounded-lg bg-slate-800"
-    onclick="showTab('notices',this)">
-    Notices
-  </button>
+<i class="fa-solid fa-money-bill-transfer"></i>
+Withdrawals
 
+</button>
 
-  <button
-    class="nav px-4 py-2 rounded-lg bg-slate-800"
-    onclick="showTab('settings',this)">
-    Settings
-  </button>
+<button class="navBtn"
+onclick="showSection('earnings')">
 
+<i class="fa-solid fa-coins"></i>
+Earnings
 
-  <button
-    class="nav px-4 py-2 rounded-lg bg-slate-800"
-    onclick="showTab('security',this)">
-    Security
-  </button>
+</button>
+
+<button class="navBtn"
+onclick="showSection('transactions')">
+
+<i class="fa-solid fa-clock-rotate-left"></i>
+Transactions
+
+</button>
+
+<button class="navBtn"
+onclick="showSection('notices')">
+
+<i class="fa-solid fa-bullhorn"></i>
+Notice
+
+</button>
+
+<button class="navBtn"
+onclick="showSection('tasks')">
+
+<i class="fa-solid fa-list-check"></i>
+Tasks
+
+</button>
+
+<button class="navBtn"
+onclick="showSection('settings')">
+
+<i class="fa-solid fa-gear"></i>
+Settings
+
+</button>
 
 </div>
 
 
-
-<!-- ==================================================
+<!-- =====================================================
      DASHBOARD
-================================================== -->
+===================================================== -->
 
-<section id="dashboard" class="tab">
+<section id="section-dashboard"
+class="adminSection">
 
-  <div class="glass rounded-2xl p-5">
+<div class="card rounded-2xl p-5">
 
-    <h2 class="text-lg font-bold mb-3">
-      Firebase Status
-    </h2>
+<h2 class="text-xl font-bold mb-3">
+Admin Dashboard
+</h2>
 
+<div class="grid md:grid-cols-2 gap-4">
 
-    <div class="grid md:grid-cols-2 gap-3">
+<div class="bg-slate-950 rounded-xl p-4">
 
+<p class="text-xs text-slate-400">
+Firebase Status
+</p>
 
-      <div class="bg-slate-900 rounded-xl p-4">
+<p
+id="firebaseState"
+class="text-emerald-400 font-bold mt-1">
 
-        <p class="text-sm text-slate-400">
-          Realtime Database
-        </p>
+Connected
 
-        <p
-          id="rtdbStatus"
-          class="text-emerald-400 font-bold mt-1">
-          Waiting...
-        </p>
+</p>
 
-      </div>
+</div>
 
+<div class="bg-slate-950 rounded-xl p-4">
 
-      <div class="bg-slate-900 rounded-xl p-4">
+<p class="text-xs text-slate-400">
+Admin Account
+</p>
 
-        <p class="text-sm text-slate-400">
-          Cloud Firestore
-        </p>
+<p
+id="adminAccount"
+class="text-white font-bold mt-1">
 
-        <p
-          id="firestoreStatus"
-          class="text-purple-400 font-bold mt-1">
-          Waiting...
-        </p>
+-
 
-      </div>
+</p>
 
+</div>
 
-    </div>
+</div>
 
-
-    <div
-      id="lastUpdate"
-      class="text-xs text-slate-500 mt-4">
-      অপেক্ষা করছে...
-    </div>
-
-  </div>
+</div>
 
 </section>
 
 
-
-<!-- ==================================================
+<!-- =====================================================
      USERS
-================================================== -->
+===================================================== -->
 
-<section id="users" class="tab hidden">
+<section id="section-users"
+class="adminSection hidden">
 
-  <div class="glass rounded-2xl p-4">
+<div class="card rounded-2xl p-4">
 
+<div class="flex flex-col md:flex-row
+justify-between gap-3 mb-4">
 
-    <div
-      class="flex flex-col md:flex-row
-             gap-3 justify-between mb-4">
+<div>
 
+<h2 class="text-xl font-bold">
+All Users
+</h2>
 
-      <h2 class="font-bold text-lg">
-        Users
-      </h2>
+<p class="text-xs text-slate-400">
+Realtime User Database
+</p>
 
+</div>
 
-      <input
-        id="userSearch"
-        oninput="renderUsers()"
-        placeholder="নাম / email / UID খুঁজুন..."
-        class="bg-slate-900 border border-slate-700
-               rounded-xl px-3 py-2 text-sm md:w-80"
-      >
+<input
+id="userSearch"
+oninput="renderUsers()"
+placeholder="নাম / UID / Email খুঁজুন"
+class="input md:max-w-sm">
 
-    </div>
-
-
-    <div class="overflow-x-auto">
-
-      <table class="w-full text-sm">
-
-        <thead>
-
-          <tr
-            class="text-slate-400
-                   border-b border-slate-800">
-
-            <th class="p-3 text-left">
-              User
-            </th>
-
-            <th class="p-3">
-              UID
-            </th>
-
-            <th class="p-3">
-              Coins
-            </th>
-
-            <th class="p-3">
-              Total Earned
-            </th>
-
-            <th class="p-3">
-              Referrals
-            </th>
-
-            <th class="p-3">
-              Action
-            </th>
-
-          </tr>
-
-        </thead>
+</div>
 
 
-        <tbody id="usersBody"></tbody>
+<div class="overflow-auto">
 
-      </table>
+<table
+class="w-full min-w-[950px] text-sm">
 
-    </div>
+<thead
+class="text-slate-400
+border-b border-slate-800">
 
-  </div>
+<tr>
+
+<th class="text-left p-3">
+User
+</th>
+
+<th class="text-left p-3">
+UID
+</th>
+
+<th class="text-left p-3">
+Coins
+</th>
+
+<th class="text-left p-3">
+Balance
+</th>
+
+<th class="text-left p-3">
+Tasks
+</th>
+
+<th class="text-left p-3">
+Referral
+</th>
+
+<th class="text-left p-3">
+Status
+</th>
+
+<th class="text-left p-3">
+Action
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="usersBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
 
 </section>
 
 
-
-<!-- ==================================================
+<!-- =====================================================
      WITHDRAWALS
-================================================== -->
+===================================================== -->
 
-<section id="withdrawals" class="tab hidden">
+<section id="section-withdrawals"
+class="adminSection hidden">
 
-  <div class="glass rounded-2xl p-4">
+<div class="card rounded-2xl p-4">
 
-    <h2 class="font-bold text-lg mb-4">
-      Withdrawal Requests
-    </h2>
+<h2 class="text-xl font-bold mb-4">
+Withdrawal History
+</h2>
 
+<div class="overflow-auto">
 
-    <div class="overflow-x-auto">
+<table
+class="w-full min-w-[1000px] text-sm">
 
-      <table class="w-full text-sm">
+<thead
+class="text-slate-400 border-b border-slate-800">
 
-        <thead>
+<tr>
 
-          <tr
-            class="text-slate-400
-                   border-b border-slate-800">
+<th class="text-left p-3">
+User
+</th>
 
-            <th class="p-3">
-              ID
-            </th>
+<th class="text-left p-3">
+Method
+</th>
 
-            <th class="p-3">
-              User
-            </th>
+<th class="text-left p-3">
+Account
+</th>
 
-            <th class="p-3">
-              Method
-            </th>
+<th class="text-left p-3">
+Coins
+</th>
 
-            <th class="p-3">
-              Account
-            </th>
+<th class="text-left p-3">
+Amount
+</th>
 
-            <th class="p-3">
-              Coins
-            </th>
+<th class="text-left p-3">
+Status
+</th>
 
-            <th class="p-3">
-              BDT
-            </th>
+<th class="text-left p-3">
+Action
+</th>
 
-            <th class="p-3">
-              Status
-            </th>
+</tr>
 
-            <th class="p-3">
-              Action
-            </th>
+</thead>
 
-          </tr>
+<tbody id="withdrawalsBody"></tbody>
 
-        </thead>
+</table>
 
+</div>
 
-        <tbody id="withdrawalsBody"></tbody>
-
-      </table>
-
-    </div>
-
-  </div>
+</div>
 
 </section>
 
 
+<!-- =====================================================
+     EARNINGS
+===================================================== -->
 
-<!-- ==================================================
-     NOTICES
-================================================== -->
+<section id="section-earnings"
+class="adminSection hidden">
 
-<section id="notices" class="tab hidden">
+<div class="card rounded-2xl p-4">
 
-  <div
-    class="glass rounded-2xl p-5 max-w-2xl">
+<div class="flex justify-between
+items-center mb-4">
 
-    <h2 class="font-bold text-lg mb-4">
-      Notice
-    </h2>
+<h2 class="text-xl font-bold">
+Earnings History
+</h2>
 
+<button
+onclick="loadAllEarnings()"
+class="btn bg-blue-600">
 
-    <textarea
-      id="noticeText"
-      rows="4"
-      class="w-full bg-slate-900
-             border border-slate-700
-             rounded-xl p-3"
-      placeholder="ইউজার অ্যাপে দেখানোর বিজ্ঞপ্তি..."
-    ></textarea>
+<i class="fa-solid fa-refresh"></i>
+Refresh
 
+</button>
 
-    <button
-      onclick="saveNotice()"
-      class="mt-3 bg-emerald-600
-             px-5 py-2 rounded-xl font-bold">
-      Save Notice
-    </button>
+</div>
 
+<div class="overflow-auto">
 
-    <p
-      id="noticeCurrent"
-      class="text-xs text-slate-400 mt-4">
-    </p>
+<table
+class="w-full min-w-[900px] text-sm">
 
-  </div>
+<thead class="text-slate-400">
+
+<tr>
+
+<th class="text-left p-3">
+User
+</th>
+
+<th class="text-left p-3">
+Task
+</th>
+
+<th class="text-left p-3">
+Coins
+</th>
+
+<th class="text-left p-3">
+Type
+</th>
+
+<th class="text-left p-3">
+Date
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="earningsBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
 
 </section>
 
 
+<!-- =====================================================
+     TRANSACTIONS
+===================================================== -->
 
-<!-- ==================================================
+<section id="section-transactions"
+class="adminSection hidden">
+
+<div class="card rounded-2xl p-4">
+
+<div class="flex justify-between items-center mb-4">
+
+<h2 class="text-xl font-bold">
+Transaction History
+</h2>
+
+<button
+onclick="loadAllTransactions()"
+class="btn bg-blue-600">
+
+<i class="fa-solid fa-refresh"></i>
+Refresh
+
+</button>
+
+</div>
+
+<div class="overflow-auto">
+
+<table
+class="w-full min-w-[900px] text-sm">
+
+<thead class="text-slate-400">
+
+<tr>
+
+<th class="text-left p-3">
+User
+</th>
+
+<th class="text-left p-3">
+Type
+</th>
+
+<th class="text-left p-3">
+Coins
+</th>
+
+<th class="text-left p-3">
+Amount
+</th>
+
+<th class="text-left p-3">
+Note
+</th>
+
+<th class="text-left p-3">
+Date
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="transactionsBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     NOTICE
+===================================================== -->
+
+<section id="section-notices"
+class="adminSection hidden">
+
+<div class="grid md:grid-cols-2 gap-4">
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+নতুন Notice
+</h2>
+
+<label class="text-xs text-slate-400">
+Audience
+</label>
+
+<select
+id="noticeAudience"
+onchange="toggleTargetUser()"
+class="input mt-1 mb-3">
+
+<option value="all">
+সব User
+</option>
+
+<option value="user">
+নির্দিষ্ট User
+</option>
+
+</select>
+
+
+<div id="targetUserBox"
+class="hidden">
+
+<label class="text-xs text-slate-400">
+Target UID
+</label>
+
+<input
+id="noticeTargetUid"
+placeholder="User UID"
+class="input mt-1 mb-3">
+
+</div>
+
+
+<label class="text-xs text-slate-400">
+Title
+</label>
+
+<input
+id="noticeTitle"
+placeholder="বিশেষ বিজ্ঞপ্তি"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Message
+</label>
+
+<textarea
+id="noticeText"
+rows="5"
+placeholder="User App-এ যে notice দেখাতে চান..."
+class="input mt-1"></textarea>
+
+
+<button
+onclick="sendNotice()"
+class="w-full mt-4 bg-emerald-600
+hover:bg-emerald-500
+text-slate-950 rounded-xl py-3 font-bold">
+
+<i class="fa-solid fa-paper-plane"></i>
+Notice পাঠান
+
+</button>
+
+</div>
+
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+Notice History
+</h2>
+
+<div
+id="noticeList"
+class="space-y-3">
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     TASKS
+===================================================== -->
+
+<section id="section-tasks"
+class="adminSection hidden">
+
+<div class="grid md:grid-cols-2 gap-4">
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+Task তৈরি / Edit
+</h2>
+
+<input
+id="taskId"
+type="hidden">
+
+<label class="text-xs text-slate-400">
+Task Name
+</label>
+
+<input
+id="taskTitle"
+placeholder="যেমন: Math Quiz"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Description
+</label>
+
+<textarea
+id="taskDescription"
+placeholder="Task description"
+class="input mt-1 mb-3"></textarea>
+
+
+<label class="text-xs text-slate-400">
+Reward Coins
+</label>
+
+<input
+id="taskCoins"
+type="number"
+placeholder="25"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Daily Limit
+</label>
+
+<input
+id="taskLimit"
+type="number"
+placeholder="5"
+class="input mt-1 mb-3">
+
+
+<label class="flex items-center gap-2">
+
+<input
+id="taskActive"
+type="checkbox"
+checked>
+
+<span class="text-sm">
+Task Active
+</span>
+
+</label>
+
+
+<div class="grid grid-cols-2 gap-2 mt-4">
+
+<button
+onclick="saveTask()"
+class="btn bg-emerald-600 text-slate-950">
+
+Save Task
+
+</button>
+
+<button
+onclick="clearTaskForm()"
+class="btn bg-slate-700">
+
+Clear
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+Task List
+</h2>
+
+<div
+id="taskList"
+class="space-y-3">
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
      SETTINGS
-================================================== -->
+===================================================== -->
 
-<section id="settings" class="tab hidden">
+<section id="section-settings"
+class="adminSection hidden">
 
-  <div
-    class="glass rounded-2xl p-5 max-w-2xl">
-
-    <h2 class="font-bold text-lg mb-4">
-      App Settings
-    </h2>
+<div class="grid md:grid-cols-2 gap-4">
 
 
-    <div class="grid gap-3">
+<!-- Coin -->
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+🪙 Coin Settings
+</h2>
+
+<label class="text-xs text-slate-400">
+100 Coins = কত BDT
+</label>
+
+<input
+id="settingCoinRate"
+type="number"
+step="0.01"
+class="input mt-1 mb-3">
 
 
-      <label class="text-sm">
+<label class="text-xs text-slate-400">
+Minimum Withdrawal Coins
+</label>
 
-        Coin to BDT rate
-
-        <input
-          id="coinRate"
-          type="number"
-          class="mt-1 w-full bg-slate-900
-                 border border-slate-700
-                 rounded-xl p-3"
-        >
-
-      </label>
+<input
+id="settingMinWithdraw"
+type="number"
+class="input mt-1 mb-3">
 
 
-      <label class="text-sm">
+<button
+onclick="saveCoinSettings()"
+class="btn bg-emerald-600 w-full">
 
-        Daily check-in coins
+Save Coin Settings
 
-        <input
-          id="dailyCoins"
-          type="number"
-          class="mt-1 w-full bg-slate-900
-                 border border-slate-700
-                 rounded-xl p-3"
-        >
+</button>
 
-      </label>
+</div>
 
 
-      <label class="text-sm">
+<!-- Daily -->
 
-        Minimum withdrawal coins
+<div class="card rounded-2xl p-5">
 
-        <input
-          id="minWithdraw"
-          type="number"
-          class="mt-1 w-full bg-slate-900
-                 border border-slate-700
-                 rounded-xl p-3"
-        >
+<h2 class="text-xl font-bold mb-4">
+📅 Daily Check-in
+</h2>
 
-      </label>
+<label class="flex gap-2 items-center mb-3">
+
+<input
+id="dailyEnabled"
+type="checkbox">
+
+<span>
+Daily Check-in চালু
+</span>
+
+</label>
 
 
-    </div>
+<label class="text-xs text-slate-400">
+Daily Coins
+</label>
+
+<input
+id="dailyCoins"
+type="number"
+class="input mt-1 mb-3">
 
 
-    <button
-      onclick="saveSettings()"
-      class="mt-4 bg-emerald-600
-             px-5 py-2 rounded-xl font-bold">
-      Save Settings
-    </button>
+<label class="text-xs text-slate-400">
+Streak Bonus
+</label>
 
-  </div>
+<input
+id="streakBonus"
+type="number"
+class="input mt-1 mb-3">
+
+
+<button
+onclick="saveDailySettings()"
+class="btn bg-amber-500 text-slate-950 w-full">
+
+Save Daily Settings
+
+</button>
+
+</div>
+
+
+<!-- Referral -->
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+👥 Referral Settings
+</h2>
+
+<label class="flex gap-2 items-center mb-3">
+
+<input
+id="referralEnabled"
+type="checkbox">
+
+<span>
+Referral চালু
+</span>
+
+</label>
+
+
+<label class="text-xs text-slate-400">
+Referrer Reward
+</label>
+
+<input
+id="referrerReward"
+type="number"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+New User Reward
+</label>
+
+<input
+id="referredReward"
+type="number"
+class="input mt-1 mb-3">
+
+
+<button
+onclick="saveReferralSettings()"
+class="btn bg-blue-600 w-full">
+
+Save Referral Settings
+
+</button>
+
+</div>
+
+
+<!-- Withdrawal -->
+
+<div class="card rounded-2xl p-5">
+
+<h2 class="text-xl font-bold mb-4">
+💸 Withdrawal Settings
+</h2>
+
+<label class="flex gap-2 items-center mb-3">
+
+<input
+id="withdrawEnabled"
+type="checkbox">
+
+<span>
+Withdrawal চালু
+</span>
+
+</label>
+
+
+<label class="text-xs text-slate-400">
+Available Methods
+</label>
+
+<input
+id="withdrawMethods"
+placeholder="bKash,Nagad,Rocket"
+class="input mt-1 mb-3">
+
+
+<button
+onclick="saveWithdrawalSettings()"
+class="btn bg-purple-600 w-full">
+
+Save Withdrawal Settings
+
+</button>
+
+</div>
+
+
+<!-- Admin Password -->
+
+<div class="card rounded-2xl p-5 md:col-span-2">
+
+<h2 class="text-xl font-bold mb-4">
+🔐 Admin Password Change
+</h2>
+
+<div class="grid md:grid-cols-3 gap-3">
+
+<div>
+
+<label class="text-xs text-slate-400">
+Current Password
+</label>
+
+<input
+id="currentPassword"
+type="password"
+class="input mt-1">
+
+</div>
+
+
+<div>
+
+<label class="text-xs text-slate-400">
+New Password
+</label>
+
+<input
+id="newPassword"
+type="password"
+class="input mt-1">
+
+</div>
+
+
+<div>
+
+<label class="text-xs text-slate-400">
+Confirm Password
+</label>
+
+<input
+id="confirmPassword"
+type="password"
+class="input mt-1">
+
+</div>
+
+</div>
+
+
+<button
+onclick="changeAdminPassword()"
+class="btn bg-orange-500 text-slate-950 mt-4">
+
+Change Password
+
+</button>
+
+</div>
+
+</div>
 
 </section>
-
-
-
-<!-- ==================================================
-     SECURITY / PASSWORD CHANGE
-================================================== -->
-
-<section id="security" class="tab hidden">
-
-  <div
-    class="glass rounded-2xl p-5 max-w-2xl">
-
-    <h2 class="font-bold text-lg mb-2">
-      🔐 Admin Security
-    </h2>
-
-    <p class="text-sm text-slate-400 mb-5">
-      এখান থেকে Admin Panel-এর password পরিবর্তন করতে পারবে।
-    </p>
-
-
-    <div class="grid gap-3">
-
-
-      <label class="text-sm">
-
-        বর্তমান Password
-
-        <input
-          id="currentPassword"
-          type="password"
-          autocomplete="off"
-          class="mt-1 w-full bg-slate-900
-                 border border-slate-700
-                 rounded-xl p-3"
-        >
-
-      </label>
-
-
-      <label class="text-sm">
-
-        নতুন Password
-
-        <input
-          id="newPassword"
-          type="password"
-          autocomplete="off"
-          class="mt-1 w-full bg-slate-900
-                 border border-slate-700
-                 rounded-xl p-3"
-        >
-
-      </label>
-
-
-      <label class="text-sm">
-
-        নতুন Password আবার লিখুন
-
-        <input
-          id="confirmPassword"
-          type="password"
-          autocomplete="off"
-          class="mt-1 w-full bg-slate-900
-                 border border-slate-700
-                 rounded-xl p-3"
-        >
-
-      </label>
-
-
-    </div>
-
-
-    <button
-      onclick="changeAdminPassword()"
-      class="mt-4 bg-emerald-600
-             hover:bg-emerald-500
-             px-5 py-2 rounded-xl font-bold">
-      Password Change
-    </button>
-
-
-    <p
-      id="passwordMessage"
-      class="text-sm mt-4">
-    </p>
-
-
-  </div>
-
-</section>
-
 
 </main>
 
 </div>
 
 
+<!-- =========================================================
+     USER MODAL
+========================================================= -->
 
-<!-- ==================================================
+<div
+id="userModal"
+class="hidden fixed inset-0 z-[90]
+modal-bg overflow-auto p-4">
+
+<div
+class="max-w-5xl mx-auto
+card rounded-3xl p-5 mt-5">
+
+<div class="flex justify-between
+items-center mb-5">
+
+<div>
+
+<h2 class="text-xl font-bold">
+User Management
+</h2>
+
+<p
+id="modalUserUid"
+class="text-xs text-slate-400">
+</p>
+
+</div>
+
+<button
+onclick="closeUserModal()"
+class="w-10 h-10 rounded-xl bg-slate-800">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+
+<div class="grid md:grid-cols-2 gap-4">
+
+
+<!-- PROFILE -->
+
+<div class="bg-slate-950 rounded-2xl p-4">
+
+<h3 class="font-bold mb-4">
+👤 Profile
+</h3>
+
+<label class="text-xs text-slate-400">
+Name
+</label>
+
+<input
+id="editName"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Email
+</label>
+
+<input
+id="editEmail"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Photo URL
+</label>
+
+<input
+id="editPhoto"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Coins
+</label>
+
+<input
+id="editCoins"
+type="number"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Balance
+</label>
+
+<input
+id="editBalance"
+type="number"
+step="0.01"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Completed Tasks
+</label>
+
+<input
+id="editTasks"
+type="number"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Referral Count
+</label>
+
+<input
+id="editReferralCount"
+type="number"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Status
+</label>
+
+<select
+id="editStatus"
+class="input mt-1">
+
+<option value="active">
+Active
+</option>
+
+<option value="blocked">
+Blocked
+</option>
+
+</select>
+
+
+<button
+onclick="saveUserChanges()"
+class="w-full mt-4
+bg-emerald-600
+text-slate-950
+rounded-xl py-3 font-bold">
+
+Save User
+
+</button>
+
+</div>
+
+
+<!-- MANUAL COINS -->
+
+<div class="bg-slate-950 rounded-2xl p-4">
+
+<h3 class="font-bold mb-4">
+🪙 Manual Coin Adjustment
+</h3>
+
+<label class="text-xs text-slate-400">
+Coins (+ / -)
+</label>
+
+<input
+id="adjustCoins"
+type="number"
+placeholder="100 অথবা -100"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Balance (+ / -)
+</label>
+
+<input
+id="adjustBalance"
+type="number"
+step="0.01"
+placeholder="10 অথবা -10"
+class="input mt-1 mb-3">
+
+
+<label class="text-xs text-slate-400">
+Reason
+</label>
+
+<input
+id="adjustReason"
+placeholder="Admin adjustment"
+class="input mt-1 mb-3">
+
+
+<button
+onclick="manualAdjustment()"
+class="w-full bg-blue-600
+rounded-xl py-3 font-bold">
+
+Apply Adjustment
+
+</button>
+
+
+<div class="border-t
+border-slate-800 mt-5 pt-5">
+
+<h3 class="font-bold mb-3">
+Recent Earnings
+</h3>
+
+<div
+id="userEarnings"
+class="space-y-2 max-h-64 overflow-auto">
+</div>
+
+</div>
+
+
+<div class="border-t
+border-slate-800 mt-5 pt-5">
+
+<h3 class="font-bold mb-3">
+Transactions
+</h3>
+
+<div
+id="userTransactions"
+class="space-y-2 max-h-64 overflow-auto">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
      FIREBASE
-================================================== -->
+========================================================= -->
 
 <script type="module">
 
-
-/* ==================================================
-   FIREBASE IMPORT
-================================================== */
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
 import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
-
-import {
-  getDatabase,
-  ref,
-  onValue,
-  update,
-  set
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-
+    getAuth,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    updatePassword,
+    EmailAuthProvider,
+    reauthenticateWithCredential
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
-  getFirestore,
-  collection,
-  doc,
-  onSnapshot,
-  setDoc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    getFirestore,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    setDoc,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    onSnapshot,
+    serverTimestamp,
+    runTransaction
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+import {
+    getDatabase,
+    ref,
+    set,
+    update,
+    remove,
+    onValue
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
-
-/* ==================================================
+/* =========================================================
    FIREBASE CONFIG
-================================================== */
+========================================================= */
 
 const firebaseConfig = {
 
-  apiKey:
+    apiKey:
     "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
 
-  authDomain:
+    authDomain:
     "erning-344b8.firebaseapp.com",
 
-  databaseURL:
+    databaseURL:
     "https://erning-344b8-default-rtdb.firebaseio.com",
 
-  projectId:
+    projectId:
     "erning-344b8",
 
-  storageBucket:
+    storageBucket:
     "erning-344b8.firebasestorage.app",
 
-  messagingSenderId:
+    messagingSenderId:
     "69804884240",
 
-  appId:
-    "1:69804884240:web:2e2ea56642c937b15ae595",
-
-  measurementId:
-    "G-1JG8GHJF7Z"
-
+    appId:
+    "1:69804884240:web:2e2ea56642c937b15ae595"
 };
 
 
+const app = initializeApp(firebaseConfig);
 
-/* ==================================================
-   INITIALIZE
-================================================== */
+const auth = getAuth(app);
 
-const app =
-  initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
 
-
-const db =
-  getDatabase(app);
+const rtdb = getDatabase(app);
 
 
-const firestore =
-  getFirestore(app);
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
 
-
-
-/* ==================================================
-   DEFAULT ADMIN PASSWORD
-================================================== */
-
-const DEFAULT_ADMIN_PASSWORD =
-  "Safin@098";
-
-
-/*
-  Password localStorage-এ রাখা হবে।
-
-  প্রথমবার:
-  Safin@098
-
-  পরে Security tab থেকে পরিবর্তন করলে
-  নতুন password ব্যবহার হবে।
-*/
-
-function getAdminPassword(){
-
-  return localStorage.getItem(
-    "takaearn_admin_password"
-  ) || DEFAULT_ADMIN_PASSWORD;
-
-}
-
-
-
-/* ==================================================
-   DATA
-================================================== */
+let currentAdmin = null;
 
 let users = {};
 
-let firestoreUsers = {};
-
 let withdrawals = {};
-
-let firestoreWithdrawals = {};
 
 let notices = {};
 
+let tasks = {};
+
 let settings = {};
 
-let firebaseStarted = false;
+let selectedUserId = null;
+
+let selectedUserListener = null;
 
 
+/* =========================================================
+   HELPERS
+========================================================= */
 
-/* ==================================================
-   PASSWORD LOGIN
-================================================== */
-
-window.adminLogin =
-function(){
-
-  const password =
-    document
-      .getElementById("adminPassword")
-      .value;
+const $ = id =>
+document.getElementById(id);
 
 
-  const error =
-    document
-      .getElementById("loginError");
+function toast(message){
+
+    const t = $("toast");
+
+    t.textContent = message;
+
+    t.classList.remove("hidden");
+
+    clearTimeout(window.__toastTimer);
+
+    window.__toastTimer =
+    setTimeout(()=>{
+        t.classList.add("hidden");
+    },3000);
+}
 
 
-  const btn =
-    document
-      .getElementById("loginBtn");
+function esc(value){
 
+    return String(value ?? "")
+    .replace(/[&<>"']/g,m=>({
 
-  error.textContent = "";
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
 
-
-  if(!password){
-
-    error.textContent =
-      "Password দিন";
-
-    return;
-
-  }
-
-
-  btn.disabled = true;
-
-  btn.textContent =
-    "Checking...";
-
-
-  setTimeout(() => {
-
-    if(
-      password ===
-      getAdminPassword()
-    ){
-
-      sessionStorage.setItem(
-        "takaearn_admin",
-        "1"
-      );
-
-
-      document
-        .getElementById("adminPassword")
-        .value = "";
-
-
-      showAdmin();
-
-    }else{
-
-      error.textContent =
-        "ভুল Admin Password!";
-
-    }
-
-
-    btn.disabled = false;
-
-    btn.textContent =
-      "প্রবেশ করুন";
-
-  },300);
-
-};
-
-
-
-/* ==================================================
-   AUTO LOGIN
-================================================== */
-
-if(
-  sessionStorage.getItem(
-    "takaearn_admin"
-  ) === "1"
-){
-
-  showAdmin();
-
-}else{
-
-  showLogin();
+    }[m]));
 
 }
 
 
+function number(value){
 
-/* ==================================================
-   SHOW LOGIN
-================================================== */
-
-function showLogin(){
-
-  document
-    .getElementById("loginScreen")
-    .classList.remove("hidden");
-
-
-  document
-    .getElementById("app")
-    .classList.add("hidden");
+    return Number(value) || 0;
 
 }
 
 
+function formatDate(value){
 
-/* ==================================================
-   SHOW ADMIN
-================================================== */
-
-function showAdmin(){
-
-  document
-    .getElementById("loginScreen")
-    .classList.add("hidden");
-
-
-  document
-    .getElementById("app")
-    .classList.remove("hidden");
-
-
-  if(!firebaseStarted){
-
-    firebaseStarted = true;
-
-    startRealtimeDatabase();
-
-    startFirestore();
-
-  }
-
-}
-
-
-
-/* ==================================================
-   LOGOUT
-================================================== */
-
-window.adminLogout =
-function(){
-
-  sessionStorage.removeItem(
-    "takaearn_admin"
-  );
-
-
-  location.reload();
-
-};
-
-
-
-/* ==================================================
-   CHANGE PASSWORD
-================================================== */
-
-window.changeAdminPassword =
-function(){
-
-  const current =
-    document
-      .getElementById("currentPassword")
-      .value;
-
-
-  const newPassword =
-    document
-      .getElementById("newPassword")
-      .value;
-
-
-  const confirmPassword =
-    document
-      .getElementById("confirmPassword")
-      .value;
-
-
-  const message =
-    document
-      .getElementById("passwordMessage");
-
-
-  message.textContent = "";
-
-
-  if(
-    current !==
-    getAdminPassword()
-  ){
-
-    message.textContent =
-      "বর্তমান password সঠিক নয়।";
-
-    message.className =
-      "text-sm mt-4 text-red-400";
-
-    return;
-
-  }
-
-
-  if(
-    newPassword.length < 6
-  ){
-
-    message.textContent =
-      "নতুন password কমপক্ষে ৬ অক্ষরের হতে হবে।";
-
-    message.className =
-      "text-sm mt-4 text-red-400";
-
-    return;
-
-  }
-
-
-  if(
-    newPassword !==
-    confirmPassword
-  ){
-
-    message.textContent =
-      "নতুন password দুইবার একই নয়।";
-
-    message.className =
-      "text-sm mt-4 text-red-400";
-
-    return;
-
-  }
-
-
-  localStorage.setItem(
-    "takaearn_admin_password",
-    newPassword
-  );
-
-
-  document
-    .getElementById("currentPassword")
-    .value = "";
-
-
-  document
-    .getElementById("newPassword")
-    .value = "";
-
-
-  document
-    .getElementById("confirmPassword")
-    .value = "";
-
-
-  message.textContent =
-    "✅ Password সফলভাবে পরিবর্তন হয়েছে।";
-
-
-  message.className =
-    "text-sm mt-4 text-emerald-400";
-
-};
-
-
-
-/* ==================================================
-   REALTIME DATABASE
-================================================== */
-
-function startRealtimeDatabase(){
-
-
-  document
-    .getElementById("rtdbStatus")
-    .textContent =
-      "Connecting...";
-
-
-
-  /* USERS */
-
-  onValue(
-    ref(db,"users"),
-
-    snapshot => {
-
-      users =
-        snapshot.val() || {};
-
-
-      document
-        .getElementById("rtdbStatus")
-        .textContent =
-          "● Connected";
-
-
-      document
-        .getElementById("connection")
-        .textContent =
-          "● Firebase Connected";
-
-
-      document
-        .getElementById("connection")
-        .className =
-          "text-xs px-3 py-2 rounded-full bg-emerald-900/50 text-emerald-400";
-
-
-      renderAll();
-
-    },
-
-    error => {
-
-      console.error(
-        "RTDB users error:",
-        error
-      );
-
-
-      document
-        .getElementById("rtdbStatus")
-        .textContent =
-          "RTDB Error";
-
-    }
-
-  );
-
-
-
-  /* WITHDRAWALS */
-
-  onValue(
-    ref(db,"withdrawals"),
-
-    snapshot => {
-
-      withdrawals =
-        snapshot.val() || {};
-
-
-      renderAll();
-
-    },
-
-    error => {
-
-      console.error(
-        "RTDB withdrawals error:",
-        error
-      );
-
-    }
-
-  );
-
-
-
-  /* NOTICES */
-
-  onValue(
-    ref(db,"notices"),
-
-    snapshot => {
-
-      notices =
-        snapshot.val() || {};
-
-
-      renderAll();
-
-    }
-
-  );
-
-
-
-  /* SETTINGS */
-
-  onValue(
-    ref(db,"settings"),
-
-    snapshot => {
-
-      settings =
-        snapshot.val() || {};
-
-
-      renderAll();
-
-    }
-
-  );
-
-}
-
-
-
-/* ==================================================
-   FIRESTORE
-================================================== */
-
-function startFirestore(){
-
-
-  document
-    .getElementById("firestoreStatus")
-    .textContent =
-      "Connecting...";
-
-
-
-  /* USERS */
-
-  onSnapshot(
-    collection(
-      firestore,
-      "users"
-    ),
-
-    snapshot => {
-
-      firestoreUsers = {};
-
-
-      snapshot.forEach(
-        docSnap => {
-
-          firestoreUsers[
-            docSnap.id
-          ] =
-            docSnap.data();
-
-        }
-      );
-
-
-      document
-        .getElementById("firestoreStatus")
-        .textContent =
-          "● Connected";
-
-
-      document
-        .getElementById("statFirestoreUsers")
-        .textContent =
-          Object.keys(
-            firestoreUsers
-          )
-          .length
-          .toLocaleString();
-
-
-      mergeFirestoreUsers();
-
-    },
-
-    error => {
-
-      console.error(
-        "Firestore users error:",
-        error
-      );
-
-
-      document
-        .getElementById("firestoreStatus")
-        .textContent =
-          "Firestore Error";
-
-    }
-
-  );
-
-
-
-  /* WITHDRAWALS */
-
-  onSnapshot(
-    collection(
-      firestore,
-      "withdrawals"
-    ),
-
-    snapshot => {
-
-      firestoreWithdrawals = {};
-
-
-      snapshot.forEach(
-        docSnap => {
-
-          firestoreWithdrawals[
-            docSnap.id
-          ] =
-            docSnap.data();
-
-        }
-      );
-
-
-      mergeFirestoreWithdrawals();
-
-    },
-
-    error => {
-
-      console.error(
-        "Firestore withdrawals error:",
-        error
-      );
-
-    }
-
-  );
-
-}
-
-
-
-/* ==================================================
-   MERGE FIRESTORE USERS
-================================================== */
-
-function mergeFirestoreUsers(){
-
-  Object.keys(
-    firestoreUsers
-  )
-  .forEach(uid => {
-
-    if(!users[uid]){
-
-      users[uid] =
-        firestoreUsers[uid];
-
-    }
-
-  });
-
-
-  renderAll();
-
-}
-
-
-
-/* ==================================================
-   MERGE FIRESTORE WITHDRAWALS
-================================================== */
-
-function mergeFirestoreWithdrawals(){
-
-  Object.keys(
-    firestoreWithdrawals
-  )
-  .forEach(id => {
-
-    if(!withdrawals[id]){
-
-      withdrawals[id] =
-        firestoreWithdrawals[id];
-
-    }
-
-  });
-
-
-  renderAll();
-
-}
-
-
-
-/* ==================================================
-   RENDER ALL
-================================================== */
-
-function renderAll(){
-
-  const userList =
-    Object.values(users);
-
-
-  const withdrawalList =
-    Object.values(withdrawals);
-
-
-
-  /* USERS */
-
-  document
-    .getElementById("statUsers")
-    .textContent =
-      userList
-      .length
-      .toLocaleString();
-
-
-
-  /* COINS */
-
-  const totalCoins =
-    userList.reduce(
-      (sum,user) =>
-        sum +
-        (
-          Number(user.coins) || 0
-        ),
-      0
-    );
-
-
-  document
-    .getElementById("statCoins")
-    .textContent =
-      totalCoins
-      .toLocaleString();
-
-
-
-  /* EARNED */
-
-  const totalEarned =
-    userList.reduce(
-      (sum,user) =>
-        sum +
-        (
-          Number(
-            user.totalEarned
-          ) || 0
-        ),
-      0
-    );
-
-
-  document
-    .getElementById("statEarned")
-    .textContent =
-      totalEarned
-      .toLocaleString();
-
-
-
-  /* WITHDRAWALS */
-
-  document
-    .getElementById("statWithdrawals")
-    .textContent =
-      withdrawalList
-      .length
-      .toLocaleString();
-
-
-
-  /* PENDING */
-
-  const pending =
-    withdrawalList.filter(
-      item =>
-        (
-          item.status ||
-          "pending"
-        ) === "pending"
-    )
-    .length;
-
-
-  document
-    .getElementById("statPending")
-    .textContent =
-      pending
-      .toLocaleString();
-
-
-
-  /* LAST UPDATE */
-
-  document
-    .getElementById("lastUpdate")
-    .textContent =
-      "সর্বশেষ আপডেট: " +
-      new Date()
-        .toLocaleString("bn-BD");
-
-
-
-  renderUsers();
-
-  renderWithdrawals();
-
-
-
-  /* NOTICE */
-
-  const notice =
-    notices.current ||
-    notices.text ||
-    "";
-
-
-  document
-    .getElementById("noticeCurrent")
-    .textContent =
-      notice
-      ? "বর্তমান: " + notice
-      : "কোনো notice নেই";
-
-
-  document
-    .getElementById("noticeText")
-    .value =
-      notice;
-
-
-
-  /* SETTINGS */
-
-  document
-    .getElementById("coinRate")
-    .value =
-      settings.coinRate ??
-      100;
-
-
-  document
-    .getElementById("dailyCoins")
-    .value =
-      settings.dailyCoins ??
-      100;
-
-
-  document
-    .getElementById("minWithdraw")
-    .value =
-      settings.minWithdraw ??
-      5000;
-
-}
-
-
-
-/* ==================================================
-   USERS TABLE
-================================================== */
-
-window.renderUsers =
-function(){
-
-  const input =
-    document
-      .getElementById("userSearch");
-
-
-  const q =
-    (
-      input?.value ||
-      ""
-    )
-    .toLowerCase();
-
-
-
-  const list =
-    Object.entries(users)
-    .filter(
-      ([uid,user]) => {
-
-        return !q ||
-
-          uid
-            .toLowerCase()
-            .includes(q) ||
-
-          String(
-            user.name || ""
-          )
-          .toLowerCase()
-          .includes(q) ||
-
-          String(
-            user.email || ""
-          )
-          .toLowerCase()
-          .includes(q);
-
-      }
-    );
-
-
-
-  document
-    .getElementById("usersBody")
-    .innerHTML =
-
-      list.map(
-        ([uid,user]) => `
-
-        <tr
-          class="border-b border-slate-800">
-
-          <td class="p-3">
-
-            <b>
-              ${esc(
-                user.name ||
-                "ব্যবহারকারী"
-              )}
-            </b>
-
-            <div
-              class="text-xs text-slate-500">
-
-              ${esc(
-                user.email || ""
-              )}
-
-            </div>
-
-          </td>
-
-
-          <td
-            class="p-3 text-xs
-                   text-slate-400">
-
-            ${esc(uid)}
-
-          </td>
-
-
-          <td
-            class="p-3 text-amber-400
-                   font-bold">
-
-            ${
-              (
-                Number(user.coins) ||
-                0
-              )
-              .toLocaleString()
-            }
-
-          </td>
-
-
-          <td
-            class="p-3 text-emerald-400">
-
-            ${
-              (
-                Number(
-                  user.totalEarned
-                ) ||
-                0
-              )
-              .toLocaleString()
-            }
-
-          </td>
-
-
-          <td class="p-3">
-
-            ${
-              Number(
-                user.referralCount
-              ) || 0
-            }
-
-          </td>
-
-
-          <td class="p-3">
-
-            <button
-              onclick="editUser('${encodeURIComponent(uid)}')"
-              class="bg-slate-700
-                     px-3 py-1.5
-                     rounded-lg text-xs">
-
-              Edit
-
-            </button>
-
-          </td>
-
-        </tr>
-
-        `
-      )
-      .join("")
-
-      ||
-
-      `
-      <tr>
-
-        <td
-          colspan="6"
-          class="p-6 text-center
-                 text-slate-500">
-
-          কোনো Firebase user পাওয়া যায়নি
-
-        </td>
-
-      </tr>
-      `;
-
-};
-
-
-
-/* ==================================================
-   EDIT USER
-================================================== */
-
-window.editUser =
-async function(encoded){
-
-  const uid =
-    decodeURIComponent(encoded);
-
-
-  const user =
-    users[uid];
-
-
-  if(!user)
-    return;
-
-
-
-  const coins =
-    prompt(
-      "নতুন Coins:",
-      user.coins ?? 0
-    );
-
-
-  if(coins === null)
-    return;
-
-
-
-  const earned =
-    prompt(
-      "নতুন Total Earned:",
-      user.totalEarned ?? 0
-    );
-
-
-  if(earned === null)
-    return;
-
-
-
-  const newCoins =
-    Number(coins);
-
-
-  const newEarned =
-    Number(earned);
-
-
-
-  if(
-    !Number.isFinite(newCoins) ||
-    !Number.isFinite(newEarned)
-  ){
-
-    alert(
-      "সঠিক সংখ্যা দিন"
-    );
-
-    return;
-
-  }
-
-
-
-  try{
-
-
-    /* RTDB */
-
-    await update(
-      ref(
-        db,
-        "users/" + uid
-      ),
-      {
-
-        coins:
-          newCoins,
-
-        totalEarned:
-          newEarned,
-
-        updatedAt:
-          new Date().toISOString()
-
-      }
-    );
-
-
-
-    /* FIRESTORE */
+    if(!value) return "-";
 
     try{
 
-      await updateDoc(
-        doc(
-          firestore,
-          "users",
-          uid
-        ),
-        {
+        return new Date(value)
+        .toLocaleString("bn-BD");
 
-          coins:
-            newCoins,
+    }catch{
 
-          totalEarned:
-            newEarned,
-
-          updatedAt:
-            new Date().toISOString()
-
-        }
-      );
-
-    }catch(
-      firestoreError
-    ){
-
-      console.warn(
-        "Firestore update skipped:",
-        firestoreError
-      );
+        return "-";
 
     }
-
-
-
-    alert(
-      "User updated successfully"
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-
-    alert(
-      "Update failed: " +
-      error.message
-    );
-
-  }
-
-};
-
-
-
-/* ==================================================
-   WITHDRAWALS
-================================================== */
-
-function renderWithdrawals(){
-
-  const list =
-    Object.entries(
-      withdrawals
-    )
-    .sort(
-      (a,b) =>
-        String(
-          b[1].createdAt || ""
-        )
-        .localeCompare(
-          String(
-            a[1].createdAt || ""
-          )
-        )
-    );
-
-
-
-  document
-    .getElementById("withdrawalsBody")
-    .innerHTML =
-
-      list.map(
-        ([id,w]) => `
-
-        <tr
-          class="border-b border-slate-800">
-
-          <td class="p-3 text-xs">
-
-            ${esc(id)}
-
-          </td>
-
-
-          <td class="p-3">
-
-            ${esc(
-              w.userName ||
-              w.uid ||
-              ""
-            )}
-
-          </td>
-
-
-          <td class="p-3">
-
-            ${esc(
-              w.method || ""
-            )}
-
-          </td>
-
-
-          <td class="p-3">
-
-            ${esc(
-              w.accountNo || ""
-            )}
-
-          </td>
-
-
-          <td
-            class="p-3 text-amber-400">
-
-            ${
-              (
-                Number(w.coins) ||
-                0
-              )
-              .toLocaleString()
-            }
-
-          </td>
-
-
-          <td class="p-3">
-
-            ৳${esc(
-              w.bdtAmount || "0"
-            )}
-
-          </td>
-
-
-          <td class="p-3">
-
-            <span
-              class="
-                px-2 py-1
-                rounded-full
-                text-xs
-
-                ${
-                  w.status ===
-                  "approved"
-
-                  ? "bg-emerald-900 text-emerald-300"
-
-                  :
-
-                  w.status ===
-                  "rejected"
-
-                  ? "bg-red-900 text-red-300"
-
-                  :
-
-                  "bg-orange-900 text-orange-300"
-                }
-              "
-            >
-
-              ${esc(
-                w.status ||
-                "pending"
-              )}
-
-            </span>
-
-          </td>
-
-
-          <td class="p-3">
-
-            <div
-              class="flex gap-1">
-
-              <button
-                onclick="setWithdrawal('${encodeURIComponent(id)}','approved')"
-                class="bg-emerald-700
-                       px-2 py-1
-                       rounded text-xs">
-
-                Approve
-
-              </button>
-
-
-              <button
-                onclick="setWithdrawal('${encodeURIComponent(id)}','rejected')"
-                class="bg-red-700
-                       px-2 py-1
-                       rounded text-xs">
-
-                Reject
-
-              </button>
-
-            </div>
-
-          </td>
-
-        </tr>
-
-        `
-      )
-      .join("")
-
-      ||
-
-      `
-      <tr>
-
-        <td
-          colspan="8"
-          class="p-6 text-center
-                 text-slate-500">
-
-          কোনো withdrawal নেই
-
-        </td>
-
-      </tr>
-      `;
 
 }
 
 
+/* =========================================================
+   AUTH
+========================================================= */
 
-/* ==================================================
-   WITHDRAWAL STATUS
-================================================== */
+window.adminLogin = async function(){
 
-window.setWithdrawal =
-async function(
-  encoded,
-  status
-){
+    const email =
+    $("adminEmail").value.trim();
 
-  const id =
-    decodeURIComponent(encoded);
+    const password =
+    $("adminPassword").value;
+
+    $("loginError").textContent = "";
+
+    if(!email || !password){
+
+        $("loginError").textContent =
+        "Email এবং password দিন।";
+
+        return;
+    }
+
+    try{
+
+        $("loginButton").disabled = true;
+
+        const result =
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        const uid =
+        result.user.uid;
+
+        const adminDoc =
+        await getDoc(
+            doc(firestore,"admins",uid)
+        );
+
+        if(
+            !adminDoc.exists() ||
+            adminDoc.data().role !== "admin" ||
+            adminDoc.data().active === false
+        ){
+
+            await signOut(auth);
+
+            $("loginError").textContent =
+            "এই account-এর Admin permission নেই.";
+
+            return;
+        }
+
+        currentAdmin =
+        result.user;
+
+        showAdmin();
+
+    }catch(error){
+
+        console.error(error);
+
+        $("loginError").textContent =
+        firebaseError(error);
+
+    }finally{
+
+        $("loginButton").disabled = false;
+
+    }
+
+};
 
 
-  const withdrawal =
-    withdrawals[id];
+function firebaseError(error){
+
+    const code =
+    error?.code || "";
+
+    if(code.includes("invalid-credential"))
+        return "Email অথবা Password ভুল।";
+
+    if(code.includes("invalid-email"))
+        return "Email সঠিক নয়।";
+
+    if(code.includes("too-many-requests"))
+        return "অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে চেষ্টা করুন।";
+
+    return error?.message ||
+    "Login failed.";
+
+}
 
 
-  if(!withdrawal)
-    return;
+function showAdmin(){
+
+    $("loginPage")
+    .classList.add("hidden");
+
+    $("adminApp")
+    .classList.remove("hidden");
+
+    $("adminAccount")
+    .textContent =
+    currentAdmin.email || currentAdmin.uid;
+
+    startRealtime();
+
+}
 
 
+window.logoutAdmin = async function(){
 
-  if(
-    !confirm(
-      `Withdrawal ${status} করতে চান?`
-    )
-  ){
+    await signOut(auth);
 
-    return;
-
-  }
+};
 
 
+onAuthStateChanged(auth,async user=>{
 
-  try{
+    if(!user){
+
+        currentAdmin = null;
+
+        $("loginPage")
+        .classList.remove("hidden");
+
+        $("adminApp")
+        .classList.add("hidden");
+
+        return;
+
+    }
+
+    try{
+
+        const adminDoc =
+        await getDoc(
+            doc(firestore,"admins",user.uid)
+        );
+
+        if(
+            adminDoc.exists() &&
+            adminDoc.data().role === "admin" &&
+            adminDoc.data().active !== false
+        ){
+
+            currentAdmin = user;
+
+            showAdmin();
+
+        }else{
+
+            await signOut(auth);
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+});
+
+
+/* =========================================================
+   REALTIME DATABASE
+========================================================= */
+
+function startRealtime(){
+
+    $("connectionStatus").textContent =
+    "Connected";
+
+    $("connectionStatus").className =
+    "text-[10px] px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-400";
+
+
+    onValue(
+        ref(rtdb,"users"),
+        snapshot=>{
+
+            users =
+            snapshot.val() || {};
+
+            renderUsers();
+
+            updateStats();
+
+        }
+    );
+
+
+    onValue(
+        ref(rtdb,"withdrawals"),
+        snapshot=>{
+
+            withdrawals =
+            snapshot.val() || {};
+
+            renderWithdrawals();
+
+            updateStats();
+
+        }
+    );
+
+
+    onValue(
+        ref(rtdb,"notices"),
+        snapshot=>{
+
+            notices =
+            snapshot.val() || {};
+
+            renderNotices();
+
+            updateStats();
+
+        }
+    );
+
+
+    onValue(
+        ref(rtdb,"tasks"),
+        snapshot=>{
+
+            tasks =
+            snapshot.val() || {};
+
+            renderTasks();
+
+        }
+    );
+
+
+    onValue(
+        ref(rtdb,"settings"),
+        snapshot=>{
+
+            settings =
+            snapshot.val() || {};
+
+            loadSettingsUI();
+
+            updateStats();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function updateStats(){
+
+    const list =
+    Object.values(users);
+
+    const totalUsers =
+    list.length;
+
+    const activeUsers =
+    list.filter(
+        u =>
+        u.status !== "blocked"
+    ).length;
+
+    const totalCoins =
+    list.reduce(
+        (sum,u)=>
+        sum + number(u.coins),
+        0
+    );
+
+    const totalBalance =
+    list.reduce(
+        (sum,u)=>
+        sum + number(u.balance),
+        0
+    );
+
+    const totalTasks =
+    list.reduce(
+        (sum,u)=>
+        sum +
+        number(
+            u.completedTasks ||
+            u.taskCount ||
+            u.tasksCompleted
+        ),
+        0
+    );
+
+    const pending =
+    Object.values(withdrawals)
+    .filter(
+        x =>
+        x.status === "pending"
+    ).length;
+
+
+    $("statUsers")
+    .textContent =
+    totalUsers.toLocaleString("bn-BD");
+
+    $("statActive")
+    .textContent =
+    activeUsers.toLocaleString("bn-BD");
+
+    $("statCoins")
+    .textContent =
+    totalCoins.toLocaleString("bn-BD");
+
+    $("statBalance")
+    .textContent =
+    "৳" +
+    totalBalance.toLocaleString("bn-BD");
+
+    $("statPending")
+    .textContent =
+    pending.toLocaleString("bn-BD");
+
+    $("statTasks")
+    .textContent =
+    totalTasks.toLocaleString("bn-BD");
+
+}
+
+
+/* =========================================================
+   USERS
+========================================================= */
+
+window.renderUsers = function(){
+
+    const search =
+    ($("userSearch")?.value || "")
+    .toLowerCase();
+
+    const rows =
+    Object.entries(users)
+    .filter(([uid,u])=>{
+
+        if(!search) return true;
+
+        return [
+
+            uid,
+            u.name,
+            u.email,
+            u.referralCode
+
+        ].some(
+            x =>
+            String(x || "")
+            .toLowerCase()
+            .includes(search)
+        );
+
+    });
+
+
+    $("usersBody").innerHTML =
+    rows.map(([uid,u])=>{
+
+        const status =
+        u.status === "blocked"
+        ? "blocked"
+        : "active";
+
+        return `
+
+        <tr class="border-b border-slate-800">
+
+            <td class="p-3">
+
+                <b>
+                    ${esc(u.name || "ব্যবহারকারী")}
+                </b>
+
+                <div class="text-[10px] text-slate-500">
+                    ${esc(u.email || "")}
+                </div>
+
+            </td>
+
+            <td class="p-3">
+                <span class="font-mono text-[10px]">
+                    ${esc(uid)}
+                </span>
+            </td>
+
+            <td class="p-3 text-amber-400 font-bold">
+                ${number(u.coins).toLocaleString("bn-BD")}
+            </td>
+
+            <td class="p-3 text-emerald-400">
+                ৳${number(u.balance).toFixed(2)}
+            </td>
+
+            <td class="p-3">
+                ${number(
+                    u.completedTasks ||
+                    u.taskCount ||
+                    u.tasksCompleted
+                )}
+            </td>
+
+            <td class="p-3">
+                ${number(u.referralCount)}
+            </td>
+
+            <td class="p-3">
+
+                <span class="${
+                    status === "active"
+                    ? "text-emerald-400"
+                    : "text-red-400"
+                }">
+
+                    ${status}
+
+                </span>
+
+            </td>
+
+            <td class="p-3">
+
+                <button
+                onclick="openUser('${esc(uid)}')"
+                class="bg-blue-600
+                px-3 py-1.5
+                rounded-lg text-xs">
+
+                    Manage
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    }).join("");
+
+
+    if(!rows.length){
+
+        $("usersBody").innerHTML = `
+
+        <tr>
+
+            <td
+            colspan="8"
+            class="p-8 text-center
+            text-slate-500">
+
+                কোনো User পাওয়া যায়নি।
+
+            </td>
+
+        </tr>
+
+        `;
+
+    }
+
+};
+
+
+/* =========================================================
+   USER MODAL
+========================================================= */
+
+window.openUser = async function(uid){
+
+    selectedUserId = uid;
+
+    const user =
+    users[uid] || {};
+
+    $("modalUserUid")
+    .textContent =
+    "UID: " + uid;
+
+    $("editName").value =
+    user.name || "";
+
+    $("editEmail").value =
+    user.email || "";
+
+    $("editPhoto").value =
+    user.photoURL || "";
+
+    $("editCoins").value =
+    number(user.coins);
+
+    $("editBalance").value =
+    number(user.balance);
+
+    $("editTasks").value =
+    number(
+        user.completedTasks ||
+        user.taskCount ||
+        user.tasksCompleted
+    );
+
+    $("editReferralCount").value =
+    number(user.referralCount);
+
+    $("editStatus").value =
+    user.status === "blocked"
+    ? "blocked"
+    : "active";
+
+
+    $("userModal")
+    .classList.remove("hidden");
+
+
+    loadUserHistory(uid);
+
+
+    if(selectedUserListener)
+        selectedUserListener();
+
+
+    selectedUserListener =
+    onValue(
+        ref(rtdb,`users/${uid}`),
+        snapshot=>{
+
+            if(!snapshot.exists())
+                return;
+
+            const u =
+            snapshot.val();
+
+            $("editName").value =
+            u.name || "";
+
+            $("editEmail").value =
+            u.email || "";
+
+            $("editPhoto").value =
+            u.photoURL || "";
+
+            $("editCoins").value =
+            number(u.coins);
+
+            $("editBalance").value =
+            number(u.balance);
+
+            $("editTasks").value =
+            number(
+                u.completedTasks ||
+                u.taskCount ||
+                u.tasksCompleted
+            );
+
+            $("editReferralCount").value =
+            number(u.referralCount);
+
+            $("editStatus").value =
+            u.status === "blocked"
+            ? "blocked"
+            : "active";
+
+        }
+    );
+
+};
+
+
+window.closeUserModal = function(){
+
+    if(selectedUserListener){
+
+        selectedUserListener();
+
+        selectedUserListener = null;
+
+    }
+
+    $("userModal")
+    .classList.add("hidden");
+
+};
+
+
+/* =========================================================
+   SAVE USER
+========================================================= */
+
+window.saveUserChanges = async function(){
+
+    if(!selectedUserId)
+        return;
+
+    const uid =
+    selectedUserId;
 
     const data = {
 
-      status:
-        status,
+        name:
+        $("editName").value.trim(),
 
-      processedAt:
+        email:
+        $("editEmail").value.trim(),
+
+        photoURL:
+        $("editPhoto").value.trim(),
+
+        coins:
+        number($("editCoins").value),
+
+        balance:
+        number($("editBalance").value),
+
+        completedTasks:
+        number($("editTasks").value),
+
+        referralCount:
+        number($("editReferralCount").value),
+
+        status:
+        $("editStatus").value,
+
+        updatedAt:
         new Date().toISOString()
 
     };
 
 
-
-    /* RTDB */
-
-    await update(
-      ref(
-        db,
-        "withdrawals/" + id
-      ),
-      data
-    );
-
-
-
-    /* FIRESTORE */
-
     try{
 
-      await updateDoc(
-        doc(
-          firestore,
-          "withdrawals",
-          id
-        ),
-        data
-      );
+        /* Firestore */
+
+        await setDoc(
+            doc(firestore,"users",uid),
+            {
+                ...data,
+                updatedAt:serverTimestamp()
+            },
+            {merge:true}
+        );
+
+
+        /* Realtime Database */
+
+        await update(
+            ref(rtdb,`users/${uid}`),
+            data
+        );
+
+
+        toast(
+            "User profile সফলভাবে আপডেট হয়েছে।"
+        );
+
 
     }catch(error){
 
-      console.warn(
-        "Firestore withdrawal update skipped:",
-        error
-      );
+        console.error(error);
+
+        toast(
+            "User update failed: " +
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =========================================================
+   MANUAL COIN/BALANCE ADJUSTMENT
+========================================================= */
+
+window.manualAdjustment = async function(){
+
+    if(!selectedUserId)
+        return;
+
+    const coinDelta =
+    number($("adjustCoins").value);
+
+    const balanceDelta =
+    number($("adjustBalance").value);
+
+    const reason =
+    $("adjustReason").value.trim() ||
+    "Admin adjustment";
+
+
+    if(
+        coinDelta === 0 &&
+        balanceDelta === 0
+    ){
+
+        toast(
+            "Coin অথবা Balance পরিবর্তন দিন।"
+        );
+
+        return;
 
     }
 
 
-
-    alert(
-      "Withdrawal status updated"
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-
-    alert(
-      "Update failed: " +
-      error.message
-    );
-
-  }
-
-};
-
-
-
-/* ==================================================
-   SAVE NOTICE
-================================================== */
-
-window.saveNotice =
-async function(){
-
-  const text =
-    document
-      .getElementById("noticeText")
-      .value
-      .trim();
-
-
-  if(!text){
-
-    alert(
-      "Notice লিখুন"
-    );
-
-    return;
-
-  }
-
-
-
-  try{
-
-
-    /* RTDB */
-
-    await set(
-      ref(
-        db,
-        "notices/current"
-      ),
-      text
-    );
-
-
-
-    /* FIRESTORE */
-
-    await setDoc(
-      doc(
-        firestore,
-        "settings",
-        "notice"
-      ),
-      {
-
-        text:
-          text,
-
-        updatedAt:
-          new Date().toISOString()
-
-      },
-
-      {
-        merge:true
-      }
-
-    );
-
-
-
-    alert(
-      "Notice saved successfully"
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-
-    alert(
-      "Notice save failed: " +
-      error.message
-    );
-
-  }
-
-};
-
-
-
-/* ==================================================
-   SAVE SETTINGS
-================================================== */
-
-window.saveSettings =
-async function(){
-
-  const data = {
-
-    coinRate:
-      Number(
-        document
-          .getElementById("coinRate")
-          .value
-      ) || 100,
-
-
-    dailyCoins:
-      Number(
-        document
-          .getElementById("dailyCoins")
-          .value
-      ) || 100,
-
-
-    minWithdraw:
-      Number(
-        document
-          .getElementById("minWithdraw")
-          .value
-      ) || 5000,
-
-
-    updatedAt:
-      new Date().toISOString()
-
-  };
-
-
-
-  try{
-
-
-    /* RTDB */
-
-    await set(
-      ref(
-        db,
-        "settings"
-      ),
-      data
-    );
-
-
-
-    /* FIRESTORE */
-
-    await setDoc(
-      doc(
-        firestore,
-        "settings",
-        "app"
-      ),
-      data,
-      {
-        merge:true
-      }
-    );
-
-
-
-    alert(
-      "Settings saved successfully"
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-
-    alert(
-      "Settings save failed: " +
-      error.message
-    );
-
-  }
-
-};
-
-
-
-/* ==================================================
-   TABS
-================================================== */
-
-window.showTab =
-function(
-  id,
-  btn
-){
-
-  document
-    .querySelectorAll(".tab")
-    .forEach(
-      item =>
-        item.classList.add(
-          "hidden"
+    const uid =
+    selectedUserId;
+
+    const userRef =
+    doc(firestore,"users",uid);
+
+    const txRef =
+    doc(
+        collection(
+            firestore,
+            "users",
+            uid,
+            "transactions"
         )
     );
 
 
-  document
-    .getElementById(id)
-    .classList.remove(
-      "hidden"
-    );
+    try{
+
+        const result =
+        await runTransaction(
+            firestore,
+            async transaction=>{
+
+                const snap =
+                await transaction.get(userRef);
+
+                const old =
+                snap.exists()
+                ? snap.data()
+                : {};
+
+                const newCoins =
+                number(old.coins) +
+                coinDelta;
+
+                const newBalance =
+                number(old.balance) +
+                balanceDelta;
 
 
-  document
-    .querySelectorAll(".nav")
-    .forEach(
-      item =>
-        item.classList.remove(
-          "active"
-        )
-    );
+                transaction.set(
+                    userRef,
+                    {
+                        coins:
+                        Math.max(0,newCoins),
+
+                        balance:
+                        Math.max(0,newBalance),
+
+                        updatedAt:
+                        serverTimestamp()
+                    },
+                    {merge:true}
+                );
 
 
-  btn.classList.add(
-    "active"
-  );
+                transaction.set(
+                    txRef,
+                    {
+                        uid,
+                        type:
+                        "admin_adjustment",
+
+                        coins:
+                        coinDelta,
+
+                        amount:
+                        balanceDelta,
+
+                        note:
+                        reason,
+
+                        createdAt:
+                        serverTimestamp(),
+
+                        adminUid:
+                        currentAdmin.uid
+                    }
+                );
+
+
+                return {
+                    newCoins:
+                    Math.max(0,newCoins),
+
+                    newBalance:
+                    Math.max(0,newBalance),
+
+                    txId:
+                    txRef.id
+                };
+
+            }
+        );
+
+
+        await update(
+            ref(rtdb,`users/${uid}`),
+            {
+                coins:
+                result.newCoins,
+
+                balance:
+                result.newBalance,
+
+                updatedAt:
+                new Date().toISOString()
+            }
+        );
+
+
+        await set(
+            ref(
+                rtdb,
+                `transactions/${uid}/${result.txId}`
+            ),
+            {
+                uid,
+                type:
+                "admin_adjustment",
+
+                coins:
+                coinDelta,
+
+                amount:
+                balanceDelta,
+
+                note:
+                reason,
+
+                createdAt:
+                new Date().toISOString(),
+
+                adminUid:
+                currentAdmin.uid
+            }
+        );
+
+
+        $("adjustCoins").value = "";
+        $("adjustBalance").value = "";
+        $("adjustReason").value = "";
+
+
+        toast(
+            "Coins/Balance পরিবর্তন সফল হয়েছে।"
+        );
+
+
+        await loadUserHistory(uid);
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Adjustment failed: " +
+            error.message
+        );
+
+    }
 
 };
 
 
+/* =========================================================
+   USER HISTORY
+========================================================= */
 
-/* ==================================================
-   ESCAPE HTML
-================================================== */
+async function loadUserHistory(uid){
 
-function esc(value){
+    $("userEarnings").innerHTML =
+    `<p class="text-xs text-slate-500">
+        Loading...
+    </p>`;
 
-  return String(
-    value ?? ""
-  )
-  .replace(
-    /[&<>"']/g,
-    char => ({
+    $("userTransactions").innerHTML =
+    `<p class="text-xs text-slate-500">
+        Loading...
+    </p>`;
 
-      "&":
-        "&amp;",
 
-      "<":
-        "&lt;",
+    try{
 
-      ">":
-        "&gt;",
+        const [
+            earningsSnap,
+            transactionsSnap
+        ] = await Promise.all([
 
-      '"':
-        "&quot;",
+            getDocs(
+                collection(
+                    firestore,
+                    "users",
+                    uid,
+                    "earnings"
+                )
+            ),
 
-      "'":
-        "&#39;"
+            getDocs(
+                collection(
+                    firestore,
+                    "users",
+                    uid,
+                    "transactions"
+                )
+            )
 
-    }[char])
-  );
+        ]);
+
+
+        const earnings =
+        earningsSnap.docs.map(
+            x=>({
+                id:x.id,
+                ...x.data()
+            })
+        );
+
+
+        const transactions =
+        transactionsSnap.docs.map(
+            x=>({
+                id:x.id,
+                ...x.data()
+            })
+        );
+
+
+        $("userEarnings").innerHTML =
+        earnings.length
+        ? earnings
+            .sort(
+                (a,b)=>
+                String(b.createdAt||"")
+                .localeCompare(
+                    String(a.createdAt||"")
+                )
+            )
+            .map(x=>`
+
+            <div
+            class="bg-slate-900
+            rounded-xl p-3">
+
+                <div class="flex
+                justify-between">
+
+                    <b class="text-sm">
+                        ${esc(
+                            x.taskTitle ||
+                            x.taskId ||
+                            "Task"
+                        )}
+                    </b>
+
+                    <span
+                    class="text-amber-400
+                    font-bold">
+
+                        +${number(x.coins)}
+
+                    </span>
+
+                </div>
+
+                <p class="text-[10px]
+                text-slate-500 mt-1">
+
+                    ${formatDate(
+                        x.createdAt
+                    )}
+
+                </p>
+
+            </div>
+
+            `).join("")
+        :
+        `<p class="text-xs text-slate-500">
+            কোনো earnings নেই।
+        </p>`;
+
+
+        $("userTransactions").innerHTML =
+        transactions.length
+        ? transactions
+            .sort(
+                (a,b)=>
+                String(b.createdAt||"")
+                .localeCompare(
+                    String(a.createdAt||"")
+                )
+            )
+            .map(x=>`
+
+            <div
+            class="bg-slate-900
+            rounded-xl p-3">
+
+                <div class="flex
+                justify-between">
+
+                    <b class="text-sm">
+                        ${esc(
+                            x.type ||
+                            "transaction"
+                        )}
+                    </b>
+
+                    <span
+                    class="${
+                        number(x.coins) >= 0
+                        ? "text-emerald-400"
+                        : "text-red-400"
+                    }">
+
+                        ${number(x.coins) > 0 ? "+" : ""}
+                        ${number(x.coins)}
+
+                    </span>
+
+                </div>
+
+                <p class="text-xs text-slate-400">
+                    ${esc(x.note || "")}
+                </p>
+
+                <p class="text-[10px]
+                text-slate-500">
+
+                    ${formatDate(
+                        x.createdAt
+                    )}
+
+                </p>
+
+            </div>
+
+            `).join("")
+        :
+        `<p class="text-xs text-slate-500">
+            কোনো transaction নেই।
+        </p>`;
+
+    }catch(error){
+
+        console.error(error);
+
+        $("userEarnings").innerHTML =
+        `<p class="text-xs text-red-400">
+            Earnings load হয়নি।
+        </p>`;
+
+        $("userTransactions").innerHTML =
+        `<p class="text-xs text-red-400">
+            Transactions load হয়নি।
+        </p>`;
+
+    }
 
 }
+
+
+/* =========================================================
+   WITHDRAWALS
+========================================================= */
+
+function renderWithdrawals(){
+
+    const rows =
+    Object.entries(withdrawals)
+    .sort(
+        (a,b)=>
+        String(
+            b[1].createdAt || ""
+        ).localeCompare(
+            String(
+                a[1].createdAt || ""
+            )
+        )
+    );
+
+
+    $("withdrawalsBody").innerHTML =
+    rows.map(([id,x])=>`
+
+    <tr
+    class="border-b border-slate-800">
+
+        <td class="p-3">
+            <span class="font-mono text-xs">
+                ${esc(x.uid || "")}
+            </span>
+        </td>
+
+        <td class="p-3">
+            ${esc(x.method || "-")}
+        </td>
+
+        <td class="p-3">
+            ${esc(x.accountNo || x.account || "-")}
+        </td>
+
+        <td class="p-3 text-amber-400">
+            ${number(x.coins)
+            .toLocaleString("bn-BD")}
+        </td>
+
+        <td class="p-3 text-emerald-400">
+            ৳${number(
+                x.bdtAmount ||
+                x.amount
+            ).toFixed(2)}
+        </td>
+
+        <td class="p-3">
+
+            <span
+            class="${
+                x.status === "approved"
+                ? "text-emerald-400"
+                : x.status === "rejected"
+                ? "text-red-400"
+                : "text-orange-400"
+            }">
+
+                ${esc(
+                    x.status ||
+                    "pending"
+                )}
+
+            </span>
+
+        </td>
+
+        <td class="p-3">
+
+            ${
+                x.status === "pending"
+
+                ? `
+
+                <div class="flex gap-1">
+
+                <button
+                onclick="processWithdrawal('${esc(id)}','approved')"
+                class="bg-emerald-600
+                px-2 py-1 rounded-lg
+                text-xs">
+
+                Approve
+
+                </button>
+
+                <button
+                onclick="processWithdrawal('${esc(id)}','rejected')"
+                class="bg-red-600
+                px-2 py-1 rounded-lg
+                text-xs">
+
+                Reject
+
+                </button>
+
+                </div>
+
+                `
+
+                : "—"
+            }
+
+        </td>
+
+    </tr>
+
+    `).join("");
+
+
+    if(!rows.length){
+
+        $("withdrawalsBody").innerHTML = `
+
+        <tr>
+
+            <td colspan="7"
+            class="p-8 text-center
+            text-slate-500">
+
+                কোনো Withdrawal নেই।
+
+            </td>
+
+        </tr>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   PROCESS WITHDRAWAL
+========================================================= */
+
+window.processWithdrawal =
+async function(id,status){
+
+    const withdrawal =
+    withdrawals[id];
+
+    if(!withdrawal)
+        return;
+
+
+    if(
+        !confirm(
+            `Withdrawal ${status} করতে চান?`
+        )
+    )
+        return;
+
+
+    try{
+
+        const data = {
+
+            status,
+
+            processedAt:
+            new Date().toISOString(),
+
+            processedBy:
+            currentAdmin.uid
+
+        };
+
+
+        await update(
+            ref(rtdb,`withdrawals/${id}`),
+            data
+        );
+
+
+        await setDoc(
+            doc(
+                firestore,
+                "withdrawals",
+                id
+            ),
+            {
+                ...withdrawal,
+                ...data,
+                processedAt:
+                serverTimestamp()
+            },
+            {merge:true}
+        );
+
+
+        toast(
+            status === "approved"
+            ? "Withdrawal approved."
+            : "Withdrawal rejected."
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Withdrawal update failed."
+        );
+
+    }
+
+};
+
+
+/* =========================================================
+   NOTICE
+========================================================= */
+
+window.toggleTargetUser =
+function(){
+
+    const value =
+    $("noticeAudience").value;
+
+    $("targetUserBox")
+    .classList.toggle(
+        "hidden",
+        value !== "user"
+    );
+
+};
+
+
+window.sendNotice =
+async function(){
+
+    const audience =
+    $("noticeAudience").value;
+
+    const title =
+    $("noticeTitle").value.trim();
+
+    const message =
+    $("noticeText").value.trim();
+
+    if(!message){
+
+        toast(
+            "Notice message লিখুন।"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const id =
+        "notice_" +
+        Date.now();
+
+
+        const data = {
+
+            id,
+
+            title:
+            title || "বিশেষ বিজ্ঞপ্তি",
+
+            text:
+            message,
+
+            active:
+            true,
+
+            createdAt:
+            new Date().toISOString(),
+
+            createdBy:
+            currentAdmin.uid
+
+        };
+
+
+        if(audience === "all"){
+
+            await set(
+                ref(
+                    rtdb,
+                    `notices/${id}`
+                ),
+                data
+            );
+
+
+            await setDoc(
+                doc(
+                    firestore,
+                    "notices",
+                    id
+                ),
+                {
+                    ...data,
+                    createdAt:
+                    serverTimestamp()
+                }
+            );
+
+
+        }else{
+
+            const uid =
+            $("noticeTargetUid")
+            .value.trim();
+
+            if(!uid){
+
+                toast(
+                    "Target UID দিন।"
+                );
+
+                return;
+
+            }
+
+
+            await set(
+                ref(
+                    rtdb,
+                    `users/${uid}/notifications/${id}`
+                ),
+                data
+            );
+
+
+            await setDoc(
+                doc(
+                    firestore,
+                    "users",
+                    uid,
+                    "notifications",
+                    id
+                ),
+                {
+                    ...data,
+                    createdAt:
+                    serverTimestamp()
+                }
+            );
+
+        }
+
+
+        $("noticeTitle").value = "";
+        $("noticeText").value = "";
+        $("noticeTargetUid").value = "";
+
+
+        toast(
+            "Notice সফলভাবে পাঠানো হয়েছে।"
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Notice পাঠানো যায়নি।"
+        );
+
+    }
+
+};
+
+
+function renderNotices(){
+
+    const rows =
+    Object.entries(notices)
+    .sort(
+        (a,b)=>
+        String(
+            b[1].createdAt || ""
+        ).localeCompare(
+            String(
+                a[1].createdAt || ""
+            )
+        )
+    );
+
+
+    $("noticeList").innerHTML =
+    rows.map(([id,n])=>`
+
+    <div
+    class="bg-slate-950
+    border border-slate-800
+    rounded-xl p-3">
+
+        <div class="flex
+        justify-between gap-2">
+
+            <b>
+                ${esc(n.title)}
+            </b>
+
+            <button
+            onclick="deleteNotice('${esc(id)}')"
+            class="text-red-400 text-xs">
+
+                Delete
+
+            </button>
+
+        </div>
+
+        <p class="text-xs
+        text-slate-400 mt-2">
+
+            ${esc(n.text)}
+
+        </p>
+
+        <p class="text-[10px]
+        text-slate-600 mt-2">
+
+            ${formatDate(n.createdAt)}
+
+        </p>
+
+    </div>
+
+    `).join("");
+
+
+    if(!rows.length){
+
+        $("noticeList").innerHTML =
+        `<p class="text-xs text-slate-500">
+            কোনো notice নেই।
+        </p>`;
+
+    }
+
+}
+
+
+window.deleteNotice =
+async function(id){
+
+    if(
+        !confirm(
+            "এই notice delete করবেন?"
+        )
+    )
+        return;
+
+
+    await remove(
+        ref(rtdb,`notices/${id}`)
+    );
+
+
+    await deleteDoc(
+        doc(
+            firestore,
+            "notices",
+            id
+        )
+    );
+
+
+    toast(
+        "Notice deleted."
+    );
+
+};
+
+
+/* =========================================================
+   TASKS
+========================================================= */
+
+window.saveTask =
+async function(){
+
+    const oldId =
+    $("taskId").value.trim();
+
+    const id =
+    oldId ||
+    "task_" + Date.now();
+
+
+    const data = {
+
+        id,
+
+        title:
+        $("taskTitle").value.trim(),
+
+        description:
+        $("taskDescription").value.trim(),
+
+        coins:
+        number(
+            $("taskCoins").value
+        ),
+
+        dailyLimit:
+        number(
+            $("taskLimit").value
+        ),
+
+        active:
+        $("taskActive").checked,
+
+        updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    if(!data.title){
+
+        toast(
+            "Task Name দিন।"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        await set(
+            ref(rtdb,`tasks/${id}`),
+            data
+        );
+
+
+        await setDoc(
+            doc(
+                firestore,
+                "tasks",
+                id
+            ),
+            {
+                ...data,
+                updatedAt:
+                serverTimestamp()
+            },
+            {merge:true}
+        );
+
+
+        clearTaskForm();
+
+        toast(
+            "Task saved."
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Task save failed."
+        );
+
+    }
+
+};
+
+
+function renderTasks(){
+
+    const list =
+    Object.entries(tasks);
+
+
+    $("taskList").innerHTML =
+    list.map(([id,t])=>`
+
+    <div
+    class="bg-slate-950
+    border border-slate-800
+    rounded-xl p-3">
+
+        <div class="flex
+        justify-between gap-2">
+
+            <div>
+
+                <b>
+                    ${esc(t.title)}
+                </b>
+
+                <p class="text-xs
+                text-slate-400">
+
+                    ${esc(t.description || "")}
+
+                </p>
+
+            </div>
+
+            <span
+            class="text-amber-400
+            font-bold">
+
+                +${number(t.coins)}
+
+            </span>
+
+        </div>
+
+
+        <div class="flex
+        justify-between items-center
+        mt-3">
+
+            <span
+            class="text-[10px] ${
+                t.active
+                ? "text-emerald-400"
+                : "text-red-400"
+            }">
+
+                ${
+                    t.active
+                    ? "ACTIVE"
+                    : "OFF"
+                }
+
+            </span>
+
+
+            <div class="flex gap-1">
+
+                <button
+                onclick="editTask('${esc(id)}')"
+                class="bg-blue-600
+                px-2 py-1
+                rounded-lg text-xs">
+
+                    Edit
+
+                </button>
+
+                <button
+                onclick="deleteTask('${esc(id)}')"
+                class="bg-red-600
+                px-2 py-1
+                rounded-lg text-xs">
+
+                    Delete
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `).join("");
+
+
+    if(!list.length){
+
+        $("taskList").innerHTML =
+        `<p class="text-xs text-slate-500">
+            কোনো task নেই।
+        </p>`;
+
+    }
+
+}
+
+
+window.editTask =
+function(id){
+
+    const t =
+    tasks[id];
+
+    if(!t)
+        return;
+
+
+    $("taskId").value =
+    id;
+
+    $("taskTitle").value =
+    t.title || "";
+
+    $("taskDescription").value =
+    t.description || "";
+
+    $("taskCoins").value =
+    number(t.coins);
+
+    $("taskLimit").value =
+    number(t.dailyLimit);
+
+    $("taskActive").checked =
+    t.active !== false;
+
+
+    showSection("tasks");
+
+};
+
+
+window.deleteTask =
+async function(id){
+
+    if(
+        !confirm(
+            "Task delete করবেন?"
+        )
+    )
+        return;
+
+
+    await remove(
+        ref(rtdb,`tasks/${id}`)
+    );
+
+
+    await deleteDoc(
+        doc(
+            firestore,
+            "tasks",
+            id
+        )
+    );
+
+
+    toast(
+        "Task deleted."
+    );
+
+};
+
+
+window.clearTaskForm =
+function(){
+
+    $("taskId").value = "";
+
+    $("taskTitle").value = "";
+
+    $("taskDescription").value = "";
+
+    $("taskCoins").value = "";
+
+    $("taskLimit").value = "";
+
+    $("taskActive").checked = true;
+
+};
+
+
+/* =========================================================
+   SETTINGS LOAD
+========================================================= */
+
+function loadSettingsUI(){
+
+    const coin =
+    settings.coin || {};
+
+    const daily =
+    settings.dailyCheckin || {};
+
+    const referral =
+    settings.referral || {};
+
+    const withdrawal =
+    settings.withdrawal || {};
+
+
+    $("settingCoinRate").value =
+    coin.coinValue ??
+    settings.coinRate ??
+    0.01;
+
+
+    $("settingMinWithdraw").value =
+    coin.minWithdraw ??
+    settings.minWithdraw ??
+    5000;
+
+
+    $("dailyEnabled").checked =
+    daily.enabled !== false;
+
+    $("dailyCoins").value =
+    daily.coins ??
+    100;
+
+    $("streakBonus").value =
+    daily.streakBonus ??
+    0;
+
+
+    $("referralEnabled").checked =
+    referral.enabled !== false;
+
+    $("referrerReward").value =
+    referral.referrerReward ??
+    50;
+
+    $("referredReward").value =
+    referral.referredReward ??
+    20;
+
+
+    $("withdrawEnabled").checked =
+    withdrawal.enabled !== false;
+
+    $("withdrawMethods").value =
+    Array.isArray(withdrawal.methods)
+    ? withdrawal.methods.join(",")
+    : (
+        withdrawal.methods ||
+        "bKash,Nagad,Rocket"
+    );
+
+}
+
+
+/* =========================================================
+   COIN SETTINGS
+========================================================= */
+
+window.saveCoinSettings =
+async function(){
+
+    const data = {
+
+        coinValue:
+        number(
+            $("settingCoinRate").value
+        ),
+
+        minWithdraw:
+        number(
+            $("settingMinWithdraw").value
+        ),
+
+        updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    await update(
+        ref(rtdb,"settings/coin"),
+        data
+    );
+
+
+    await setDoc(
+        doc(
+            firestore,
+            "settings",
+            "coin"
+        ),
+        {
+            ...data,
+            updatedAt:
+            serverTimestamp()
+        },
+        {merge:true}
+    );
+
+
+    toast(
+        "Coin settings saved."
+    );
+
+};
+
+
+/* =========================================================
+   DAILY CHECKIN
+========================================================= */
+
+window.saveDailySettings =
+async function(){
+
+    const data = {
+
+        enabled:
+        $("dailyEnabled").checked,
+
+        coins:
+        number(
+            $("dailyCoins").value
+        ),
+
+        streakBonus:
+        number(
+            $("streakBonus").value
+        ),
+
+        updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    await update(
+        ref(rtdb,"settings/dailyCheckin"),
+        data
+    );
+
+
+    await setDoc(
+        doc(
+            firestore,
+            "settings",
+            "dailyCheckin"
+        ),
+        {
+            ...data,
+            updatedAt:
+            serverTimestamp()
+        },
+        {merge:true}
+    );
+
+
+    toast(
+        "Daily Check-in settings saved."
+    );
+
+};
+
+
+/* =========================================================
+   REFERRAL
+========================================================= */
+
+window.saveReferralSettings =
+async function(){
+
+    const data = {
+
+        enabled:
+        $("referralEnabled").checked,
+
+        referrerReward:
+        number(
+            $("referrerReward").value
+        ),
+
+        referredReward:
+        number(
+            $("referredReward").value
+        ),
+
+        updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    await update(
+        ref(rtdb,"settings/referral"),
+        data
+    );
+
+
+    await setDoc(
+        doc(
+            firestore,
+            "settings",
+            "referral"
+        ),
+        {
+            ...data,
+            updatedAt:
+            serverTimestamp()
+        },
+        {merge:true}
+    );
+
+
+    toast(
+        "Referral settings saved."
+    );
+
+};
+
+
+/* =========================================================
+   WITHDRAWAL SETTINGS
+========================================================= */
+
+window.saveWithdrawalSettings =
+async function(){
+
+    const methods =
+    $("withdrawMethods")
+    .value
+    .split(",")
+    .map(x=>x.trim())
+    .filter(Boolean);
+
+
+    const data = {
+
+        enabled:
+        $("withdrawEnabled").checked,
+
+        methods,
+
+        updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    await update(
+        ref(rtdb,"settings/withdrawal"),
+        data
+    );
+
+
+    await setDoc(
+        doc(
+            firestore,
+            "settings",
+            "withdrawal"
+        ),
+        {
+            ...data,
+            updatedAt:
+            serverTimestamp()
+        },
+        {merge:true}
+    );
+
+
+    toast(
+        "Withdrawal settings saved."
+    );
+
+};
+
+
+/* =========================================================
+   PASSWORD CHANGE
+========================================================= */
+
+window.changeAdminPassword =
+async function(){
+
+    const current =
+    $("currentPassword").value;
+
+    const newPassword =
+    $("newPassword").value;
+
+    const confirmPassword =
+    $("confirmPassword").value;
+
+
+    if(!current){
+
+        toast(
+            "Current password দিন।"
+        );
+
+        return;
+
+    }
+
+
+    if(newPassword.length < 6){
+
+        toast(
+            "নতুন password কমপক্ষে 6 character হতে হবে।"
+        );
+
+        return;
+
+    }
+
+
+    if(newPassword !== confirmPassword){
+
+        toast(
+            "নতুন password দুইটি একই নয়।"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const credential =
+        EmailAuthProvider.credential(
+            currentAdmin.email,
+            current
+        );
+
+
+        await reauthenticateWithCredential(
+            currentAdmin,
+            credential
+        );
+
+
+        await updatePassword(
+            currentAdmin,
+            newPassword
+        );
+
+
+        $("currentPassword").value = "";
+
+        $("newPassword").value = "";
+
+        $("confirmPassword").value = "";
+
+
+        toast(
+            "Admin password পরিবর্তন হয়েছে।"
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            firebaseError(error)
+        );
+
+    }
+
+};
+
+
+/* =========================================================
+   LOAD ALL EARNINGS
+========================================================= */
+
+window.loadAllEarnings =
+async function(){
+
+    const body =
+    $("earningsBody");
+
+    body.innerHTML =
+    `<tr><td colspan="5"
+    class="p-5 text-center">
+    Loading...
+    </td></tr>`;
+
+
+    const rows = [];
+
+
+    for(
+        const uid of Object.keys(users)
+    ){
+
+        try{
+
+            const snap =
+            await getDocs(
+                collection(
+                    firestore,
+                    "users",
+                    uid,
+                    "earnings"
+                )
+            );
+
+
+            snap.forEach(docSnap=>{
+
+                rows.push({
+
+                    uid,
+
+                    userName:
+                    users[uid]?.name ||
+                    uid,
+
+                    ...docSnap.data()
+
+                });
+
+            });
+
+        }catch(error){
+
+            console.warn(
+                "Earnings error",
+                uid,
+                error
+            );
+
+        }
+
+    }
+
+
+    rows.sort(
+        (a,b)=>
+        String(
+            b.createdAt || ""
+        ).localeCompare(
+            String(
+                a.createdAt || ""
+            )
+        )
+    );
+
+
+    body.innerHTML =
+    rows.map(x=>`
+
+    <tr class="border-b border-slate-800">
+
+        <td class="p-3">
+
+            ${esc(x.userName)}
+
+            <div class="text-[9px]
+            text-slate-500">
+
+                ${esc(x.uid)}
+
+            </div>
+
+        </td>
+
+        <td class="p-3">
+            ${esc(
+                x.taskTitle ||
+                x.taskId ||
+                "-"
+            )}
+        </td>
+
+        <td class="p-3
+        text-amber-400">
+
+            +${number(x.coins)}
+
+        </td>
+
+        <td class="p-3">
+            ${esc(x.type || "-")}
+        </td>
+
+        <td class="p-3
+        text-xs text-slate-400">
+
+            ${formatDate(x.createdAt)}
+
+        </td>
+
+    </tr>
+
+    `).join("");
+
+
+    if(!rows.length){
+
+        body.innerHTML =
+        `<tr><td colspan="5"
+        class="p-6 text-center
+        text-slate-500">
+        কোনো earnings পাওয়া যায়নি।
+        </td></tr>`;
+
+    }
+
+};
+
+
+/* =========================================================
+   LOAD ALL TRANSACTIONS
+========================================================= */
+
+window.loadAllTransactions =
+async function(){
+
+    const body =
+    $("transactionsBody");
+
+    body.innerHTML =
+    `<tr><td colspan="6"
+    class="p-5 text-center">
+    Loading...
+    </td></tr>`;
+
+
+    const rows = [];
+
+
+    for(
+        const uid of Object.keys(users)
+    ){
+
+        try{
+
+            const snap =
+            await getDocs(
+                collection(
+                    firestore,
+                    "users",
+                    uid,
+                    "transactions"
+                )
+            );
+
+
+            snap.forEach(docSnap=>{
+
+                rows.push({
+
+                    uid,
+
+                    userName:
+                    users[uid]?.name ||
+                    uid,
+
+                    ...docSnap.data()
+
+                });
+
+            });
+
+        }catch(error){
+
+            console.warn(
+                "Transaction error",
+                uid,
+                error
+            );
+
+        }
+
+    }
+
+
+    rows.sort(
+        (a,b)=>
+        String(
+            b.createdAt || ""
+        ).localeCompare(
+            String(
+                a.createdAt || ""
+            )
+        )
+    );
+
+
+    body.innerHTML =
+    rows.map(x=>`
+
+    <tr class="border-b border-slate-800">
+
+        <td class="p-3">
+
+            ${esc(x.userName)}
+
+            <div class="text-[9px]
+            text-slate-500">
+
+                ${esc(x.uid)}
+
+            </div>
+
+        </td>
+
+        <td class="p-3">
+            ${esc(x.type || "-")}
+        </td>
+
+        <td class="p-3
+        ${
+            number(x.coins) >= 0
+            ? "text-emerald-400"
+            : "text-red-400"
+        }">
+
+            ${number(x.coins)}
+
+        </td>
+
+        <td class="p-3">
+            ৳${number(x.amount).toFixed(2)}
+        </td>
+
+        <td class="p-3">
+            ${esc(x.note || "-")}
+        </td>
+
+        <td class="p-3
+        text-xs text-slate-400">
+
+            ${formatDate(x.createdAt)}
+
+        </td>
+
+    </tr>
+
+    `).join("");
+
+
+    if(!rows.length){
+
+        body.innerHTML =
+        `<tr><td colspan="6"
+        class="p-6 text-center
+        text-slate-500">
+        কোনো transaction পাওয়া যায়নি।
+        </td></tr>`;
+
+    }
+
+};
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+window.showSection =
+function(section){
+
+    document
+    .querySelectorAll(".adminSection")
+    .forEach(x=>
+        x.classList.add("hidden")
+    );
+
+
+    const target =
+    $("section-" + section);
+
+    if(target)
+        target.classList.remove("hidden");
+
+
+    document
+    .querySelectorAll(".navBtn")
+    .forEach(x=>{
+        x.classList.remove(
+            "bg-emerald-600"
+        );
+
+        x.classList.add(
+            "bg-slate-800"
+        );
+    });
+
+
+    event?.currentTarget
+    ?.classList
+    .remove("bg-slate-800");
+
+    event?.currentTarget
+    ?.classList
+    .add("bg-emerald-600");
+
+
+    if(section === "earnings")
+        loadAllEarnings();
+
+    if(section === "transactions")
+        loadAllTransactions();
+
+};
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+window.addEventListener(
+"beforeunload",
+()=>{
+    if(selectedUserListener)
+        selectedUserListener();
+});
 
 </script>
 
