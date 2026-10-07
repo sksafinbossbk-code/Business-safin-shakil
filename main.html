@@ -4,231 +4,2532 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TakaEarn Admin Panel</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>*{font-family:'Hind Siliguri',sans-serif}body{background:#020617}.glass{background:rgba(15,23,42,.88);border:1px solid #1e293b}.active{background:#059669!important;color:#fff!important}</style>
+
+<style>
+*{
+  font-family:'Hind Siliguri',sans-serif
+}
+
+body{
+  background:#020617
+}
+
+.glass{
+  background:rgba(15,23,42,.90);
+  border:1px solid #1e293b
+}
+
+.active{
+  background:#059669!important;
+  color:#fff!important
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed
+}
+
+::-webkit-scrollbar{
+  width:7px;
+  height:7px
+}
+
+::-webkit-scrollbar-track{
+  background:#020617
+}
+
+::-webkit-scrollbar-thumb{
+  background:#334155;
+  border-radius:10px
+}
+</style>
 </head>
+
 <body class="text-slate-100 min-h-screen">
 
-<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+
+<!-- ==================================================
+     PASSWORD LOGIN
+================================================== -->
+
+<div id="loginScreen"
+     class="min-h-screen flex items-center justify-center p-4">
+
   <div class="glass rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+
     <div class="text-center mb-5">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center text-2xl">⚙️</div>
-      <h1 class="text-2xl font-bold mt-3">TakaEarn Admin</h1>
-      <p class="text-slate-400 text-sm">অ্যাডমিন প্যানেলে প্রবেশ করুন</p>
+
+      <div class="w-14 h-14 mx-auto rounded-2xl
+                  bg-emerald-500 flex items-center
+                  justify-center text-2xl">
+        ⚙️
+      </div>
+
+      <h1 class="text-2xl font-bold mt-3">
+        TakaEarn Admin
+      </h1>
+
+      <p class="text-slate-400 text-sm">
+        Admin Panel
+      </p>
+
     </div>
-    <input id="adminPass" type="password" placeholder="Admin Password" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
-    <button onclick="adminLogin()" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl p-3 font-bold">লগইন</button>
-    <p id="loginError" class="text-red-400 text-xs mt-3 text-center"></p>
+
+
+    <input
+      id="adminPassword"
+      type="password"
+      placeholder="Admin Password"
+      autocomplete="off"
+      class="w-full bg-slate-900 border border-slate-700
+             rounded-xl p-3 outline-none
+             focus:border-emerald-500"
+      onkeydown="if(event.key==='Enter') adminLogin()"
+    >
+
+
+    <button
+      id="loginBtn"
+      onclick="adminLogin()"
+      class="w-full mt-3 bg-emerald-600
+             hover:bg-emerald-500 rounded-xl
+             p-3 font-bold"
+    >
+      প্রবেশ করুন
+    </button>
+
+
+    <p
+      id="loginError"
+      class="text-red-400 text-xs mt-3 text-center"
+    ></p>
+
   </div>
+
 </div>
+
+
+
+<!-- ==================================================
+     ADMIN APP
+================================================== -->
 
 <div id="app" class="hidden">
-<header class="sticky top-0 z-20 bg-slate-950/95 backdrop-blur border-b border-slate-800">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <div><h1 class="font-bold text-xl">TakaEarn Admin</h1><p class="text-xs text-emerald-400">Firebase Realtime Dashboard</p></div>
-    <div class="flex gap-2">
-      <span id="connection" class="text-xs px-3 py-2 rounded-full bg-slate-800 text-slate-400">Connecting...</span>
-      <button onclick="location.reload()" class="px-3 py-2 rounded-lg bg-slate-800 text-xs">Logout</button>
+
+
+<header
+  class="sticky top-0 z-20
+         bg-slate-950/95 backdrop-blur
+         border-b border-slate-800">
+
+  <div
+    class="max-w-7xl mx-auto px-4 py-3
+           flex items-center justify-between">
+
+    <div>
+
+      <h1 class="font-bold text-xl">
+        TakaEarn Admin
+      </h1>
+
+      <p class="text-xs text-emerald-400">
+        Firebase Realtime + Firestore Dashboard
+      </p>
+
     </div>
+
+
+    <div class="flex gap-2 items-center">
+
+      <span
+        id="connection"
+        class="text-xs px-3 py-2 rounded-full
+               bg-slate-800 text-slate-400">
+        Connecting...
+      </span>
+
+
+      <button
+        onclick="adminLogout()"
+        class="px-3 py-2 rounded-lg
+               bg-red-900/60 text-xs">
+        Logout
+      </button>
+
+    </div>
+
   </div>
+
 </header>
 
+
+
 <main class="max-w-7xl mx-auto p-4">
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
-    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">মোট ইউজার</p><b id="statUsers" class="text-2xl">0</b></div>
-    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">মোট কয়েন</p><b id="statCoins" class="text-2xl text-amber-400">0</b></div>
-    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">মোট আয়</p><b id="statEarned" class="text-2xl text-emerald-400">0</b></div>
-    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">Withdrawals</p><b id="statWithdrawals" class="text-2xl text-blue-400">0</b></div>
-    <div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">Pending</p><b id="statPending" class="text-2xl text-orange-400">0</b></div>
+
+
+<!-- ==================================================
+     STATS
+================================================== -->
+
+<div
+  class="grid grid-cols-2 md:grid-cols-6
+         gap-3 mb-5">
+
+
+  <div class="glass rounded-xl p-4">
+
+    <p class="text-xs text-slate-400">
+      মোট ইউজার
+    </p>
+
+    <b
+      id="statUsers"
+      class="text-2xl">
+      0
+    </b>
+
   </div>
 
-  <div class="flex flex-wrap gap-2 mb-5">
-    <button class="nav active px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('dashboard',this)">Dashboard</button>
-    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('users',this)">Users</button>
-    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('withdrawals',this)">Withdrawals</button>
-    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('notices',this)">Notices</button>
-    <button class="nav px-4 py-2 rounded-lg bg-slate-800" onclick="showTab('settings',this)">Settings</button>
+
+  <div class="glass rounded-xl p-4">
+
+    <p class="text-xs text-slate-400">
+      মোট কয়েন
+    </p>
+
+    <b
+      id="statCoins"
+      class="text-2xl text-amber-400">
+      0
+    </b>
+
   </div>
 
-  <section id="dashboard" class="tab">
-    <div class="glass rounded-2xl p-5">
-      <h2 class="text-lg font-bold mb-3">রিয়েল-টাইম স্ট্যাটাস</h2>
-      <p class="text-sm text-slate-400">Firebase Realtime Database-এর <b class="text-white">users</b>, <b class="text-white">withdrawals</b>, <b class="text-white">notices</b> এবং <b class="text-white">settings</b> path থেকে ডাটা লাইভ আপডেট হবে।</p>
-      <div id="lastUpdate" class="text-xs text-slate-500 mt-3">অপেক্ষা করছে...</div>
-    </div>
-  </section>
 
-  <section id="users" class="tab hidden">
-    <div class="glass rounded-2xl p-4">
-      <div class="flex flex-col md:flex-row gap-3 justify-between mb-4">
-        <h2 class="font-bold text-lg">Users</h2>
-        <input id="userSearch" oninput="renderUsers()" placeholder="নাম / email / UID খুঁজুন..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm md:w-80">
-      </div>
-      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-slate-400 border-b border-slate-800">
-      <th class="p-3 text-left">User</th><th class="p-3">UID</th><th class="p-3">Coins</th><th class="p-3">Total Earned</th><th class="p-3">Referrals</th><th class="p-3">Action</th>
-      </tr></thead><tbody id="usersBody"></tbody></table></div>
-    </div>
-  </section>
+  <div class="glass rounded-xl p-4">
 
-  <section id="withdrawals" class="tab hidden">
-    <div class="glass rounded-2xl p-4">
-      <h2 class="font-bold text-lg mb-4">Withdrawal Requests</h2>
-      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-slate-400 border-b border-slate-800">
-      <th class="p-3">ID</th><th class="p-3">User</th><th class="p-3">Method</th><th class="p-3">Account</th><th class="p-3">Coins</th><th class="p-3">BDT</th><th class="p-3">Status</th><th class="p-3">Action</th>
-      </tr></thead><tbody id="withdrawalsBody"></tbody></table></div>
-    </div>
-  </section>
+    <p class="text-xs text-slate-400">
+      মোট আয়
+    </p>
 
-  <section id="notices" class="tab hidden">
-    <div class="glass rounded-2xl p-5 max-w-2xl">
-      <h2 class="font-bold text-lg mb-4">Notice</h2>
-      <textarea id="noticeText" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3" placeholder="ইউজার অ্যাপে দেখানোর বিজ্ঞপ্তি..."></textarea>
-      <button onclick="saveNotice()" class="mt-3 bg-emerald-600 px-5 py-2 rounded-xl font-bold">Save Notice</button>
-      <p id="noticeCurrent" class="text-xs text-slate-400 mt-4"></p>
-    </div>
-  </section>
+    <b
+      id="statEarned"
+      class="text-2xl text-emerald-400">
+      0
+    </b>
 
-  <section id="settings" class="tab hidden">
-    <div class="glass rounded-2xl p-5 max-w-2xl">
-      <h2 class="font-bold text-lg mb-4">App Settings</h2>
-      <div class="grid gap-3">
-        <label class="text-sm">Coin to BDT rate<input id="coinRate" type="number" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"></label>
-        <label class="text-sm">Daily check-in coins<input id="dailyCoins" type="number" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"></label>
-        <label class="text-sm">Minimum withdrawal coins<input id="minWithdraw" type="number" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-3"></label>
-      </div>
-      <button onclick="saveSettings()" class="mt-4 bg-emerald-600 px-5 py-2 rounded-xl font-bold">Save Settings</button>
-    </div>
-  </section>
-</main>
+  </div>
+
+
+  <div class="glass rounded-xl p-4">
+
+    <p class="text-xs text-slate-400">
+      Withdrawals
+    </p>
+
+    <b
+      id="statWithdrawals"
+      class="text-2xl text-blue-400">
+      0
+    </b>
+
+  </div>
+
+
+  <div class="glass rounded-xl p-4">
+
+    <p class="text-xs text-slate-400">
+      Pending
+    </p>
+
+    <b
+      id="statPending"
+      class="text-2xl text-orange-400">
+      0
+    </b>
+
+  </div>
+
+
+  <div class="glass rounded-xl p-4">
+
+    <p class="text-xs text-slate-400">
+      Firestore Users
+    </p>
+
+    <b
+      id="statFirestoreUsers"
+      class="text-2xl text-purple-400">
+      0
+    </b>
+
+  </div>
+
 </div>
 
+
+
+<!-- ==================================================
+     NAVIGATION
+================================================== -->
+
+<div class="flex flex-wrap gap-2 mb-5">
+
+
+  <button
+    class="nav active px-4 py-2 rounded-lg bg-slate-800"
+    onclick="showTab('dashboard',this)">
+    Dashboard
+  </button>
+
+
+  <button
+    class="nav px-4 py-2 rounded-lg bg-slate-800"
+    onclick="showTab('users',this)">
+    Users
+  </button>
+
+
+  <button
+    class="nav px-4 py-2 rounded-lg bg-slate-800"
+    onclick="showTab('withdrawals',this)">
+    Withdrawals
+  </button>
+
+
+  <button
+    class="nav px-4 py-2 rounded-lg bg-slate-800"
+    onclick="showTab('notices',this)">
+    Notices
+  </button>
+
+
+  <button
+    class="nav px-4 py-2 rounded-lg bg-slate-800"
+    onclick="showTab('settings',this)">
+    Settings
+  </button>
+
+
+  <button
+    class="nav px-4 py-2 rounded-lg bg-slate-800"
+    onclick="showTab('security',this)">
+    Security
+  </button>
+
+</div>
+
+
+
+<!-- ==================================================
+     DASHBOARD
+================================================== -->
+
+<section id="dashboard" class="tab">
+
+  <div class="glass rounded-2xl p-5">
+
+    <h2 class="text-lg font-bold mb-3">
+      Firebase Status
+    </h2>
+
+
+    <div class="grid md:grid-cols-2 gap-3">
+
+
+      <div class="bg-slate-900 rounded-xl p-4">
+
+        <p class="text-sm text-slate-400">
+          Realtime Database
+        </p>
+
+        <p
+          id="rtdbStatus"
+          class="text-emerald-400 font-bold mt-1">
+          Waiting...
+        </p>
+
+      </div>
+
+
+      <div class="bg-slate-900 rounded-xl p-4">
+
+        <p class="text-sm text-slate-400">
+          Cloud Firestore
+        </p>
+
+        <p
+          id="firestoreStatus"
+          class="text-purple-400 font-bold mt-1">
+          Waiting...
+        </p>
+
+      </div>
+
+
+    </div>
+
+
+    <div
+      id="lastUpdate"
+      class="text-xs text-slate-500 mt-4">
+      অপেক্ষা করছে...
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     USERS
+================================================== -->
+
+<section id="users" class="tab hidden">
+
+  <div class="glass rounded-2xl p-4">
+
+
+    <div
+      class="flex flex-col md:flex-row
+             gap-3 justify-between mb-4">
+
+
+      <h2 class="font-bold text-lg">
+        Users
+      </h2>
+
+
+      <input
+        id="userSearch"
+        oninput="renderUsers()"
+        placeholder="নাম / email / UID খুঁজুন..."
+        class="bg-slate-900 border border-slate-700
+               rounded-xl px-3 py-2 text-sm md:w-80"
+      >
+
+    </div>
+
+
+    <div class="overflow-x-auto">
+
+      <table class="w-full text-sm">
+
+        <thead>
+
+          <tr
+            class="text-slate-400
+                   border-b border-slate-800">
+
+            <th class="p-3 text-left">
+              User
+            </th>
+
+            <th class="p-3">
+              UID
+            </th>
+
+            <th class="p-3">
+              Coins
+            </th>
+
+            <th class="p-3">
+              Total Earned
+            </th>
+
+            <th class="p-3">
+              Referrals
+            </th>
+
+            <th class="p-3">
+              Action
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="usersBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     WITHDRAWALS
+================================================== -->
+
+<section id="withdrawals" class="tab hidden">
+
+  <div class="glass rounded-2xl p-4">
+
+    <h2 class="font-bold text-lg mb-4">
+      Withdrawal Requests
+    </h2>
+
+
+    <div class="overflow-x-auto">
+
+      <table class="w-full text-sm">
+
+        <thead>
+
+          <tr
+            class="text-slate-400
+                   border-b border-slate-800">
+
+            <th class="p-3">
+              ID
+            </th>
+
+            <th class="p-3">
+              User
+            </th>
+
+            <th class="p-3">
+              Method
+            </th>
+
+            <th class="p-3">
+              Account
+            </th>
+
+            <th class="p-3">
+              Coins
+            </th>
+
+            <th class="p-3">
+              BDT
+            </th>
+
+            <th class="p-3">
+              Status
+            </th>
+
+            <th class="p-3">
+              Action
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="withdrawalsBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     NOTICES
+================================================== -->
+
+<section id="notices" class="tab hidden">
+
+  <div
+    class="glass rounded-2xl p-5 max-w-2xl">
+
+    <h2 class="font-bold text-lg mb-4">
+      Notice
+    </h2>
+
+
+    <textarea
+      id="noticeText"
+      rows="4"
+      class="w-full bg-slate-900
+             border border-slate-700
+             rounded-xl p-3"
+      placeholder="ইউজার অ্যাপে দেখানোর বিজ্ঞপ্তি..."
+    ></textarea>
+
+
+    <button
+      onclick="saveNotice()"
+      class="mt-3 bg-emerald-600
+             px-5 py-2 rounded-xl font-bold">
+      Save Notice
+    </button>
+
+
+    <p
+      id="noticeCurrent"
+      class="text-xs text-slate-400 mt-4">
+    </p>
+
+  </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     SETTINGS
+================================================== -->
+
+<section id="settings" class="tab hidden">
+
+  <div
+    class="glass rounded-2xl p-5 max-w-2xl">
+
+    <h2 class="font-bold text-lg mb-4">
+      App Settings
+    </h2>
+
+
+    <div class="grid gap-3">
+
+
+      <label class="text-sm">
+
+        Coin to BDT rate
+
+        <input
+          id="coinRate"
+          type="number"
+          class="mt-1 w-full bg-slate-900
+                 border border-slate-700
+                 rounded-xl p-3"
+        >
+
+      </label>
+
+
+      <label class="text-sm">
+
+        Daily check-in coins
+
+        <input
+          id="dailyCoins"
+          type="number"
+          class="mt-1 w-full bg-slate-900
+                 border border-slate-700
+                 rounded-xl p-3"
+        >
+
+      </label>
+
+
+      <label class="text-sm">
+
+        Minimum withdrawal coins
+
+        <input
+          id="minWithdraw"
+          type="number"
+          class="mt-1 w-full bg-slate-900
+                 border border-slate-700
+                 rounded-xl p-3"
+        >
+
+      </label>
+
+
+    </div>
+
+
+    <button
+      onclick="saveSettings()"
+      class="mt-4 bg-emerald-600
+             px-5 py-2 rounded-xl font-bold">
+      Save Settings
+    </button>
+
+  </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     SECURITY / PASSWORD CHANGE
+================================================== -->
+
+<section id="security" class="tab hidden">
+
+  <div
+    class="glass rounded-2xl p-5 max-w-2xl">
+
+    <h2 class="font-bold text-lg mb-2">
+      🔐 Admin Security
+    </h2>
+
+    <p class="text-sm text-slate-400 mb-5">
+      এখান থেকে Admin Panel-এর password পরিবর্তন করতে পারবে।
+    </p>
+
+
+    <div class="grid gap-3">
+
+
+      <label class="text-sm">
+
+        বর্তমান Password
+
+        <input
+          id="currentPassword"
+          type="password"
+          autocomplete="off"
+          class="mt-1 w-full bg-slate-900
+                 border border-slate-700
+                 rounded-xl p-3"
+        >
+
+      </label>
+
+
+      <label class="text-sm">
+
+        নতুন Password
+
+        <input
+          id="newPassword"
+          type="password"
+          autocomplete="off"
+          class="mt-1 w-full bg-slate-900
+                 border border-slate-700
+                 rounded-xl p-3"
+        >
+
+      </label>
+
+
+      <label class="text-sm">
+
+        নতুন Password আবার লিখুন
+
+        <input
+          id="confirmPassword"
+          type="password"
+          autocomplete="off"
+          class="mt-1 w-full bg-slate-900
+                 border border-slate-700
+                 rounded-xl p-3"
+        >
+
+      </label>
+
+
+    </div>
+
+
+    <button
+      onclick="changeAdminPassword()"
+      class="mt-4 bg-emerald-600
+             hover:bg-emerald-500
+             px-5 py-2 rounded-xl font-bold">
+      Password Change
+    </button>
+
+
+    <p
+      id="passwordMessage"
+      class="text-sm mt-4">
+    </p>
+
+
+  </div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+
+<!-- ==================================================
+     FIREBASE
+================================================== -->
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+
+/* ==================================================
+   FIREBASE IMPORT
+================================================== */
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  set
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+
+import {
+  getFirestore,
+  collection,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+
+/* ==================================================
+   FIREBASE CONFIG
+================================================== */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
-  authDomain: "erning-344b8.firebaseapp.com",
-  databaseURL: "https://erning-344b8-default-rtdb.firebaseio.com",
-  projectId: "erning-344b8",
-  storageBucket: "erning-344b8.firebasestorage.app",
-  messagingSenderId: "69804884240",
-  appId: "1:69804884240:web:2e2ea56642c937b15ae595",
-  measurementId: "G-1JG8GHJF7Z"
+
+  apiKey:
+    "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
+
+  authDomain:
+    "erning-344b8.firebaseapp.com",
+
+  databaseURL:
+    "https://erning-344b8-default-rtdb.firebaseio.com",
+
+  projectId:
+    "erning-344b8",
+
+  storageBucket:
+    "erning-344b8.firebasestorage.app",
+
+  messagingSenderId:
+    "69804884240",
+
+  appId:
+    "1:69804884240:web:2e2ea56642c937b15ae595",
+
+  measurementId:
+    "G-1JG8GHJF7Z"
+
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
-let users = {}, withdrawals = {}, notices = {}, settings = {};
 
-window.adminLogin = function(){
-  const pass = document.getElementById('adminPass').value;
-  if(pass === 'Safin@098'){
-    sessionStorage.setItem('takaearn_admin','1');
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    startFirebase();
-  } else document.getElementById('loginError').textContent='ভুল Admin Password';
-};
+/* ==================================================
+   INITIALIZE
+================================================== */
 
-if(sessionStorage.getItem('takaearn_admin')==='1'){
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-  startFirebase();
+const app =
+  initializeApp(firebaseConfig);
+
+
+const db =
+  getDatabase(app);
+
+
+const firestore =
+  getFirestore(app);
+
+
+
+/* ==================================================
+   DEFAULT ADMIN PASSWORD
+================================================== */
+
+const DEFAULT_ADMIN_PASSWORD =
+  "Safin@098";
+
+
+/*
+  Password localStorage-এ রাখা হবে।
+
+  প্রথমবার:
+  Safin@098
+
+  পরে Security tab থেকে পরিবর্তন করলে
+  নতুন password ব্যবহার হবে।
+*/
+
+function getAdminPassword(){
+
+  return localStorage.getItem(
+    "takaearn_admin_password"
+  ) || DEFAULT_ADMIN_PASSWORD;
+
 }
 
-function startFirebase(){
-  onValue(ref(db,'.'), snap=>{
-    const root=snap.val()||{};
-    users=root.users||{};
-    withdrawals=root.withdrawals||{};
-    notices=root.notices||{};
-    settings=root.settings||{};
-    document.getElementById('connection').textContent='● Firebase Connected';
-    document.getElementById('connection').className='text-xs px-3 py-2 rounded-full bg-emerald-900/50 text-emerald-400';
-    renderAll();
-  },err=>{
-    document.getElementById('connection').textContent='Firebase Error';
-    document.getElementById('connection').className='text-xs px-3 py-2 rounded-full bg-red-900/50 text-red-400';
-    console.error(err);
+
+
+/* ==================================================
+   DATA
+================================================== */
+
+let users = {};
+
+let firestoreUsers = {};
+
+let withdrawals = {};
+
+let firestoreWithdrawals = {};
+
+let notices = {};
+
+let settings = {};
+
+let firebaseStarted = false;
+
+
+
+/* ==================================================
+   PASSWORD LOGIN
+================================================== */
+
+window.adminLogin =
+function(){
+
+  const password =
+    document
+      .getElementById("adminPassword")
+      .value;
+
+
+  const error =
+    document
+      .getElementById("loginError");
+
+
+  const btn =
+    document
+      .getElementById("loginBtn");
+
+
+  error.textContent = "";
+
+
+  if(!password){
+
+    error.textContent =
+      "Password দিন";
+
+    return;
+
+  }
+
+
+  btn.disabled = true;
+
+  btn.textContent =
+    "Checking...";
+
+
+  setTimeout(() => {
+
+    if(
+      password ===
+      getAdminPassword()
+    ){
+
+      sessionStorage.setItem(
+        "takaearn_admin",
+        "1"
+      );
+
+
+      document
+        .getElementById("adminPassword")
+        .value = "";
+
+
+      showAdmin();
+
+    }else{
+
+      error.textContent =
+        "ভুল Admin Password!";
+
+    }
+
+
+    btn.disabled = false;
+
+    btn.textContent =
+      "প্রবেশ করুন";
+
+  },300);
+
+};
+
+
+
+/* ==================================================
+   AUTO LOGIN
+================================================== */
+
+if(
+  sessionStorage.getItem(
+    "takaearn_admin"
+  ) === "1"
+){
+
+  showAdmin();
+
+}else{
+
+  showLogin();
+
+}
+
+
+
+/* ==================================================
+   SHOW LOGIN
+================================================== */
+
+function showLogin(){
+
+  document
+    .getElementById("loginScreen")
+    .classList.remove("hidden");
+
+
+  document
+    .getElementById("app")
+    .classList.add("hidden");
+
+}
+
+
+
+/* ==================================================
+   SHOW ADMIN
+================================================== */
+
+function showAdmin(){
+
+  document
+    .getElementById("loginScreen")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("app")
+    .classList.remove("hidden");
+
+
+  if(!firebaseStarted){
+
+    firebaseStarted = true;
+
+    startRealtimeDatabase();
+
+    startFirestore();
+
+  }
+
+}
+
+
+
+/* ==================================================
+   LOGOUT
+================================================== */
+
+window.adminLogout =
+function(){
+
+  sessionStorage.removeItem(
+    "takaearn_admin"
+  );
+
+
+  location.reload();
+
+};
+
+
+
+/* ==================================================
+   CHANGE PASSWORD
+================================================== */
+
+window.changeAdminPassword =
+function(){
+
+  const current =
+    document
+      .getElementById("currentPassword")
+      .value;
+
+
+  const newPassword =
+    document
+      .getElementById("newPassword")
+      .value;
+
+
+  const confirmPassword =
+    document
+      .getElementById("confirmPassword")
+      .value;
+
+
+  const message =
+    document
+      .getElementById("passwordMessage");
+
+
+  message.textContent = "";
+
+
+  if(
+    current !==
+    getAdminPassword()
+  ){
+
+    message.textContent =
+      "বর্তমান password সঠিক নয়।";
+
+    message.className =
+      "text-sm mt-4 text-red-400";
+
+    return;
+
+  }
+
+
+  if(
+    newPassword.length < 6
+  ){
+
+    message.textContent =
+      "নতুন password কমপক্ষে ৬ অক্ষরের হতে হবে।";
+
+    message.className =
+      "text-sm mt-4 text-red-400";
+
+    return;
+
+  }
+
+
+  if(
+    newPassword !==
+    confirmPassword
+  ){
+
+    message.textContent =
+      "নতুন password দুইবার একই নয়।";
+
+    message.className =
+      "text-sm mt-4 text-red-400";
+
+    return;
+
+  }
+
+
+  localStorage.setItem(
+    "takaearn_admin_password",
+    newPassword
+  );
+
+
+  document
+    .getElementById("currentPassword")
+    .value = "";
+
+
+  document
+    .getElementById("newPassword")
+    .value = "";
+
+
+  document
+    .getElementById("confirmPassword")
+    .value = "";
+
+
+  message.textContent =
+    "✅ Password সফলভাবে পরিবর্তন হয়েছে।";
+
+
+  message.className =
+    "text-sm mt-4 text-emerald-400";
+
+};
+
+
+
+/* ==================================================
+   REALTIME DATABASE
+================================================== */
+
+function startRealtimeDatabase(){
+
+
+  document
+    .getElementById("rtdbStatus")
+    .textContent =
+      "Connecting...";
+
+
+
+  /* USERS */
+
+  onValue(
+    ref(db,"users"),
+
+    snapshot => {
+
+      users =
+        snapshot.val() || {};
+
+
+      document
+        .getElementById("rtdbStatus")
+        .textContent =
+          "● Connected";
+
+
+      document
+        .getElementById("connection")
+        .textContent =
+          "● Firebase Connected";
+
+
+      document
+        .getElementById("connection")
+        .className =
+          "text-xs px-3 py-2 rounded-full bg-emerald-900/50 text-emerald-400";
+
+
+      renderAll();
+
+    },
+
+    error => {
+
+      console.error(
+        "RTDB users error:",
+        error
+      );
+
+
+      document
+        .getElementById("rtdbStatus")
+        .textContent =
+          "RTDB Error";
+
+    }
+
+  );
+
+
+
+  /* WITHDRAWALS */
+
+  onValue(
+    ref(db,"withdrawals"),
+
+    snapshot => {
+
+      withdrawals =
+        snapshot.val() || {};
+
+
+      renderAll();
+
+    },
+
+    error => {
+
+      console.error(
+        "RTDB withdrawals error:",
+        error
+      );
+
+    }
+
+  );
+
+
+
+  /* NOTICES */
+
+  onValue(
+    ref(db,"notices"),
+
+    snapshot => {
+
+      notices =
+        snapshot.val() || {};
+
+
+      renderAll();
+
+    }
+
+  );
+
+
+
+  /* SETTINGS */
+
+  onValue(
+    ref(db,"settings"),
+
+    snapshot => {
+
+      settings =
+        snapshot.val() || {};
+
+
+      renderAll();
+
+    }
+
+  );
+
+}
+
+
+
+/* ==================================================
+   FIRESTORE
+================================================== */
+
+function startFirestore(){
+
+
+  document
+    .getElementById("firestoreStatus")
+    .textContent =
+      "Connecting...";
+
+
+
+  /* USERS */
+
+  onSnapshot(
+    collection(
+      firestore,
+      "users"
+    ),
+
+    snapshot => {
+
+      firestoreUsers = {};
+
+
+      snapshot.forEach(
+        docSnap => {
+
+          firestoreUsers[
+            docSnap.id
+          ] =
+            docSnap.data();
+
+        }
+      );
+
+
+      document
+        .getElementById("firestoreStatus")
+        .textContent =
+          "● Connected";
+
+
+      document
+        .getElementById("statFirestoreUsers")
+        .textContent =
+          Object.keys(
+            firestoreUsers
+          )
+          .length
+          .toLocaleString();
+
+
+      mergeFirestoreUsers();
+
+    },
+
+    error => {
+
+      console.error(
+        "Firestore users error:",
+        error
+      );
+
+
+      document
+        .getElementById("firestoreStatus")
+        .textContent =
+          "Firestore Error";
+
+    }
+
+  );
+
+
+
+  /* WITHDRAWALS */
+
+  onSnapshot(
+    collection(
+      firestore,
+      "withdrawals"
+    ),
+
+    snapshot => {
+
+      firestoreWithdrawals = {};
+
+
+      snapshot.forEach(
+        docSnap => {
+
+          firestoreWithdrawals[
+            docSnap.id
+          ] =
+            docSnap.data();
+
+        }
+      );
+
+
+      mergeFirestoreWithdrawals();
+
+    },
+
+    error => {
+
+      console.error(
+        "Firestore withdrawals error:",
+        error
+      );
+
+    }
+
+  );
+
+}
+
+
+
+/* ==================================================
+   MERGE FIRESTORE USERS
+================================================== */
+
+function mergeFirestoreUsers(){
+
+  Object.keys(
+    firestoreUsers
+  )
+  .forEach(uid => {
+
+    if(!users[uid]){
+
+      users[uid] =
+        firestoreUsers[uid];
+
+    }
+
   });
+
+
+  renderAll();
+
 }
+
+
+
+/* ==================================================
+   MERGE FIRESTORE WITHDRAWALS
+================================================== */
+
+function mergeFirestoreWithdrawals(){
+
+  Object.keys(
+    firestoreWithdrawals
+  )
+  .forEach(id => {
+
+    if(!withdrawals[id]){
+
+      withdrawals[id] =
+        firestoreWithdrawals[id];
+
+    }
+
+  });
+
+
+  renderAll();
+
+}
+
+
+
+/* ==================================================
+   RENDER ALL
+================================================== */
 
 function renderAll(){
-  const ul=Object.values(users), wl=Object.values(withdrawals);
-  document.getElementById('statUsers').textContent=ul.length.toLocaleString();
-  document.getElementById('statCoins').textContent=ul.reduce((s,u)=>s+(+u.coins||0),0).toLocaleString();
-  document.getElementById('statEarned').textContent=ul.reduce((s,u)=>s+(+u.totalEarned||0),0).toLocaleString();
-  document.getElementById('statWithdrawals').textContent=wl.length.toLocaleString();
-  document.getElementById('statPending').textContent=wl.filter(x=>(x.status||'pending')==='pending').length.toLocaleString();
-  document.getElementById('lastUpdate').textContent='সর্বশেষ আপডেট: '+new Date().toLocaleString('bn-BD');
-  renderUsers(); renderWithdrawals();
-  const n=notices.current || notices.text || '';
-  document.getElementById('noticeCurrent').textContent=n?'বর্তমান: '+n:'কোনো notice নেই';
-  document.getElementById('noticeText').value=n;
-  document.getElementById('coinRate').value=settings.coinRate??100;
-  document.getElementById('dailyCoins').value=settings.dailyCoins??100;
-  document.getElementById('minWithdraw').value=settings.minWithdraw??5000;
+
+  const userList =
+    Object.values(users);
+
+
+  const withdrawalList =
+    Object.values(withdrawals);
+
+
+
+  /* USERS */
+
+  document
+    .getElementById("statUsers")
+    .textContent =
+      userList
+      .length
+      .toLocaleString();
+
+
+
+  /* COINS */
+
+  const totalCoins =
+    userList.reduce(
+      (sum,user) =>
+        sum +
+        (
+          Number(user.coins) || 0
+        ),
+      0
+    );
+
+
+  document
+    .getElementById("statCoins")
+    .textContent =
+      totalCoins
+      .toLocaleString();
+
+
+
+  /* EARNED */
+
+  const totalEarned =
+    userList.reduce(
+      (sum,user) =>
+        sum +
+        (
+          Number(
+            user.totalEarned
+          ) || 0
+        ),
+      0
+    );
+
+
+  document
+    .getElementById("statEarned")
+    .textContent =
+      totalEarned
+      .toLocaleString();
+
+
+
+  /* WITHDRAWALS */
+
+  document
+    .getElementById("statWithdrawals")
+    .textContent =
+      withdrawalList
+      .length
+      .toLocaleString();
+
+
+
+  /* PENDING */
+
+  const pending =
+    withdrawalList.filter(
+      item =>
+        (
+          item.status ||
+          "pending"
+        ) === "pending"
+    )
+    .length;
+
+
+  document
+    .getElementById("statPending")
+    .textContent =
+      pending
+      .toLocaleString();
+
+
+
+  /* LAST UPDATE */
+
+  document
+    .getElementById("lastUpdate")
+    .textContent =
+      "সর্বশেষ আপডেট: " +
+      new Date()
+        .toLocaleString("bn-BD");
+
+
+
+  renderUsers();
+
+  renderWithdrawals();
+
+
+
+  /* NOTICE */
+
+  const notice =
+    notices.current ||
+    notices.text ||
+    "";
+
+
+  document
+    .getElementById("noticeCurrent")
+    .textContent =
+      notice
+      ? "বর্তমান: " + notice
+      : "কোনো notice নেই";
+
+
+  document
+    .getElementById("noticeText")
+    .value =
+      notice;
+
+
+
+  /* SETTINGS */
+
+  document
+    .getElementById("coinRate")
+    .value =
+      settings.coinRate ??
+      100;
+
+
+  document
+    .getElementById("dailyCoins")
+    .value =
+      settings.dailyCoins ??
+      100;
+
+
+  document
+    .getElementById("minWithdraw")
+    .value =
+      settings.minWithdraw ??
+      5000;
+
 }
 
-window.renderUsers=function(){
-  const q=(document.getElementById('userSearch').value||'').toLowerCase();
-  const list=Object.entries(users).filter(([id,u])=>
-    !q || id.toLowerCase().includes(q) || String(u.name||'').toLowerCase().includes(q) || String(u.email||'').toLowerCase().includes(q)
-  );
-  document.getElementById('usersBody').innerHTML=list.map(([id,u])=>`
-    <tr class="border-b border-slate-800">
-      <td class="p-3"><b>${esc(u.name||'ব্যবহারকারী')}</b><div class="text-xs text-slate-500">${esc(u.email||'')}</div></td>
-      <td class="p-3 text-xs text-slate-400">${esc(id)}</td>
-      <td class="p-3 text-amber-400 font-bold">${(+u.coins||0).toLocaleString()}</td>
-      <td class="p-3 text-emerald-400">${(+u.totalEarned||0).toLocaleString()}</td>
-      <td class="p-3">${u.referralCount||0}</td>
-      <td class="p-3"><button onclick="editUser('${encodeURIComponent(id)}')" class="bg-slate-700 px-3 py-1.5 rounded-lg text-xs">Edit</button></td>
-    </tr>`).join('') || `<tr><td colspan="6" class="p-6 text-center text-slate-500">কোনো Firebase user পাওয়া যায়নি</td></tr>`;
+
+
+/* ==================================================
+   USERS TABLE
+================================================== */
+
+window.renderUsers =
+function(){
+
+  const input =
+    document
+      .getElementById("userSearch");
+
+
+  const q =
+    (
+      input?.value ||
+      ""
+    )
+    .toLowerCase();
+
+
+
+  const list =
+    Object.entries(users)
+    .filter(
+      ([uid,user]) => {
+
+        return !q ||
+
+          uid
+            .toLowerCase()
+            .includes(q) ||
+
+          String(
+            user.name || ""
+          )
+          .toLowerCase()
+          .includes(q) ||
+
+          String(
+            user.email || ""
+          )
+          .toLowerCase()
+          .includes(q);
+
+      }
+    );
+
+
+
+  document
+    .getElementById("usersBody")
+    .innerHTML =
+
+      list.map(
+        ([uid,user]) => `
+
+        <tr
+          class="border-b border-slate-800">
+
+          <td class="p-3">
+
+            <b>
+              ${esc(
+                user.name ||
+                "ব্যবহারকারী"
+              )}
+            </b>
+
+            <div
+              class="text-xs text-slate-500">
+
+              ${esc(
+                user.email || ""
+              )}
+
+            </div>
+
+          </td>
+
+
+          <td
+            class="p-3 text-xs
+                   text-slate-400">
+
+            ${esc(uid)}
+
+          </td>
+
+
+          <td
+            class="p-3 text-amber-400
+                   font-bold">
+
+            ${
+              (
+                Number(user.coins) ||
+                0
+              )
+              .toLocaleString()
+            }
+
+          </td>
+
+
+          <td
+            class="p-3 text-emerald-400">
+
+            ${
+              (
+                Number(
+                  user.totalEarned
+                ) ||
+                0
+              )
+              .toLocaleString()
+            }
+
+          </td>
+
+
+          <td class="p-3">
+
+            ${
+              Number(
+                user.referralCount
+              ) || 0
+            }
+
+          </td>
+
+
+          <td class="p-3">
+
+            <button
+              onclick="editUser('${encodeURIComponent(uid)}')"
+              class="bg-slate-700
+                     px-3 py-1.5
+                     rounded-lg text-xs">
+
+              Edit
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        `
+      )
+      .join("")
+
+      ||
+
+      `
+      <tr>
+
+        <td
+          colspan="6"
+          class="p-6 text-center
+                 text-slate-500">
+
+          কোনো Firebase user পাওয়া যায়নি
+
+        </td>
+
+      </tr>
+      `;
+
 };
 
-window.editUser=function(encoded){
-  const id=decodeURIComponent(encoded),u=users[id]; if(!u)return;
-  const coins=prompt('নতুন Coins:',u.coins??0); if(coins===null)return;
-  const earned=prompt('নতুন Total Earned:',u.totalEarned??0); if(earned===null)return;
-  update(ref(db,'users/'+id),{coins:Number(coins)||0,totalEarned:Number(earned)||0,updatedAt:new Date().toISOString()})
-    .then(()=>alert('User updated')).catch(e=>alert('Update failed: '+e.message));
+
+
+/* ==================================================
+   EDIT USER
+================================================== */
+
+window.editUser =
+async function(encoded){
+
+  const uid =
+    decodeURIComponent(encoded);
+
+
+  const user =
+    users[uid];
+
+
+  if(!user)
+    return;
+
+
+
+  const coins =
+    prompt(
+      "নতুন Coins:",
+      user.coins ?? 0
+    );
+
+
+  if(coins === null)
+    return;
+
+
+
+  const earned =
+    prompt(
+      "নতুন Total Earned:",
+      user.totalEarned ?? 0
+    );
+
+
+  if(earned === null)
+    return;
+
+
+
+  const newCoins =
+    Number(coins);
+
+
+  const newEarned =
+    Number(earned);
+
+
+
+  if(
+    !Number.isFinite(newCoins) ||
+    !Number.isFinite(newEarned)
+  ){
+
+    alert(
+      "সঠিক সংখ্যা দিন"
+    );
+
+    return;
+
+  }
+
+
+
+  try{
+
+
+    /* RTDB */
+
+    await update(
+      ref(
+        db,
+        "users/" + uid
+      ),
+      {
+
+        coins:
+          newCoins,
+
+        totalEarned:
+          newEarned,
+
+        updatedAt:
+          new Date().toISOString()
+
+      }
+    );
+
+
+
+    /* FIRESTORE */
+
+    try{
+
+      await updateDoc(
+        doc(
+          firestore,
+          "users",
+          uid
+        ),
+        {
+
+          coins:
+            newCoins,
+
+          totalEarned:
+            newEarned,
+
+          updatedAt:
+            new Date().toISOString()
+
+        }
+      );
+
+    }catch(
+      firestoreError
+    ){
+
+      console.warn(
+        "Firestore update skipped:",
+        firestoreError
+      );
+
+    }
+
+
+
+    alert(
+      "User updated successfully"
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    alert(
+      "Update failed: " +
+      error.message
+    );
+
+  }
+
 };
+
+
+
+/* ==================================================
+   WITHDRAWALS
+================================================== */
 
 function renderWithdrawals(){
-  document.getElementById('withdrawalsBody').innerHTML=Object.entries(withdrawals).sort((a,b)=>
-    String(b[1].createdAt||'').localeCompare(String(a[1].createdAt||''))).map(([id,w])=>`
-    <tr class="border-b border-slate-800">
-      <td class="p-3 text-xs">${esc(id)}</td><td class="p-3">${esc(w.userName||w.uid||'')}</td>
-      <td class="p-3">${esc(w.method||'')}</td><td class="p-3">${esc(w.accountNo||'')}</td>
-      <td class="p-3 text-amber-400">${(+w.coins||0).toLocaleString()}</td><td class="p-3">৳${esc(w.bdtAmount||'0')}</td>
-      <td class="p-3"><span class="px-2 py-1 rounded-full text-xs ${w.status==='approved'?'bg-emerald-900 text-emerald-300':w.status==='rejected'?'bg-red-900 text-red-300':'bg-orange-900 text-orange-300'}">${esc(w.status||'pending')}</span></td>
-      <td class="p-3 flex gap-1"><button onclick="setWithdrawal('${encodeURIComponent(id)}','approved')" class="bg-emerald-700 px-2 py-1 rounded text-xs">Approve</button><button onclick="setWithdrawal('${encodeURIComponent(id)}','rejected')" class="bg-red-700 px-2 py-1 rounded text-xs">Reject</button></td>
-    </tr>`).join('') || `<tr><td colspan="8" class="p-6 text-center text-slate-500">কোনো withdrawal নেই</td></tr>`;
+
+  const list =
+    Object.entries(
+      withdrawals
+    )
+    .sort(
+      (a,b) =>
+        String(
+          b[1].createdAt || ""
+        )
+        .localeCompare(
+          String(
+            a[1].createdAt || ""
+          )
+        )
+    );
+
+
+
+  document
+    .getElementById("withdrawalsBody")
+    .innerHTML =
+
+      list.map(
+        ([id,w]) => `
+
+        <tr
+          class="border-b border-slate-800">
+
+          <td class="p-3 text-xs">
+
+            ${esc(id)}
+
+          </td>
+
+
+          <td class="p-3">
+
+            ${esc(
+              w.userName ||
+              w.uid ||
+              ""
+            )}
+
+          </td>
+
+
+          <td class="p-3">
+
+            ${esc(
+              w.method || ""
+            )}
+
+          </td>
+
+
+          <td class="p-3">
+
+            ${esc(
+              w.accountNo || ""
+            )}
+
+          </td>
+
+
+          <td
+            class="p-3 text-amber-400">
+
+            ${
+              (
+                Number(w.coins) ||
+                0
+              )
+              .toLocaleString()
+            }
+
+          </td>
+
+
+          <td class="p-3">
+
+            ৳${esc(
+              w.bdtAmount || "0"
+            )}
+
+          </td>
+
+
+          <td class="p-3">
+
+            <span
+              class="
+                px-2 py-1
+                rounded-full
+                text-xs
+
+                ${
+                  w.status ===
+                  "approved"
+
+                  ? "bg-emerald-900 text-emerald-300"
+
+                  :
+
+                  w.status ===
+                  "rejected"
+
+                  ? "bg-red-900 text-red-300"
+
+                  :
+
+                  "bg-orange-900 text-orange-300"
+                }
+              "
+            >
+
+              ${esc(
+                w.status ||
+                "pending"
+              )}
+
+            </span>
+
+          </td>
+
+
+          <td class="p-3">
+
+            <div
+              class="flex gap-1">
+
+              <button
+                onclick="setWithdrawal('${encodeURIComponent(id)}','approved')"
+                class="bg-emerald-700
+                       px-2 py-1
+                       rounded text-xs">
+
+                Approve
+
+              </button>
+
+
+              <button
+                onclick="setWithdrawal('${encodeURIComponent(id)}','rejected')"
+                class="bg-red-700
+                       px-2 py-1
+                       rounded text-xs">
+
+                Reject
+
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        `
+      )
+      .join("")
+
+      ||
+
+      `
+      <tr>
+
+        <td
+          colspan="8"
+          class="p-6 text-center
+                 text-slate-500">
+
+          কোনো withdrawal নেই
+
+        </td>
+
+      </tr>
+      `;
+
 }
-window.setWithdrawal=function(encoded,status){
-  const id=decodeURIComponent(encoded);
-  update(ref(db,'withdrawals/'+id),{status,processedAt:new Date().toISOString()}).then(()=>alert('Status updated')).catch(e=>alert(e.message));
+
+
+
+/* ==================================================
+   WITHDRAWAL STATUS
+================================================== */
+
+window.setWithdrawal =
+async function(
+  encoded,
+  status
+){
+
+  const id =
+    decodeURIComponent(encoded);
+
+
+  const withdrawal =
+    withdrawals[id];
+
+
+  if(!withdrawal)
+    return;
+
+
+
+  if(
+    !confirm(
+      `Withdrawal ${status} করতে চান?`
+    )
+  ){
+
+    return;
+
+  }
+
+
+
+  try{
+
+    const data = {
+
+      status:
+        status,
+
+      processedAt:
+        new Date().toISOString()
+
+    };
+
+
+
+    /* RTDB */
+
+    await update(
+      ref(
+        db,
+        "withdrawals/" + id
+      ),
+      data
+    );
+
+
+
+    /* FIRESTORE */
+
+    try{
+
+      await updateDoc(
+        doc(
+          firestore,
+          "withdrawals",
+          id
+        ),
+        data
+      );
+
+    }catch(error){
+
+      console.warn(
+        "Firestore withdrawal update skipped:",
+        error
+      );
+
+    }
+
+
+
+    alert(
+      "Withdrawal status updated"
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    alert(
+      "Update failed: " +
+      error.message
+    );
+
+  }
+
 };
-window.saveNotice=function(){
-  const text=document.getElementById('noticeText').value.trim();
-  set(ref(db,'notices/current'),text).then(()=>alert('Notice saved')).catch(e=>alert(e.message));
+
+
+
+/* ==================================================
+   SAVE NOTICE
+================================================== */
+
+window.saveNotice =
+async function(){
+
+  const text =
+    document
+      .getElementById("noticeText")
+      .value
+      .trim();
+
+
+  if(!text){
+
+    alert(
+      "Notice লিখুন"
+    );
+
+    return;
+
+  }
+
+
+
+  try{
+
+
+    /* RTDB */
+
+    await set(
+      ref(
+        db,
+        "notices/current"
+      ),
+      text
+    );
+
+
+
+    /* FIRESTORE */
+
+    await setDoc(
+      doc(
+        firestore,
+        "settings",
+        "notice"
+      ),
+      {
+
+        text:
+          text,
+
+        updatedAt:
+          new Date().toISOString()
+
+      },
+
+      {
+        merge:true
+      }
+
+    );
+
+
+
+    alert(
+      "Notice saved successfully"
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    alert(
+      "Notice save failed: " +
+      error.message
+    );
+
+  }
+
 };
-window.saveSettings=function(){
-  const data={coinRate:Number(document.getElementById('coinRate').value)||100,dailyCoins:Number(document.getElementById('dailyCoins').value)||100,minWithdraw:Number(document.getElementById('minWithdraw').value)||5000,updatedAt:new Date().toISOString()};
-  set(ref(db,'settings'),data).then(()=>alert('Settings saved')).catch(e=>alert(e.message));
+
+
+
+/* ==================================================
+   SAVE SETTINGS
+================================================== */
+
+window.saveSettings =
+async function(){
+
+  const data = {
+
+    coinRate:
+      Number(
+        document
+          .getElementById("coinRate")
+          .value
+      ) || 100,
+
+
+    dailyCoins:
+      Number(
+        document
+          .getElementById("dailyCoins")
+          .value
+      ) || 100,
+
+
+    minWithdraw:
+      Number(
+        document
+          .getElementById("minWithdraw")
+          .value
+      ) || 5000,
+
+
+    updatedAt:
+      new Date().toISOString()
+
+  };
+
+
+
+  try{
+
+
+    /* RTDB */
+
+    await set(
+      ref(
+        db,
+        "settings"
+      ),
+      data
+    );
+
+
+
+    /* FIRESTORE */
+
+    await setDoc(
+      doc(
+        firestore,
+        "settings",
+        "app"
+      ),
+      data,
+      {
+        merge:true
+      }
+    );
+
+
+
+    alert(
+      "Settings saved successfully"
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    alert(
+      "Settings save failed: " +
+      error.message
+    );
+
+  }
+
 };
-window.showTab=function(id,btn){
-  document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
-  btn.classList.add('active');
+
+
+
+/* ==================================================
+   TABS
+================================================== */
+
+window.showTab =
+function(
+  id,
+  btn
+){
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(
+      item =>
+        item.classList.add(
+          "hidden"
+        )
+    );
+
+
+  document
+    .getElementById(id)
+    .classList.remove(
+      "hidden"
+    );
+
+
+  document
+    .querySelectorAll(".nav")
+    .forEach(
+      item =>
+        item.classList.remove(
+          "active"
+        )
+    );
+
+
+  btn.classList.add(
+    "active"
+  );
+
 };
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+
+
+/* ==================================================
+   ESCAPE HTML
+================================================== */
+
+function esc(value){
+
+  return String(
+    value ?? ""
+  )
+  .replace(
+    /[&<>"']/g,
+    char => ({
+
+      "&":
+        "&amp;",
+
+      "<":
+        "&lt;",
+
+      ">":
+        "&gt;",
+
+      '"':
+        "&quot;",
+
+      "'":
+        "&#39;"
+
+    }[char])
+  );
+
+}
+
 </script>
+
 </body>
 </html>
