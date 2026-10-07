@@ -215,23 +215,7 @@
           <span>দ্রুত ইনকাম টাস্ক</span>
         </h3>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          
-          <button onclick="switchTab('tab-tasks', 'spin')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 active:scale-98 transition-all text-right group cursor-pointer">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition-transform">
-              <i class="fa-solid fa-dharmachakra"></i>
-            </div>
-            <h4 class="font-bold text-white text-sm">Spin & Win</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">চাকা ঘুরিয়ে জয় করুন পয়েন্ট</p>
-          </button>
-
-          <button onclick="switchTab('tab-tasks', 'scratch')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 active:scale-98 transition-all text-right group cursor-pointer">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition-transform">
-              <i class="fa-solid fa-hand-holding-hand"></i>
-            </div>
-            <h4 class="font-bold text-white text-sm">Scratch Card</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">কার্ড ঘষে তাৎক্ষণিক বোনাস</p>
-          </button>
+        <div class="grid grid-cols-2 gap-3">
 
           <button onclick="switchTab('tab-tasks', 'quiz')" class="glass-card p-4 rounded-2xl hover:border-brand-500/50 active:scale-98 transition-all text-right group cursor-pointer">
             <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition-transform">
@@ -265,73 +249,7 @@
         <span class="bg-brand-500/10 text-brand-400 text-xs px-3 py-1 rounded-full border border-brand-500/20 font-semibold">১,০০০ কয়েন = ৳১০ BDT</span>
       </div>
 
-      <!-- 1. Spin & Win Game -->
-      <div id="task-spin-card" class="glass-card rounded-2xl p-5 md:p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-3 space-x-reverse">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-dharmachakra"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-white text-sm sm:text-base">Spin & Win (চাকা ঘুরিয়ে আয়)</h3>
-              <p class="text-xs text-slate-400">স্পিন সম্পূর্ণ হলে পয়েন্ট যোগ হবে</p>
-            </div>
-          </div>
-          <span class="text-[11px] bg-slate-800 px-2.5 py-1 rounded-full text-purple-300 font-semibold border border-slate-700">দৈনিক আনলিমিটেড</span>
-        </div>
-
-        <div class="flex flex-col items-center justify-center py-2">
-          <div class="relative w-60 h-60 sm:w-64 sm:h-64">
-            <!-- Wheel Pointer -->
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-amber-400 text-3xl filter drop-shadow">
-              <i class="fa-solid fa-caret-down"></i>
-            </div>
-            <!-- Canvas Wheel -->
-            <canvas id="spin-canvas" width="300" height="300" class="w-full h-full rounded-full border-4 border-slate-800 shadow-2xl touch-none"></canvas>
-          </div>
-
-          <button id="spin-start-btn" onclick="spinWheel()" class="mt-5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:scale-95 text-white font-bold px-8 py-2.5 rounded-xl transition-all shadow-lg shadow-purple-600/30 flex items-center space-x-2 space-x-reverse cursor-pointer">
-            <i class="fa-solid fa-play"></i>
-            <span>স্পিন করুন!</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 2. Scratch Card Game -->
-      <div id="task-scratch-card" class="glass-card rounded-2xl p-5 md:p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-3 space-x-reverse">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-hand-holding-hand"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-white text-sm sm:text-base">Scratch & Win (কার্ড স্ক্র্যাচ করুন)</h3>
-              <p class="text-xs text-slate-400">কার্ডের ওপর আঙুল বা মাউস দিয়ে ঘষুন</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col items-center justify-center py-2">
-          <div class="relative w-64 h-40 rounded-2xl overflow-hidden border-2 border-slate-700 shadow-xl bg-slate-900 flex items-center justify-center">
-            
-            <!-- Hidden Reward Layer Underneath -->
-            <div class="text-center">
-              <i class="fa-solid fa-trophy text-amber-400 text-3xl mb-1"></i>
-              <div id="scratch-reward-text" class="text-2xl font-black text-amber-300">৫০ কয়েন</div>
-              <p class="text-[10px] text-slate-400">অভিনন্দন! পয়েন্ট অর্জিত হয়েছে</p>
-            </div>
-
-            <!-- Foreground Scratch Canvas -->
-            <canvas id="scratch-canvas" width="256" height="160" class="absolute top-0 left-0 w-full h-full cursor-pointer touch-none"></canvas>
-          </div>
-
-          <button id="reset-scratch-btn" onclick="initScratchCard()" class="mt-4 text-xs bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold px-4 py-2 rounded-lg transition-all border border-slate-700 cursor-pointer">
-            <i class="fa-solid fa-rotate-right ml-1"></i> নতুন স্ক্র্যাচ কার্ড নিন
-          </button>
-        </div>
-      </div>
-
-      <!-- 3. Math Quiz -->
+      <!-- 1. Math Quiz -->
       <div id="task-quiz-card" class="glass-card rounded-2xl p-5 md:p-6">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-3 space-x-reverse">
@@ -739,6 +657,7 @@
       signOut 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+
     // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDv0VBjW7qEXT-ZC2tt4uQixnGfDhs2Lc0",
@@ -759,6 +678,22 @@
 
     const LOCAL_STORE_KEY = 'takaearn_user_profile_v3';
     const LOCAL_TX_KEY = 'takaearn_transactions_v3';
+    const DEVICE_LOCK_KEY = 'takaearn_bound_device_uid';
+
+    // Check device lock to prevent multiple accounts per device
+    function isDeviceLockedToOtherAccount(targetUid) {
+      const boundUid = localStorage.getItem(DEVICE_LOCK_KEY);
+      if (boundUid && boundUid !== targetUid) {
+        return true;
+      }
+      return false;
+    }
+
+    function lockDeviceToAccount(uid) {
+      if (!localStorage.getItem(DEVICE_LOCK_KEY)) {
+        localStorage.setItem(DEVICE_LOCK_KEY, uid);
+      }
+    }
 
     function loadLocalProfile() {
       const saved = localStorage.getItem(LOCAL_STORE_KEY);
@@ -869,6 +804,17 @@
       const inputName = document.getElementById('quick-login-name').value.trim();
       if (!inputName) return;
 
+      const generatedUid = 'usr_' + btoa(encodeURIComponent(inputName)).replace(/=/g, '').slice(0, 10);
+
+      // Device lock enforcement
+      if (isDeviceLockedToOtherAccount(generatedUid)) {
+        window.showToast('⚠️ এই ডিভাইসে ইতিমধ্যে একটি একাউন্ট সক্রিয় আছে! একাধিক একাউন্ট খোলা নিষিদ্ধ।');
+        return;
+      }
+
+      lockDeviceToAccount(generatedUid);
+
+      currentUserProfile.uid = generatedUid;
       currentUserProfile.name = inputName;
       currentUserProfile.email = inputName.toLowerCase().replace(/\s+/g, '') + '@erning.com';
       currentUserProfile.photoURL = 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(inputName);
@@ -882,6 +828,13 @@
 
     window.handleGoogleLogin = async function() {
       if (!auth) {
+        const demoUid = "usr_google_guest";
+        if (isDeviceLockedToOtherAccount(demoUid)) {
+          window.showToast('⚠️ এই ডিভাইসে ইতিমধ্যে একটি একাউন্ট আছে! একাধিক একাউন্ট তৈরি করা যাবে না।');
+          return;
+        }
+        lockDeviceToAccount(demoUid);
+        currentUserProfile.uid = demoUid;
         currentUserProfile.name = "গুগল ব্যবহারকারী";
         currentUserProfile.isLoggedIn = true;
         saveLocalProfile(currentUserProfile);
@@ -895,6 +848,13 @@
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
         
+        if (isDeviceLockedToOtherAccount(user.uid)) {
+          window.showToast('⚠️ এই ডিভাইসে ইতিমধ্যে অন্য একটি একাউন্ট সক্রিয় করা আছে!');
+          return;
+        }
+
+        lockDeviceToAccount(user.uid);
+
         currentUserProfile.name = user.displayName || currentUserProfile.name;
         currentUserProfile.email = user.email || currentUserProfile.email;
         currentUserProfile.photoURL = user.photoURL || currentUserProfile.photoURL;
@@ -907,8 +867,14 @@
         window.showToast('গুগল দিয়ে সফলভাবে লগইন হয়েছে!');
       } catch (err) {
         console.warn("Google Login fallback triggered:", err);
-        const demoName = "অনলাইন ব্যবহারকারী";
-        currentUserProfile.name = demoName;
+        const demoUid = "usr_demo_user";
+        if (isDeviceLockedToOtherAccount(demoUid)) {
+          window.showToast('⚠️ এই ডিভাইসে ইতিমধ্যে একটি একাউন্ট খোলা আছে!');
+          return;
+        }
+        lockDeviceToAccount(demoUid);
+        currentUserProfile.uid = demoUid;
+        currentUserProfile.name = "অনলাইন ব্যবহারকারী";
         currentUserProfile.isLoggedIn = true;
         saveLocalProfile(currentUserProfile);
         window.updateDashboardUI(currentUserProfile);
@@ -918,13 +884,24 @@
     };
 
     window.handleLogout = async function() {
-      if (auth) {
-        try { await signOut(auth); } catch(e){}
+      try {
+        if (auth) {
+          await signOut(auth);
+        }
+      } catch(e) {
+        console.warn("Signout error:", e);
       }
+
+      // Mark user as logged out in state
       currentUserProfile.isLoggedIn = false;
       saveLocalProfile(currentUserProfile);
-      window.updateDashboardUI(currentUserProfile);
-      window.showToast('সফলভাবে লগআউট হয়েছে');
+
+      window.showToast('সফলভাবে লগআউট হয়েছে! পেজ রিলোড হচ্ছে...');
+      
+      // Clear session completely and reload page instantly
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
     };
 
     window.addCoinsToUser = function(amount, reason) {
@@ -1219,6 +1196,131 @@
     scratchCanvas.addEventListener('touchstart', (e) => { isScratching = true; scratch(e); }, {passive: false});
     scratchCanvas.addEventListener('touchmove', scratch, {passive: false});
     window.addEventListener('touchend', () => isScratching = false);
+
+    // Math Quiz Logic
+    function generateMathQuiz() {
+      const num1 = Math.floor(Math.random() * 20) + 5;
+      const num2 = Math.floor(Math.random() * 15) + 5;
+      const isAdd = Math.random() > 0.4;
+      const ans = isAdd ? num1 + num2 : Math.max(1, num1 - num2);
+
+      document.getElementById('quiz-question').innerText = `${num1} ${isAdd ? '+' : '-'} ${num2} = ?`;
+
+      const optionsSet = new Set([ans]);
+      while (optionsSet.size < 4) {
+        const offset = (Math.floor(Math.random() * 8) + 1) * (Math.random() > 0.5 ? 1 : -1);
+        const wrongOption = Math.max(0, ans + offset);
+        if (wrongOption !== ans) optionsSet.add(wrongOption);
+      }
+
+      const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+      const container = document.getElementById('quiz-options-container');
+
+      container.innerHTML = options.map(opt => `
+        <button onclick="checkQuizAnswer(${opt}, ${ans})" class="bg-slate-800 hover:bg-brand-600 active:scale-95 text-white font-bold py-2 px-3 rounded-xl text-xs sm:text-sm transition-all border border-slate-700 cursor-pointer">
+          ${opt}
+        </button>
+      `).join('');
+    }
+    generateMathQuiz();
+
+    window.checkQuizAnswer = function(selected, correct) {
+      if (selected === correct) {
+        if (window.addCoinsToUser) window.addCoinsToUser(25, 'ম্যাথ কুইজ উত্তর');
+      } else {
+        showToast('ভুল উত্তর! সঠিক উত্তর ছিল: ' + correct);
+      }
+      generateMathQuiz();
+    };
+
+    window.switchTab = function(tabId, gameTarget) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab-item').forEach(el => {
+        el.classList.remove('text-brand-500');
+        el.classList.add('text-slate-400');
+      });
+
+      const activeNav = document.getElementById('nav-btn-' + tabId.replace('tab-', ''));
+      if (activeNav) {
+        activeNav.classList.add('text-brand-500');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      if (gameTarget) {
+        const targetEl = document.getElementById(`task-${gameTarget}-card`);
+        if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.convertCoinsToBDT = function() {
+      const input = parseInt(document.getElementById('calc-coins-input').value) || 0;
+      const bdt = (input / 100).toFixed(2);
+      document.getElementById('calc-bdt-output').innerText = `৳ ${bdt}`;
+    };
+
+    window.copyReferralLink = function() {
+      const refCode = document.getElementById('user-ref-code-display').innerText;
+      const link = `https://${window.location.hostname}/?ref=${refCode}`;
+      
+      const tempInput = document.createElement("input");
+      tempInput.value = link;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      showToast('রেফারেল লিঙ্ক কপি করা হয়েছে!');
+    };
+
+    window.submitReferralCode = function() {
+      const input = document.getElementById('refer-input-code').value.trim();
+      if (!input) return showToast('রেফার কোড টাইপ করুন!');
+      if (window.addCoinsToUser) window.addCoinsToUser(200, 'রেফারেল বোনাস');
+      document.getElementById('refer-input-code').value = '';
+    };
+
+    window.updateWithdrawalThreshold = function(method) {
+      const hint = document.getElementById('withdraw-threshold-hint');
+      const thresholds = {
+        'bKash': 'বিকাশ (৫,০০০ কয়েন = ৳৫০ BDT)',
+        'Nagad': 'নগদ (৫,০০০ কয়েন = ৳৫০ BDT)',
+        'Rocket': 'রকেট (৫,০০০ কয়েন = ৳৫০ BDT)',
+        'Recharge': 'রিচার্জ (২,০০০ কয়েন = ৳২০ BDT)',
+        'Crypto': 'ক্রিপ্টো / বাইন্যান্স (৫০,০০০ কয়েন = ৳৫০০ BDT)',
+        'Payoneer': 'পাইওনিয়ার (৫০,০০০ কয়েন = ৳৫০০ BDT)'
+      };
+      hint.innerText = `💡 সর্বনিম্ন উইথড্র লিমিট: ${thresholds[method] || ''}`;
+    };
+
+    window.showToast = function(msg) {
+      const toast = document.getElementById('toast-msg');
+      document.getElementById('toast-text').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    };
+  </script>
+
+  <script>
+    // Audio Sound Effects
+    function playWinSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e){}
+    }
 
     // Math Quiz Logic
     function generateMathQuiz() {
