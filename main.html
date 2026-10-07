@@ -1,1612 +1,2432 @@
 <!DOCTYPE html>
 <html lang="bn">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>TakaEarn Admin Panel</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
->
-
-<link
-  rel="preconnect"
-  href="https://fonts.googleapis.com"
->
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"
-  rel="stylesheet"
->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-  box-sizing:border-box;
+*{font-family:'Hind Siliguri',sans-serif}
+body{background:#f5f7fb}
+.sidebar{
+    background:linear-gradient(180deg,#111827,#1e293b);
 }
-
-body{
-  font-family:"Hind Siliguri",sans-serif;
-  background:#020617;
-  color:white;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.login-bg{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:
-    radial-gradient(
-      circle at top,
-      #064e3b 0,
-      #020617 45%,
-      #020617 100%
-    );
-}
-
-.login-card{
-  width:100%;
-  max-width:420px;
-  background:#0f172a;
-  border:1px solid #1e293b;
-  border-radius:24px;
-  padding:30px;
-  box-shadow:0 25px 70px rgba(0,0,0,.5);
-}
-
-.logo{
-  width:80px;
-  height:80px;
-  margin:auto;
-  border-radius:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#10b981;
-  box-shadow:0 10px 35px rgba(16,185,129,.3);
-}
-
-.input{
-  width:100%;
-  background:#020617;
-  border:1px solid #334155;
-  color:white;
-  border-radius:12px;
-  padding:14px 16px;
-  outline:none;
-}
-
-.input:focus{
-  border-color:#10b981;
-}
-
-.login-btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  background:#10b981;
-  color:white;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.login-btn:hover{
-  background:#059669;
-}
-
-.login-btn:disabled{
-  opacity:.6;
-  cursor:not-allowed;
-}
-
-.error{
-  color:#f87171;
-  min-height:25px;
-  margin-top:8px;
-  font-size:14px;
-}
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-  background:#0f172a;
-  border-bottom:1px solid #1e293b;
-}
-
 .card{
-  background:#0f172a;
-  border:1px solid #1e293b;
-  border-radius:16px;
+    background:white;
+    border-radius:18px;
+    box-shadow:0 5px 20px rgba(0,0,0,.05);
 }
-
+.nav-item{
+    transition:.2s;
+    cursor:pointer;
+}
+.nav-item:hover,
+.nav-active{
+    background:#2563eb!important;
+    color:white!important;
+}
+.modal-bg{
+    background:rgba(0,0,0,.55);
+}
+.hide{display:none!important}
+.loader{
+    width:25px;
+    height:25px;
+    border:3px solid #ddd;
+    border-top-color:#2563eb;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+table{min-width:900px}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:20px;
+}
 </style>
-
 </head>
-
 
 <body>
 
-
-<!-- =====================================================
-     LOGIN SCREEN
-===================================================== -->
-
-<div id="loginScreen" class="login-bg">
-
-  <div class="login-card">
-
-    <div class="text-center">
-
-      <div class="logo">
-
-        <i
-          class="fa-solid fa-shield-halved text-white text-3xl"
-        ></i>
-
-      </div>
-
-      <h1
-        class="text-2xl font-bold mt-5"
-      >
-        TakaEarn Admin
-      </h1>
-
-      <p
-        class="text-slate-400 mt-2"
-      >
-        Secure Admin Panel
-      </p>
-
+<!-- MOBILE HEADER -->
+<header class="lg:hidden bg-slate-900 text-white p-4 flex items-center justify-between sticky top-0 z-40">
+    <div>
+        <h1 class="font-bold text-lg">TakaEarn Admin</h1>
+        <p class="text-xs text-slate-300">Control Panel</p>
     </div>
 
+    <button onclick="toggleSidebar()"
+        class="bg-blue-600 px-4 py-2 rounded-xl">
+        ☰
+    </button>
+</header>
 
-    <div class="mt-8">
+<!-- SIDEBAR -->
+<aside id="sidebar"
+class="sidebar fixed left-0 top-0 bottom-0 w-64 text-white z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 
-      <label
-        class="block text-sm text-slate-300 mb-2"
-      >
-        Admin Password
-      </label>
-
-      <div class="relative">
-
-        <input
-          id="adminPassword"
-          class="input pr-12"
-          type="password"
-          placeholder="Password লিখুন"
-          autocomplete="current-password"
-        >
-
-        <button
-          type="button"
-          onclick="togglePassword()"
-          class="absolute right-4 top-1/2
-                 -translate-y-1/2
-                 text-slate-400"
-        >
-
-          <i
-            id="passwordEye"
-            class="fa-solid fa-eye"
-          ></i>
-
-        </button>
-
-      </div>
-
-
-      <div
-        id="loginError"
-        class="error"
-      ></div>
-
-
-      <button
-        id="loginBtn"
-        class="login-btn mt-2"
-        onclick="adminLogin()"
-      >
-
-        <i
-          class="fa-solid fa-right-to-bracket mr-2"
-        ></i>
-
-        Login
-
-      </button>
-
+    <div class="p-6 border-b border-slate-700">
+        <h1 class="text-2xl font-bold">TakaEarn</h1>
+        <p class="text-slate-400 text-sm">Admin Panel</p>
     </div>
 
+    <nav class="p-3 space-y-1">
 
-    <p
-      class="text-center text-xs
-             text-slate-500 mt-6"
-    >
-      Password required to access Admin Panel
-    </p>
+        <div onclick="showPage('dashboard')"
+             id="nav-dashboard"
+             class="nav-item nav-active rounded-xl px-4 py-3">
+            📊 Dashboard
+        </div>
 
-  </div>
+        <div onclick="showPage('users')"
+             id="nav-users"
+             class="nav-item rounded-xl px-4 py-3">
+            👥 Users
+        </div>
 
-</div>
+        <div onclick="showPage('withdrawals')"
+             id="nav-withdrawals"
+             class="nav-item rounded-xl px-4 py-3">
+            💸 Withdrawals
+        </div>
 
+        <div onclick="showPage('transactions')"
+             id="nav-transactions"
+             class="nav-item rounded-xl px-4 py-3">
+            🔄 Transactions
+        </div>
 
+        <div onclick="showPage('earnings')"
+             id="nav-earnings"
+             class="nav-item rounded-xl px-4 py-3">
+            💰 Earnings
+        </div>
 
-<!-- =====================================================
-     ADMIN PANEL
-===================================================== -->
+        <div onclick="showPage('devices')"
+             id="nav-devices"
+             class="nav-item rounded-xl px-4 py-3">
+            📱 Devices
+        </div>
 
-<div
-  id="adminApp"
-  class="hidden min-h-screen"
->
+        <div onclick="showPage('notices')"
+             id="nav-notices"
+             class="nav-item rounded-xl px-4 py-3">
+            📢 Notices
+        </div>
 
+        <div onclick="showPage('settings')"
+             id="nav-settings"
+             class="nav-item rounded-xl px-4 py-3">
+            ⚙️ Settings
+        </div>
 
-  <!-- TOP BAR -->
+    </nav>
 
-  <header class="topbar">
-
-    <div
-      class="max-w-7xl mx-auto px-4 py-4
-             flex items-center justify-between"
-    >
-
-      <div>
-
-        <h1
-          class="text-xl font-bold"
-        >
-          <i
-            class="fa-solid fa-shield-halved
-                   text-emerald-400 mr-2"
-          ></i>
-
-          TakaEarn Admin
-
-        </h1>
-
-        <p
-          class="text-xs text-slate-400"
-        >
-          Admin Control Panel
-        </p>
-
-      </div>
-
-
-      <button
-        onclick="adminLogout()"
-        class="bg-red-500/10
-               text-red-400
-               border border-red-500/20
-               px-4 py-2 rounded-xl"
-      >
-
-        <i
-          class="fa-solid fa-right-from-bracket mr-1"
-        ></i>
-
-        Logout
-
-      </button>
-
+    <div class="absolute bottom-0 left-0 right-0 p-4">
+        <div class="bg-slate-800 rounded-xl p-3 text-sm">
+            <div class="text-green-400">● Firebase Connected</div>
+            <div class="text-slate-400 text-xs mt-1">
+                TakaEarn Admin
+            </div>
+        </div>
     </div>
+</aside>
 
-  </header>
+<!-- MAIN -->
+<main class="lg:ml-64 p-4 lg:p-8">
 
+<!-- DASHBOARD -->
+<section id="page-dashboard">
 
-
-  <!-- MAIN -->
-
-  <main
-    class="max-w-7xl mx-auto
-           p-4 md:p-6"
-  >
-
-
-    <!-- DASHBOARD -->
-
-    <section>
-
-      <div class="mb-6">
-
-        <h2
-          class="text-2xl font-bold"
-        >
-          Dashboard
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-slate-800">
+            Dashboard
         </h2>
-
-        <p
-          class="text-slate-400"
-        >
-          TakaEarn overview
+        <p class="text-slate-500">
+            TakaEarn application overview
         </p>
+    </div>
 
-      </div>
-
-
-      <div
-        class="grid grid-cols-2
-               lg:grid-cols-4 gap-4"
-      >
-
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
         <div class="card p-5">
-
-          <div
-            class="text-emerald-400
-                   text-2xl mb-3"
-          >
-
-            <i
-              class="fa-solid fa-users"
-            ></i>
-
-          </div>
-
-          <p
-            class="text-slate-400 text-sm"
-          >
-            Total Users
-          </p>
-
-          <h3
-            id="totalUsers"
-            class="text-2xl font-bold mt-1"
-          >
-            0
-          </h3>
-
+            <div class="text-3xl mb-2">👥</div>
+            <p class="text-slate-500">Total Users</p>
+            <h3 id="statUsers" class="text-3xl font-bold mt-1">0</h3>
         </div>
-
 
         <div class="card p-5">
-
-          <div
-            class="text-yellow-400
-                   text-2xl mb-3"
-          >
-
-            <i
-              class="fa-solid fa-coins"
-            ></i>
-
-          </div>
-
-          <p
-            class="text-slate-400 text-sm"
-          >
-            Total Coins
-          </p>
-
-          <h3
-            id="totalCoins"
-            class="text-2xl font-bold mt-1"
-          >
-            0
-          </h3>
-
+            <div class="text-3xl mb-2">💰</div>
+            <p class="text-slate-500">Total Coins</p>
+            <h3 id="statCoins" class="text-3xl font-bold mt-1">0</h3>
         </div>
-
 
         <div class="card p-5">
-
-          <div
-            class="text-blue-400
-                   text-2xl mb-3"
-          >
-
-            <i
-              class="fa-solid fa-money-bill-transfer"
-            ></i>
-
-          </div>
-
-          <p
-            class="text-slate-400 text-sm"
-          >
-            Withdrawals
-          </p>
-
-          <h3
-            id="totalWithdrawals"
-            class="text-2xl font-bold mt-1"
-          >
-            0
-          </h3>
-
+            <div class="text-3xl mb-2">💸</div>
+            <p class="text-slate-500">Withdrawals</p>
+            <h3 id="statWithdrawals" class="text-3xl font-bold mt-1">0</h3>
         </div>
-
 
         <div class="card p-5">
-
-          <div
-            class="text-purple-400
-                   text-2xl mb-3"
-          >
-
-            <i
-              class="fa-solid fa-list-check"
-            ></i>
-
-          </div>
-
-          <p
-            class="text-slate-400 text-sm"
-          >
-            Tasks
-          </p>
-
-          <h3
-            id="totalTasks"
-            class="text-2xl font-bold mt-1"
-          >
-            0
-          </h3>
-
+            <div class="text-3xl mb-2">📱</div>
+            <p class="text-slate-500">Devices</p>
+            <h3 id="statDevices" class="text-3xl font-bold mt-1">0</h3>
         </div>
 
-      </div>
+    </div>
 
+    <div class="grid lg:grid-cols-2 gap-6">
 
+        <div class="card p-6">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-bold">Recent Users</h3>
+                <button onclick="showPage('users')"
+                    class="text-blue-600 text-sm">
+                    সব দেখুন →
+                </button>
+            </div>
 
-      <!-- ADMIN STATUS -->
-
-      <div
-        class="card p-5 mt-6"
-      >
-
-        <div
-          class="flex items-center gap-3"
-        >
-
-          <div
-            class="w-11 h-11
-                   rounded-xl
-                   bg-emerald-500/10
-                   flex items-center
-                   justify-center"
-          >
-
-            <i
-              class="fa-solid fa-circle-check
-                     text-emerald-400"
-            ></i>
-
-          </div>
-
-
-          <div>
-
-            <h3
-              class="font-bold"
-            >
-              Admin Connected
-            </h3>
-
-            <p
-              class="text-sm
-                     text-slate-400"
-            >
-              Firebase authentication active
-            </p>
-
-          </div>
-
+            <div id="recentUsers" class="space-y-3">
+                <div class="text-slate-400">Loading...</div>
+            </div>
         </div>
 
-      </div>
+        <div class="card p-6">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-bold">Recent Withdrawals</h3>
+                <button onclick="showPage('withdrawals')"
+                    class="text-blue-600 text-sm">
+                    সব দেখুন →
+                </button>
+            </div>
+
+            <div id="recentWithdrawals" class="space-y-3">
+                <div class="text-slate-400">Loading...</div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
 
 
-    </section>
+<!-- USERS -->
+<section id="page-users" class="hide">
 
-
-
-    <!-- USERS -->
-
-    <section class="mt-8">
-
-      <div
-        class="flex items-center
-               justify-between mb-4"
-      >
+    <div class="flex flex-col md:flex-row md:items-center
+                justify-between gap-4 mb-6">
 
         <div>
-
-          <h2
-            class="text-xl font-bold"
-          >
-            Users
-          </h2>
-
-          <p
-            class="text-sm text-slate-400"
-          >
-            Registered users
-          </p>
-
+            <h2 class="text-3xl font-bold">Users</h2>
+            <p class="text-slate-500">সকল ইউজার ম্যানেজ করুন</p>
         </div>
 
-      </div>
+        <button onclick="loadUsers()"
+            class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+            🔄 Refresh
+        </button>
+    </div>
 
+    <div class="card p-4 mb-5">
+        <input
+            id="userSearch"
+            oninput="filterUsers()"
+            placeholder="UID, নাম, email বা phone দিয়ে Search..."
+            class="w-full border rounded-xl px-4 py-3 outline-none
+                   focus:ring-2 focus:ring-blue-500">
+    </div>
 
-      <div
-        class="card overflow-hidden"
-      >
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
 
-        <div
-          class="overflow-x-auto"
-        >
+            <table class="w-full text-left">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="p-4">User</th>
+                        <th class="p-4">UID</th>
+                        <th class="p-4">Coins</th>
+                        <th class="p-4">Total Earned</th>
+                        <th class="p-4">Phone</th>
+                        <th class="p-4">Action</th>
+                    </tr>
+                </thead>
 
-          <table
-            class="w-full text-sm"
-          >
-
-            <thead
-              class="bg-slate-800"
-            >
-
-              <tr>
-
-                <th class="p-4 text-left">
-                  User
-                </th>
-
-                <th class="p-4 text-left">
-                  Coins
-                </th>
-
-                <th class="p-4 text-left">
-                  Balance
-                </th>
-
-                <th class="p-4 text-left">
-                  UID
-                </th>
-
-              </tr>
-
-            </thead>
-
-
-            <tbody
-              id="usersTable"
-            >
-
-              <tr>
-
-                <td
-                  colspan="4"
-                  class="p-6 text-center
-                         text-slate-500"
-                >
-                  Loading...
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
+                <tbody id="usersTable">
+                </tbody>
+            </table>
 
         </div>
+    </div>
 
-      </div>
-
-    </section>
-
+</section>
 
 
-    <!-- WITHDRAWALS -->
+<!-- WITHDRAWALS -->
+<section id="page-withdrawals" class="hide">
 
-    <section class="mt-8">
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold">Withdrawals</h2>
+        <p class="text-slate-500">
+            User withdrawal request control
+        </p>
+    </div>
 
-      <h2
-        class="text-xl font-bold mb-4"
-      >
-        Withdrawals
-      </h2>
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
 
-      <div class="card overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="p-4">User</th>
+                        <th class="p-4">Amount</th>
+                        <th class="p-4">Method</th>
+                        <th class="p-4">Account</th>
+                        <th class="p-4">Status</th>
+                        <th class="p-4">Action</th>
+                    </tr>
+                </thead>
 
-        <div
-          class="overflow-x-auto"
-        >
-
-          <table
-            class="w-full text-sm"
-          >
-
-            <thead
-              class="bg-slate-800"
-            >
-
-              <tr>
-
-                <th class="p-4 text-left">
-                  User
-                </th>
-
-                <th class="p-4 text-left">
-                  Amount
-                </th>
-
-                <th class="p-4 text-left">
-                  Method
-                </th>
-
-                <th class="p-4 text-left">
-                  Status
-                </th>
-
-              </tr>
-
-            </thead>
-
-
-            <tbody
-              id="withdrawalsTable"
-            >
-
-              <tr>
-
-                <td
-                  colspan="4"
-                  class="p-6 text-center
-                         text-slate-500"
-                >
-                  Loading...
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
+                <tbody id="withdrawalsTable">
+                </tbody>
+            </table>
 
         </div>
+    </div>
 
-      </div>
-
-    </section>
-
+</section>
 
 
-    <!-- NOTICE -->
+<!-- TRANSACTIONS -->
+<section id="page-transactions" class="hide">
 
-    <section class="mt-8">
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold">Transactions</h2>
+        <p class="text-slate-500">
+            User transaction records
+        </p>
+    </div>
 
-      <h2
-        class="text-xl font-bold mb-4"
-      >
-        Notices
-      </h2>
-
-      <div class="card p-5">
+    <div class="card p-6">
 
         <input
-          id="noticeTitle"
-          class="input mb-3"
-          placeholder="Notice title"
-        >
+            id="transactionUid"
+            placeholder="User UID লিখুন"
+            class="border rounded-xl px-4 py-3 w-full mb-4">
 
-        <textarea
-          id="noticeMessage"
-          class="input min-h-[120px]"
-          placeholder="Notice message"
-        ></textarea>
-
-        <button
-          onclick="createNotice()"
-          class="mt-3
-                 bg-emerald-500
-                 px-5 py-3
-                 rounded-xl
-                 font-bold"
-        >
-
-          <i
-            class="fa-solid fa-plus mr-1"
-          ></i>
-
-          Add Notice
-
+        <button onclick="loadUserTransactions()"
+            class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+            Search Transactions
         </button>
 
-      </div>
+        <div class="overflow-x-auto mt-6">
 
-    </section>
+            <table class="w-full">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="p-3">Reason</th>
+                        <th class="p-3">Amount</th>
+                        <th class="p-3">Type</th>
+                        <th class="p-3">Date</th>
+                    </tr>
+                </thead>
+
+                <tbody id="transactionsTable">
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
 
 
+<!-- EARNINGS -->
+<section id="page-earnings" class="hide">
 
-    <!-- TASKS -->
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold">Earnings</h2>
+        <p class="text-slate-500">
+            User earning history
+        </p>
+    </div>
 
-    <section class="mt-8 pb-10">
-
-      <h2
-        class="text-xl font-bold mb-4"
-      >
-        Tasks
-      </h2>
-
-      <div class="card p-5">
+    <div class="card p-6">
 
         <input
-          id="taskTitle"
-          class="input mb-3"
-          placeholder="Task title"
-        >
+            id="earningUid"
+            placeholder="User UID লিখুন"
+            class="border rounded-xl px-4 py-3 w-full mb-4">
 
-        <input
-          id="taskReward"
-          class="input mb-3"
-          type="number"
-          placeholder="Reward coins"
-        >
-
-        <button
-          onclick="createTask()"
-          class="bg-emerald-500
-                 px-5 py-3
-                 rounded-xl
-                 font-bold"
-        >
-
-          <i
-            class="fa-solid fa-plus mr-1"
-          ></i>
-
-          Add Task
-
+        <button onclick="loadUserEarnings()"
+            class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+            Search Earnings
         </button>
 
-      </div>
+        <div class="overflow-x-auto mt-6">
 
-    </section>
+            <table class="w-full">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="p-3">Reason</th>
+                        <th class="p-3">Coins</th>
+                        <th class="p-3">Date</th>
+                    </tr>
+                </thead>
+
+                <tbody id="earningsTable">
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
 
 
-  </main>
+<!-- DEVICES -->
+<section id="page-devices" class="hide">
+
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold">Device Bindings</h2>
+        <p class="text-slate-500">
+            Registered devices
+        </p>
+    </div>
+
+    <div class="card overflow-hidden">
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="p-4">Device ID</th>
+                        <th class="p-4">User UID</th>
+                        <th class="p-4">Created</th>
+                    </tr>
+                </thead>
+
+                <tbody id="devicesTable">
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- NOTICES -->
+<section id="page-notices" class="hide">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <div>
+            <h2 class="text-3xl font-bold">Notices</h2>
+            <p class="text-slate-500">
+                User App-এ Notice পাঠান
+            </p>
+        </div>
+
+        <button onclick="openNoticeModal()"
+            class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+            + New Notice
+        </button>
+
+    </div>
+
+    <div id="noticesList" class="grid gap-4">
+    </div>
+
+</section>
+
+
+<!-- SETTINGS -->
+<section id="page-settings" class="hide">
+
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold">App Settings</h2>
+        <p class="text-slate-500">
+            Application settings
+        </p>
+    </div>
+
+    <div class="card p-6 max-w-2xl">
+
+        <label class="block font-semibold mb-2">
+            App Name
+        </label>
+
+        <input id="settingAppName"
+            class="border rounded-xl px-4 py-3 w-full mb-5"
+            value="TakaEarn">
+
+        <label class="block font-semibold mb-2">
+            Minimum Withdrawal
+        </label>
+
+        <input id="settingMinWithdraw"
+            type="number"
+            class="border rounded-xl px-4 py-3 w-full mb-5"
+            value="100">
+
+        <label class="block font-semibold mb-2">
+            Maintenance Mode
+        </label>
+
+        <select id="settingMaintenance"
+            class="border rounded-xl px-4 py-3 w-full mb-5">
+
+            <option value="false">OFF</option>
+            <option value="true">ON</option>
+
+        </select>
+
+        <button onclick="saveSettings()"
+            class="bg-blue-600 text-white px-6 py-3 rounded-xl">
+            Save Settings
+        </button>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- USER MODAL -->
+<div id="userModal"
+class="modal-bg fixed inset-0 z-[100] hidden items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+        <div class="p-5 border-b flex justify-between">
+            <h3 class="text-xl font-bold">User Details</h3>
+
+            <button onclick="closeUserModal()"
+                class="text-2xl">
+                ×
+            </button>
+        </div>
+
+        <div id="userDetails" class="p-5"></div>
+
+    </div>
 
 </div>
 
 
+<!-- NOTICE MODAL -->
+<div id="noticeModal"
+class="modal-bg fixed inset-0 z-[100] hidden items-center justify-center p-4">
 
-<!-- =====================================================
-     FIREBASE
-===================================================== -->
+    <div class="bg-white rounded-2xl w-full max-w-lg">
+
+        <div class="p-5 border-b flex justify-between">
+
+            <h3 class="text-xl font-bold">
+                Create Notice
+            </h3>
+
+            <button onclick="closeNoticeModal()"
+                class="text-2xl">
+                ×
+            </button>
+
+        </div>
+
+        <div class="p-5">
+
+            <input
+                id="noticeTitle"
+                placeholder="Notice Title"
+                class="border rounded-xl px-4 py-3 w-full mb-4">
+
+            <textarea
+                id="noticeMessage"
+                placeholder="Notice message..."
+                rows="5"
+                class="border rounded-xl px-4 py-3 w-full mb-4">
+            </textarea>
+
+            <select
+                id="noticeActive"
+                class="border rounded-xl px-4 py-3 w-full mb-4">
+
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+
+            </select>
+
+            <button onclick="createNotice()"
+                class="w-full bg-blue-600 text-white py-3 rounded-xl">
+                Publish Notice
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast"
+class="fixed right-5 bottom-5 hidden z-[200]">
+
+    <div id="toastText"
+        class="bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl">
+    </div>
+
+</div>
+
 
 <script type="module">
 
-import {
-  initializeApp
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 
 import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithCustomToken,
-  signOut
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
-
-import {
-  getFirestore,
-  collection,
-  onSnapshot,
-  addDoc,
-  serverTimestamp
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    getDoc,
+    setDoc,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    orderBy
+}
+from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 import {
-  getDatabase,
-  ref,
-  onValue
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+    getDatabase,
+    ref,
+    get,
+    set,
+    update,
+    remove
+}
+from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 
-import {
-  getFunctions,
-  httpsCallable
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
-
-
-
-/* =========================================
+/* =====================================================
    FIREBASE CONFIG
-========================================= */
+===================================================== */
 
 const firebaseConfig = {
 
-  apiKey:
-    "AIzaSyDv0VBJ7WqEXT-ZC2tt4uQixnGfDhs2Lc0",
+    apiKey: "YOUR_API_KEY",
 
-  authDomain:
-    "erning-344b8.firebaseapp.com",
+    authDomain:
+        "erning-344b8.firebaseapp.com",
 
-  databaseURL:
-    "https://erning-344b8-default-rtdb.firebaseio.com",
+    databaseURL:
+        "https://erning-344b8-default-rtdb.firebaseio.com",
 
-  projectId:
-    "erning-344b8",
+    projectId:
+        "erning-344b8",
 
-  storageBucket:
-    "erning-344b8.firebasestorage.app",
+    storageBucket:
+        "erning-344b8.firebasestorage.app",
 
-  messagingSenderId:
-    "69804884240",
+    messagingSenderId:
+        "YOUR_MESSAGING_SENDER_ID",
 
-  appId:
-    "1:69804884240:web:2e2ea56642c937b15ae595"
-
-};
-
-
-
-const app =
-  initializeApp(firebaseConfig);
-
-
-const auth =
-  getAuth(app);
-
-
-const db =
-  getFirestore(app);
-
-
-const rtdb =
-  getDatabase(app);
-
-
-const functions =
-  getFunctions(
-    app,
-    "asia-southeast1"
-  );
-
-
-const adminLoginFunction =
-  httpsCallable(
-    functions,
-    "adminLogin"
-  );
-
-
-
-/* =========================================
-   GLOBAL
-========================================= */
-
-window.firebaseAuth = auth;
-window.firebaseDB = db;
-window.firebaseRTDB = rtdb;
-
-
-
-/* =========================================
-   PASSWORD LOGIN
-========================================= */
-
-window.adminLogin = async function(){
-
-  const password =
-    document.getElementById(
-      "adminPassword"
-    ).value.trim();
-
-
-  const error =
-    document.getElementById(
-      "loginError"
-    );
-
-
-  const button =
-    document.getElementById(
-      "loginBtn"
-    );
-
-
-  error.textContent = "";
-
-
-  if(!password){
-
-    error.textContent =
-      "Password লিখুন।";
-
-    return;
-  }
-
-
-  try{
-
-    button.disabled = true;
-
-    button.innerHTML =
-      '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Checking...';
-
-
-    const result =
-      await adminLoginFunction({
-        password: password
-      });
-
-
-    const token =
-      result.data.token;
-
-
-    if(!token){
-
-      throw new Error(
-        "Login token পাওয়া যায়নি।"
-      );
-
-    }
-
-
-    await signInWithCustomToken(
-      auth,
-      token
-    );
-
-
-  }catch(err){
-
-    console.error(err);
-
-    error.textContent =
-      "ভুল password অথবা server error।";
-
-
-  }finally{
-
-    button.disabled = false;
-
-    button.innerHTML =
-      '<i class="fa-solid fa-right-to-bracket mr-2"></i>Login';
-
-  }
+    appId:
+        "YOUR_APP_ID"
 
 };
 
 
+/* =====================================================
+   INITIALIZE
+===================================================== */
 
-/* =========================================
-   AUTH STATE
-========================================= */
+const app = initializeApp(firebaseConfig);
 
-onAuthStateChanged(
-  auth,
-  async (user) => {
+const db = getFirestore(app);
 
-    const login =
-      document.getElementById(
-        "loginScreen"
-      );
-
-    const panel =
-      document.getElementById(
-        "adminApp"
-      );
+const rtdb = getDatabase(app);
 
 
-    if(!user){
+/* =====================================================
+   GLOBAL DATA
+===================================================== */
 
-      login.classList.remove(
-        "hidden"
-      );
+let allUsers = [];
 
-      panel.classList.add(
-        "hidden"
-      );
+let allWithdrawals = [];
 
-      return;
-    }
+let allDevices = [];
 
 
-    /*
-      শুধুমাত্র আমাদের
-      password-only admin UID
-    */
+/* =====================================================
+   TOAST
+===================================================== */
 
-    if(
-      user.uid !==
-      "takaearn-admin"
-    ){
+window.showToast = function(message){
 
-      await signOut(auth);
+    const toast =
+        document.getElementById("toast");
 
-      return;
+    const text =
+        document.getElementById("toastText");
 
-    }
+    text.textContent = message;
 
+    toast.classList.remove("hidden");
 
-    login.classList.add(
-      "hidden"
-    );
-
-    panel.classList.remove(
-      "hidden"
-    );
-
-
-    loadUsers();
-
-    loadWithdrawals();
-
-  }
-);
-
-
-
-/* =========================================
-   LOGOUT
-========================================= */
-
-window.adminLogout =
-async function(){
-
-  await signOut(auth);
-
-  location.reload();
+    setTimeout(()=>{
+        toast.classList.add("hidden");
+    },3000);
 
 };
 
 
+/* =====================================================
+   SIDEBAR
+===================================================== */
 
-/* =========================================
-   PASSWORD SHOW/HIDE
-========================================= */
+window.toggleSidebar = function(){
 
-window.togglePassword =
-function(){
-
-  const input =
-    document.getElementById(
-      "adminPassword"
-    );
-
-  const icon =
-    document.getElementById(
-      "passwordEye"
-    );
-
-
-  if(input.type === "password"){
-
-    input.type = "text";
-
-    icon.className =
-      "fa-solid fa-eye-slash";
-
-  }else{
-
-    input.type = "password";
-
-    icon.className =
-      "fa-solid fa-eye";
-
-  }
+    document
+        .getElementById("sidebar")
+        .classList.toggle("-translate-x-full");
 
 };
 
 
+/* =====================================================
+   PAGE SYSTEM
+===================================================== */
 
-/* =========================================
-   ENTER KEY
-========================================= */
+window.showPage = function(page){
 
-document
-  .getElementById("adminPassword")
-  .addEventListener(
-    "keydown",
-    function(e){
+    document
+        .querySelectorAll("main section")
+        .forEach(x=>x.classList.add("hide"));
 
-      if(e.key === "Enter"){
+    document
+        .getElementById("page-"+page)
+        .classList.remove("hide");
 
-        window.adminLogin();
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(x=>x.classList.remove("nav-active"));
 
-      }
+    const nav =
+        document.getElementById("nav-"+page);
+
+    if(nav)
+        nav.classList.add("nav-active");
+
+    if(window.innerWidth < 1024){
+
+        document
+            .getElementById("sidebar")
+            .classList.add("-translate-x-full");
 
     }
-  );
+
+    if(page==="users")
+        loadUsers();
+
+    if(page==="withdrawals")
+        loadWithdrawals();
+
+    if(page==="devices")
+        loadDevices();
+
+    if(page==="notices")
+        loadNotices();
+
+    if(page==="settings")
+        loadSettings();
+
+};
 
 
+/* =====================================================
+   DASHBOARD
+===================================================== */
 
-/* =========================================
-   LOAD USERS
-========================================= */
+async function loadDashboard(){
 
-function loadUsers(){
+    try{
 
-  const usersRef =
-    ref(
-      rtdb,
-      "users"
-    );
+        const usersSnap =
+            await getDocs(collection(db,"users"));
 
+        let totalCoins = 0;
 
-  onValue(
-    usersRef,
-    (snapshot)=>{
+        allUsers = [];
 
-      const data =
-        snapshot.val() || {};
+        usersSnap.forEach(d=>{
 
+            const data = d.data();
 
-      const users =
-        Object.entries(data);
+            allUsers.push({
+                id:d.id,
+                ...data
+            });
 
+            totalCoins +=
+                Number(data.coins || 0);
 
-      document.getElementById(
-        "totalUsers"
-      ).textContent =
-        users.length;
+        });
 
 
-      let coins = 0;
+        document
+            .getElementById("statUsers")
+            .textContent = allUsers.length;
+
+        document
+            .getElementById("statCoins")
+            .textContent =
+                totalCoins.toLocaleString();
 
 
-      let html = "";
-
-
-      users.forEach(
-        ([uid,user])=>{
-
-          const userCoins =
-            Number(
-              user.coins || 0
+        const withdrawalsSnap =
+            await getDocs(
+                collection(db,"withdrawals")
             );
 
+        allWithdrawals = [];
 
-          const balance =
-            Number(
-              user.balance || 0
+        withdrawalsSnap.forEach(d=>{
+
+            allWithdrawals.push({
+                id:d.id,
+                ...d.data()
+            });
+
+        });
+
+        document
+            .getElementById("statWithdrawals")
+            .textContent =
+                allWithdrawals.length;
+
+
+        const devicesSnap =
+            await getDocs(
+                collection(db,"deviceBindings")
             );
 
+        allDevices = [];
 
-          coins += userCoins;
+        devicesSnap.forEach(d=>{
 
+            allDevices.push({
+                id:d.id,
+                ...d.data()
+            });
 
-          html += `
+        });
 
-          <tr
-            class="border-t
-                   border-slate-800"
-          >
-
-            <td class="p-4">
-
-              <div
-                class="font-semibold"
-              >
-
-                ${
-                  escapeHtml(
-                    user.name ||
-                    "Unknown User"
-                  )
-                }
-
-              </div>
-
-              <div
-                class="text-xs
-                       text-slate-500"
-              >
-
-                ${
-                  escapeHtml(
-                    user.phone ||
-                    ""
-                  )
-                }
-
-              </div>
-
-            </td>
+        document
+            .getElementById("statDevices")
+            .textContent =
+                allDevices.length;
 
 
-            <td class="p-4">
+        renderRecentUsers();
 
-              ${userCoins}
+        renderRecentWithdrawals();
 
-            </td>
+    }catch(error){
 
+        console.error(error);
 
-            <td class="p-4">
-
-              ${balance}
-
-            </td>
-
-
-            <td
-              class="p-4 text-xs
-                     text-slate-500"
-            >
-
-              ${escapeHtml(uid)}
-
-            </td>
-
-          </tr>
-
-          `;
-
-        }
-      );
-
-
-      document.getElementById(
-        "totalCoins"
-      ).textContent =
-        coins;
-
-
-      document.getElementById(
-        "usersTable"
-      ).innerHTML =
-        html ||
-        `
-        <tr>
-          <td
-            colspan="4"
-            class="p-6 text-center
-                   text-slate-500"
-          >
-            No users found
-          </td>
-        </tr>
-        `;
+        showToast(
+            "Firebase data load হয়নি: "+
+            error.message
+        );
 
     }
-  );
 
 }
 
 
+/* =====================================================
+   RECENT USERS
+===================================================== */
 
-/* =========================================
-   LOAD WITHDRAWALS
-========================================= */
+function renderRecentUsers(){
 
-function loadWithdrawals(){
+    const box =
+        document.getElementById("recentUsers");
 
-  const withdrawalRef =
-    ref(
-      rtdb,
-      "withdrawals"
-    );
+    const users =
+        allUsers.slice(-5).reverse();
+
+    if(!users.length){
+
+        box.innerHTML =
+            `<p class="text-slate-400">
+                কোনো user নেই
+            </p>`;
+
+        return;
+    }
+
+    box.innerHTML =
+        users.map(u=>`
+
+        <div class="flex items-center justify-between
+                    border-b pb-3">
+
+            <div>
+
+                <div class="font-semibold">
+                    ${escapeHTML(
+                        u.name ||
+                        u.displayName ||
+                        "User"
+                    )}
+                </div>
+
+                <div class="text-xs text-slate-400">
+                    ${escapeHTML(u.email || u.phone || u.id)}
+                </div>
+
+            </div>
+
+            <div class="font-bold text-blue-600">
+                ${Number(u.coins || 0).toLocaleString()}
+            </div>
+
+        </div>
+
+    `).join("");
+
+}
 
 
-  onValue(
-    withdrawalRef,
-    (snapshot)=>{
+/* =====================================================
+   RECENT WITHDRAWALS
+===================================================== */
 
-      const data =
-        snapshot.val() || {};
+function renderRecentWithdrawals(){
+
+    const box =
+        document.getElementById(
+            "recentWithdrawals"
+        );
+
+    const list =
+        allWithdrawals.slice(-5).reverse();
+
+    if(!list.length){
+
+        box.innerHTML =
+            `<p class="text-slate-400">
+                কোনো withdrawal নেই
+            </p>`;
+
+        return;
+
+    }
+
+    box.innerHTML =
+        list.map(w=>`
+
+        <div class="border-b pb-3">
+
+            <div class="flex justify-between">
+
+                <span class="font-semibold">
+                    ${escapeHTML(
+                        w.method ||
+                        w.withdrawMethod ||
+                        "Withdrawal"
+                    )}
+                </span>
+
+                <span class="font-bold">
+                    ${Number(
+                        w.amount ||
+                        w.coins ||
+                        0
+                    ).toLocaleString()}
+                </span>
+
+            </div>
+
+            <div class="text-xs text-slate-400">
+                ${escapeHTML(
+                    w.status || "pending"
+                )}
+            </div>
+
+        </div>
+
+    `).join("");
+
+}
 
 
-      const list =
-        Object.entries(data);
+/* =====================================================
+   USERS
+===================================================== */
+
+window.loadUsers = async function(){
+
+    const tbody =
+        document.getElementById("usersTable");
+
+    tbody.innerHTML =
+        `<tr>
+            <td colspan="6" class="p-8 text-center">
+                Loading...
+            </td>
+        </tr>`;
+
+    try{
+
+        const snap =
+            await getDocs(collection(db,"users"));
+
+        allUsers = [];
+
+        snap.forEach(d=>{
+
+            allUsers.push({
+                id:d.id,
+                ...d.data()
+            });
+
+        });
+
+        renderUsers(allUsers);
+
+    }catch(error){
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="6"
+                    class="p-8 text-center text-red-500">
+                    ${escapeHTML(error.message)}
+                </td>
+            </tr>`;
+
+    }
+
+};
 
 
-      document.getElementById(
-        "totalWithdrawals"
-      ).textContent =
-        list.length;
+function renderUsers(users){
 
+    const tbody =
+        document.getElementById("usersTable");
 
-      let html = "";
+    if(!users.length){
 
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="6"
+                    class="p-8 text-center text-slate-400">
+                    কোনো user পাওয়া যায়নি
+                </td>
+            </tr>`;
 
-      list.forEach(
-        ([id,item])=>{
+        return;
+    }
 
-          html += `
+    tbody.innerHTML =
+        users.map(u=>`
 
-          <tr
-            class="border-t
-                   border-slate-800"
-          >
+        <tr class="border-b hover:bg-slate-50">
 
             <td class="p-4">
 
-              ${escapeHtml(
-                item.uid || "-"
-              )}
+                <div class="font-semibold">
+                    ${escapeHTML(
+                        u.name ||
+                        u.displayName ||
+                        "User"
+                    )}
+                </div>
+
+                <div class="text-xs text-slate-400">
+                    ${escapeHTML(u.email || "")}
+                </div>
 
             </td>
 
+            <td class="p-4 text-xs">
+                ${escapeHTML(u.id)}
+            </td>
+
+            <td class="p-4 font-bold text-blue-600">
+                ${Number(u.coins || 0).toLocaleString()}
+            </td>
+
+            <td class="p-4">
+                ${Number(
+                    u.totalEarned || 0
+                ).toLocaleString()}
+            </td>
+
+            <td class="p-4">
+                ${escapeHTML(
+                    u.phone ||
+                    u.phoneNumber ||
+                    "-"
+                )}
+            </td>
 
             <td class="p-4">
 
-              ${escapeHtml(
-                String(
-                  item.amount ??
-                  item.coins ??
-                  0
+                <button
+                    onclick="openUser('${u.id}')"
+                    class="bg-blue-600 text-white
+                           px-4 py-2 rounded-lg">
+
+                    View
+
+                </button>
+
+            </td>
+
+        </tr>
+
+    `).join("");
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+window.filterUsers = function(){
+
+    const value =
+        document
+        .getElementById("userSearch")
+        .value
+        .toLowerCase()
+        .trim();
+
+    const filtered =
+        allUsers.filter(u=>{
+
+            return (
+
+                String(u.id || "")
+                    .toLowerCase()
+                    .includes(value)
+
+                ||
+
+                String(u.name || "")
+                    .toLowerCase()
+                    .includes(value)
+
+                ||
+
+                String(u.email || "")
+                    .toLowerCase()
+                    .includes(value)
+
+                ||
+
+                String(u.phone || "")
+                    .toLowerCase()
+                    .includes(value)
+
+            );
+
+        });
+
+    renderUsers(filtered);
+
+};
+
+
+/* =====================================================
+   USER DETAILS
+===================================================== */
+
+window.openUser = async function(uid){
+
+    const modal =
+        document.getElementById("userModal");
+
+    const details =
+        document.getElementById("userDetails");
+
+    modal.classList.remove("hidden");
+
+    modal.classList.add("flex");
+
+    details.innerHTML =
+        `<div class="text-center p-5">
+            Loading...
+        </div>`;
+
+    try{
+
+        const snap =
+            await getDoc(
+                doc(db,"users",uid)
+            );
+
+        if(!snap.exists()){
+
+            details.innerHTML =
+                "User পাওয়া যায়নি";
+
+            return;
+        }
+
+        const u = snap.data();
+
+        details.innerHTML = `
+
+            <div class="space-y-4">
+
+                <div class="bg-slate-100 rounded-xl p-4">
+                    <div class="text-xs text-slate-500">
+                        UID
+                    </div>
+
+                    <div class="font-mono text-sm break-all">
+                        ${escapeHTML(uid)}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-slate-500">
+                        Name
+                    </label>
+
+                    <input
+                        id="editName"
+                        value="${escapeAttr(
+                            u.name ||
+                            u.displayName ||
+                            ""
+                        )}"
+                        class="border rounded-xl
+                               px-4 py-3 w-full">
+                </div>
+
+                <div>
+                    <label class="text-sm text-slate-500">
+                        Coins
+                    </label>
+
+                    <input
+                        id="editCoins"
+                        type="number"
+                        value="${Number(u.coins || 0)}"
+                        class="border rounded-xl
+                               px-4 py-3 w-full">
+                </div>
+
+                <div>
+                    <label class="text-sm text-slate-500">
+                        Total Earned
+                    </label>
+
+                    <input
+                        id="editTotalEarned"
+                        type="number"
+                        value="${Number(
+                            u.totalEarned || 0
+                        )}"
+                        class="border rounded-xl
+                               px-4 py-3 w-full">
+                </div>
+
+                <div>
+                    <label class="text-sm text-slate-500">
+                        Email
+                    </label>
+
+                    <input
+                        value="${escapeAttr(
+                            u.email || ""
+                        )}"
+                        disabled
+                        class="border rounded-xl
+                               px-4 py-3 w-full
+                               bg-slate-100">
+                </div>
+
+                <button
+                    onclick="saveUser('${uid}')"
+                    class="w-full bg-blue-600
+                           text-white py-3 rounded-xl">
+
+                    Save User
+
+                </button>
+
+                <button
+                    onclick="deleteUser('${uid}')"
+                    class="w-full bg-red-600
+                           text-white py-3 rounded-xl">
+
+                    Delete User
+
+                </button>
+
+            </div>
+
+        `;
+
+    }catch(error){
+
+        details.innerHTML =
+            `<p class="text-red-500">
+                ${escapeHTML(error.message)}
+            </p>`;
+
+    }
+
+};
+
+
+window.closeUserModal = function(){
+
+    document
+        .getElementById("userModal")
+        .classList.add("hidden");
+
+    document
+        .getElementById("userModal")
+        .classList.remove("flex");
+
+};
+
+
+/* =====================================================
+   SAVE USER
+===================================================== */
+
+window.saveUser = async function(uid){
+
+    try{
+
+        const name =
+            document.getElementById(
+                "editName"
+            ).value.trim();
+
+        const coins =
+            Number(
+                document.getElementById(
+                    "editCoins"
+                ).value
+            );
+
+        const totalEarned =
+            Number(
+                document.getElementById(
+                    "editTotalEarned"
+                ).value
+            );
+
+        await updateDoc(
+            doc(db,"users",uid),
+            {
+                name,
+                coins,
+                totalEarned
+            }
+        );
+
+
+        /*
+          RTDB sync
+        */
+
+        await update(
+            ref(rtdb,"users/"+uid),
+            {
+                name,
+                coins,
+                totalEarned
+            }
+        );
+
+
+        showToast("User updated successfully");
+
+        closeUserModal();
+
+        loadUsers();
+
+        loadDashboard();
+
+    }catch(error){
+
+        showToast(
+            "Update failed: "+
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================================
+   DELETE USER
+===================================================== */
+
+window.deleteUser = async function(uid){
+
+    const ok =
+        confirm(
+            "এই user-এর Firestore profile delete করবেন?"
+        );
+
+    if(!ok) return;
+
+    try{
+
+        await deleteDoc(
+            doc(db,"users",uid)
+        );
+
+        await remove(
+            ref(rtdb,"users/"+uid)
+        );
+
+        showToast("User profile deleted");
+
+        closeUserModal();
+
+        loadUsers();
+
+        loadDashboard();
+
+    }catch(error){
+
+        showToast(
+            "Delete failed: "+
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================================
+   WITHDRAWALS
+===================================================== */
+
+window.loadWithdrawals = async function(){
+
+    const tbody =
+        document.getElementById(
+            "withdrawalsTable"
+        );
+
+    tbody.innerHTML =
+        `<tr>
+            <td colspan="6"
+                class="p-8 text-center">
+                Loading...
+            </td>
+        </tr>`;
+
+    try{
+
+        const snap =
+            await getDocs(
+                collection(db,"withdrawals")
+            );
+
+        allWithdrawals = [];
+
+        snap.forEach(d=>{
+
+            allWithdrawals.push({
+                id:d.id,
+                ...d.data()
+            });
+
+        });
+
+        renderWithdrawals();
+
+    }catch(error){
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="6"
+                    class="p-8 text-red-500">
+                    ${escapeHTML(error.message)}
+                </td>
+            </tr>`;
+
+    }
+
+};
+
+
+function renderWithdrawals(){
+
+    const tbody =
+        document.getElementById(
+            "withdrawalsTable"
+        );
+
+    tbody.innerHTML =
+        allWithdrawals.map(w=>`
+
+        <tr class="border-b">
+
+            <td class="p-4">
+
+                <div class="font-semibold">
+                    ${escapeHTML(
+                        w.name ||
+                        w.uid ||
+                        "User"
+                    )}
+                </div>
+
+                <div class="text-xs text-slate-400">
+                    ${escapeHTML(w.uid || "")}
+                </div>
+
+            </td>
+
+            <td class="p-4 font-bold">
+                ${Number(
+                    w.amount ||
+                    w.coins ||
+                    0
+                ).toLocaleString()}
+            </td>
+
+            <td class="p-4">
+                ${escapeHTML(
+                    w.method ||
+                    w.withdrawMethod ||
+                    "-"
+                )}
+            </td>
+
+            <td class="p-4">
+                ${escapeHTML(
+                    w.account ||
+                    w.number ||
+                    w.phone ||
+                    "-"
+                )}
+            </td>
+
+            <td class="p-4">
+                <span class="px-3 py-1 rounded-full text-sm
+                    ${statusClass(w.status)}">
+
+                    ${escapeHTML(
+                        w.status ||
+                        "pending"
+                    )}
+
+                </span>
+            </td>
+
+            <td class="p-4">
+
+                <div class="flex gap-2">
+
+                    <button
+                        onclick="changeWithdrawalStatus(
+                            '${w.id}',
+                            '${w.uid || ""}',
+                            'approved'
+                        )"
+                        class="bg-green-600 text-white
+                               px-3 py-2 rounded-lg">
+
+                        Approve
+
+                    </button>
+
+                    <button
+                        onclick="changeWithdrawalStatus(
+                            '${w.id}',
+                            '${w.uid || ""}',
+                            'rejected'
+                        )"
+                        class="bg-red-600 text-white
+                               px-3 py-2 rounded-lg">
+
+                        Reject
+
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `).join("");
+
+}
+
+
+function statusClass(status){
+
+    status =
+        String(status || "")
+        .toLowerCase();
+
+    if(status==="approved")
+        return "bg-green-100 text-green-700";
+
+    if(status==="rejected")
+        return "bg-red-100 text-red-700";
+
+    return "bg-yellow-100 text-yellow-700";
+
+}
+
+
+/* =====================================================
+   WITHDRAWAL STATUS
+===================================================== */
+
+window.changeWithdrawalStatus =
+async function(id,uid,status){
+
+    const ok =
+        confirm(
+            "Withdrawal status "+status+
+            " করতে চান?"
+        );
+
+    if(!ok) return;
+
+    try{
+
+        await updateDoc(
+            doc(db,"withdrawals",id),
+            {
+                status,
+                reviewedAt:new Date().toISOString()
+            }
+        );
+
+
+        /*
+          RTDB structure:
+          withdrawals/{uid}/{withdrawalId}
+        */
+
+        if(uid){
+
+            await update(
+                ref(
+                    rtdb,
+                    "withdrawals/"+uid+"/"+id
+                ),
+                {
+                    status,
+                    reviewedAt:new Date().toISOString()
+                }
+            );
+
+        }
+
+        showToast(
+            "Withdrawal "+status
+        );
+
+        loadWithdrawals();
+
+    }catch(error){
+
+        showToast(
+            "Status update failed: "+
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================================
+   TRANSACTIONS
+===================================================== */
+
+window.loadUserTransactions =
+async function(){
+
+    const uid =
+        document
+        .getElementById(
+            "transactionUid"
+        )
+        .value.trim();
+
+    if(!uid){
+
+        showToast("UID দিন");
+
+        return;
+
+    }
+
+    const tbody =
+        document.getElementById(
+            "transactionsTable"
+        );
+
+    tbody.innerHTML =
+        `<tr>
+            <td colspan="4"
+                class="p-5 text-center">
+                Loading...
+            </td>
+        </tr>`;
+
+    try{
+
+        const snap =
+            await getDocs(
+                collection(
+                    db,
+                    "users",
+                    uid,
+                    "transactions"
                 )
-              )}
+            );
 
-            </td>
+        let rows = [];
 
+        snap.forEach(d=>{
 
-            <td class="p-4">
+            rows.push({
+                id:d.id,
+                ...d.data()
+            });
 
-              ${escapeHtml(
-                item.method ||
-                "-"
-              )}
+        });
 
-            </td>
+        rows.sort(
+            (a,b)=>
+                String(b.createdAt || "")
+                .localeCompare(
+                    String(a.createdAt || "")
+                )
+        );
 
+        tbody.innerHTML =
+            rows.map(t=>`
 
-            <td class="p-4">
+            <tr class="border-b">
 
-              <span
-                class="
-                  px-3 py-1
-                  rounded-full
-                  bg-yellow-500/10
-                  text-yellow-400
-                "
-              >
+                <td class="p-3">
+                    ${escapeHTML(
+                        t.reason ||
+                        t.description ||
+                        "-"
+                    )}
+                </td>
 
-                ${
-                  escapeHtml(
-                    item.status ||
-                    "pending"
-                  )
-                }
+                <td class="p-3 font-bold">
+                    ${Number(
+                        t.amount ||
+                        t.coins ||
+                        0
+                    ).toLocaleString()}
+                </td>
 
-              </span>
+                <td class="p-3">
+                    ${escapeHTML(
+                        t.type ||
+                        "-"
+                    )}
+                </td>
 
-            </td>
+                <td class="p-3 text-sm">
+                    ${escapeHTML(
+                        formatDate(
+                            t.createdAt
+                        )
+                    )}
+                </td>
 
-          </tr>
+            </tr>
 
-          `;
+        `).join("");
 
-        }
-      );
+    }catch(error){
 
-
-      document.getElementById(
-        "withdrawalsTable"
-      ).innerHTML =
-        html ||
-        `
-        <tr>
-          <td
-            colspan="4"
-            class="p-6 text-center
-                   text-slate-500"
-          >
-            No withdrawals found
-          </td>
-        </tr>
-        `;
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="4"
+                    class="p-5 text-red-500">
+                    ${escapeHTML(error.message)}
+                </td>
+            </tr>`;
 
     }
-  );
-
-}
-
-
-
-/* =========================================
-   CREATE NOTICE
-========================================= */
-
-window.createNotice =
-async function(){
-
-  const title =
-    document.getElementById(
-      "noticeTitle"
-    ).value.trim();
-
-
-  const message =
-    document.getElementById(
-      "noticeMessage"
-    ).value.trim();
-
-
-  if(!title || !message){
-
-    alert(
-      "Title এবং message দিন।"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    await addDoc(
-      collection(
-        db,
-        "notices"
-      ),
-      {
-
-        title: title,
-
-        message: message,
-
-        createdAt:
-          serverTimestamp(),
-
-        active: true,
-
-        target: "global"
-
-      }
-    );
-
-
-    document.getElementById(
-      "noticeTitle"
-    ).value = "";
-
-
-    document.getElementById(
-      "noticeMessage"
-    ).value = "";
-
-
-    alert(
-      "Notice added successfully."
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-    alert(
-      "Notice add করা যায়নি।"
-    );
-
-  }
 
 };
 
 
+/* =====================================================
+   EARNINGS
+===================================================== */
 
-/* =========================================
-   CREATE TASK
-========================================= */
-
-window.createTask =
+window.loadUserEarnings =
 async function(){
 
-  const title =
-    document.getElementById(
-      "taskTitle"
-    ).value.trim();
+    const uid =
+        document
+        .getElementById(
+            "earningUid"
+        )
+        .value.trim();
 
+    if(!uid){
 
-  const reward =
-    Number(
-      document.getElementById(
-        "taskReward"
-      ).value
-    );
+        showToast("UID দিন");
 
+        return;
 
-  if(!title || !reward){
+    }
 
-    alert(
-      "Task title এবং reward দিন।"
-    );
+    const tbody =
+        document.getElementById(
+            "earningsTable"
+        );
 
-    return;
+    tbody.innerHTML =
+        `<tr>
+            <td colspan="3"
+                class="p-5 text-center">
+                Loading...
+            </td>
+        </tr>`;
 
-  }
+    try{
 
+        const snap =
+            await getDocs(
+                collection(
+                    db,
+                    "users",
+                    uid,
+                    "earnings"
+                )
+            );
 
-  try{
+        let rows = [];
 
-    await addDoc(
-      collection(
-        db,
-        "tasks"
-      ),
-      {
+        snap.forEach(d=>{
 
-        title: title,
+            rows.push({
+                id:d.id,
+                ...d.data()
+            });
 
-        reward: reward,
+        });
 
-        active: true,
+        tbody.innerHTML =
+            rows.map(e=>`
 
-        createdAt:
-          serverTimestamp()
+            <tr class="border-b">
 
-      }
-    );
+                <td class="p-3">
+                    ${escapeHTML(
+                        e.reason ||
+                        e.description ||
+                        "-"
+                    )}
+                </td>
 
+                <td class="p-3 font-bold text-green-600">
+                    +${Number(
+                        e.amount ||
+                        e.coins ||
+                        0
+                    ).toLocaleString()}
+                </td>
 
-    document.getElementById(
-      "taskTitle"
-    ).value = "";
+                <td class="p-3">
+                    ${escapeHTML(
+                        formatDate(
+                            e.createdAt
+                        )
+                    )}
+                </td>
 
+            </tr>
 
-    document.getElementById(
-      "taskReward"
-    ).value = "";
+        `).join("");
 
+    }catch(error){
 
-    alert(
-      "Task added successfully."
-    );
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="3"
+                    class="p-5 text-red-500">
+                    ${escapeHTML(error.message)}
+                </td>
+            </tr>`;
 
-
-  }catch(error){
-
-    console.error(error);
-
-    alert(
-      "Task add করা যায়নি।"
-    );
-
-  }
+    }
 
 };
 
 
+/* =====================================================
+   DEVICES
+===================================================== */
 
-/* =========================================
-   SECURITY: HTML ESCAPE
-========================================= */
+window.loadDevices = async function(){
 
-function escapeHtml(value){
+    const tbody =
+        document.getElementById(
+            "devicesTable"
+        );
 
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    tbody.innerHTML =
+        `<tr>
+            <td colspan="3"
+                class="p-6 text-center">
+                Loading...
+            </td>
+        </tr>`;
+
+    try{
+
+        const snap =
+            await getDocs(
+                collection(db,"deviceBindings")
+            );
+
+        allDevices = [];
+
+        snap.forEach(d=>{
+
+            allDevices.push({
+                id:d.id,
+                ...d.data()
+            });
+
+        });
+
+        tbody.innerHTML =
+            allDevices.map(d=>`
+
+            <tr class="border-b">
+
+                <td class="p-4 font-mono text-xs">
+                    ${escapeHTML(d.id)}
+                </td>
+
+                <td class="p-4 font-mono text-xs">
+                    ${escapeHTML(
+                        d.uid || "-"
+                    )}
+                </td>
+
+                <td class="p-4">
+                    ${escapeHTML(
+                        formatDate(
+                            d.createdAt
+                        )
+                    )}
+                </td>
+
+            </tr>
+
+        `).join("");
+
+    }catch(error){
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="3"
+                    class="p-6 text-red-500">
+                    ${escapeHTML(error.message)}
+                </td>
+            </tr>`;
+
+    }
+
+};
+
+
+/* =====================================================
+   NOTICES
+===================================================== */
+
+window.loadNotices = async function(){
+
+    const box =
+        document.getElementById(
+            "noticesList"
+        );
+
+    box.innerHTML =
+        `<div class="card p-6">
+            Loading notices...
+        </div>`;
+
+    try{
+
+        const snap =
+            await getDocs(
+                collection(db,"notices")
+            );
+
+        let notices = [];
+
+        snap.forEach(d=>{
+
+            notices.push({
+                id:d.id,
+                ...d.data()
+            });
+
+        });
+
+        if(!notices.length){
+
+            box.innerHTML =
+                `<div class="card p-6 text-slate-400">
+                    কোনো notice নেই।
+                </div>`;
+
+            return;
+
+        }
+
+        box.innerHTML =
+            notices.map(n=>`
+
+            <div class="card p-5">
+
+                <div class="flex justify-between gap-4">
+
+                    <div>
+
+                        <h3 class="font-bold text-lg">
+                            ${escapeHTML(
+                                n.title ||
+                                "Notice"
+                            )}
+                        </h3>
+
+                        <p class="text-slate-600 mt-2 whitespace-pre-line">
+                            ${escapeHTML(
+                                n.message ||
+                                ""
+                            )}
+                        </p>
+
+                    </div>
+
+                    <button
+                        onclick="deleteNotice('${n.id}')"
+                        class="text-red-600">
+                        🗑️
+                    </button>
+
+                </div>
+
+                <div class="mt-4 text-xs">
+
+                    <span class="${
+                        n.active === false
+                        ? "text-red-500"
+                        : "text-green-600"
+                    }">
+
+                        ● ${
+                            n.active === false
+                            ? "Inactive"
+                            : "Active"
+                        }
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        `).join("");
+
+    }catch(error){
+
+        box.innerHTML =
+            `<div class="card p-6 text-red-500">
+                ${escapeHTML(error.message)}
+            </div>`;
+
+    }
+
+};
+
+
+/* =====================================================
+   NOTICE MODAL
+===================================================== */
+
+window.openNoticeModal = function(){
+
+    document
+        .getElementById("noticeModal")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("noticeModal")
+        .classList.add("flex");
+
+};
+
+
+window.closeNoticeModal = function(){
+
+    document
+        .getElementById("noticeModal")
+        .classList.add("hidden");
+
+    document
+        .getElementById("noticeModal")
+        .classList.remove("flex");
+
+};
+
+
+window.createNotice = async function(){
+
+    const title =
+        document
+        .getElementById("noticeTitle")
+        .value.trim();
+
+    const message =
+        document
+        .getElementById("noticeMessage")
+        .value.trim();
+
+    const active =
+        document
+        .getElementById("noticeActive")
+        .value === "true";
+
+    if(!title || !message){
+
+        showToast(
+            "Title এবং Message দিন"
+        );
+
+        return;
+
+    }
+
+    try{
+
+        const notice = {
+
+            title,
+
+            message,
+
+            active,
+
+            createdAt:
+                new Date().toISOString()
+
+        };
+
+
+        const refDoc =
+            await addDoc(
+                collection(db,"notices"),
+                notice
+            );
+
+
+        /*
+          RTDB notice sync
+        */
+
+        await set(
+            ref(
+                rtdb,
+                "notices/"+refDoc.id
+            ),
+            {
+                ...notice,
+                id:refDoc.id
+            }
+        );
+
+
+        showToast(
+            "Notice published"
+        );
+
+        document
+            .getElementById("noticeTitle")
+            .value="";
+
+        document
+            .getElementById("noticeMessage")
+            .value="";
+
+        closeNoticeModal();
+
+        loadNotices();
+
+    }catch(error){
+
+        showToast(
+            "Notice failed: "+
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================================
+   DELETE NOTICE
+===================================================== */
+
+window.deleteNotice = async function(id){
+
+    if(!confirm("এই notice delete করবেন?"))
+        return;
+
+    try{
+
+        await deleteDoc(
+            doc(db,"notices",id)
+        );
+
+        await remove(
+            ref(
+                rtdb,
+                "notices/"+id
+            )
+        );
+
+        showToast(
+            "Notice deleted"
+        );
+
+        loadNotices();
+
+    }catch(error){
+
+        showToast(
+            "Delete failed: "+
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+window.loadSettings = async function(){
+
+    try{
+
+        const snap =
+            await getDoc(
+                doc(
+                    db,
+                    "adminSettings",
+                    "app"
+                )
+            );
+
+        if(!snap.exists())
+            return;
+
+        const s = snap.data();
+
+        document
+            .getElementById("settingAppName")
+            .value =
+                s.appName || "TakaEarn";
+
+        document
+            .getElementById("settingMinWithdraw")
+            .value =
+                s.minimumWithdrawal || 100;
+
+        document
+            .getElementById("settingMaintenance")
+            .value =
+                String(
+                    s.maintenanceMode || false
+                );
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+};
+
+
+window.saveSettings = async function(){
+
+    const data = {
+
+        appName:
+            document
+            .getElementById(
+                "settingAppName"
+            ).value.trim(),
+
+        minimumWithdrawal:
+            Number(
+                document
+                .getElementById(
+                    "settingMinWithdraw"
+                ).value
+            ),
+
+        maintenanceMode:
+            document
+            .getElementById(
+                "settingMaintenance"
+            ).value === "true",
+
+        updatedAt:
+            new Date().toISOString()
+
+    };
+
+    try{
+
+        await set(
+            doc(
+                db,
+                "adminSettings",
+                "app"
+            ),
+            data,
+            {merge:true}
+        );
+
+
+        await update(
+            ref(
+                rtdb,
+                "adminSettings/app"
+            ),
+            data
+        );
+
+
+        showToast(
+            "Settings saved"
+        );
+
+    }catch(error){
+
+        showToast(
+            "Settings failed: "+
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 
 }
+
+
+function escapeAttr(value){
+
+    return escapeHTML(value);
+
+}
+
+
+function formatDate(value){
+
+    if(!value)
+        return "-";
+
+    try{
+
+        return new Date(value)
+            .toLocaleString(
+                "bn-BD",
+                {
+                    year:"numeric",
+                    month:"short",
+                    day:"numeric",
+                    hour:"numeric",
+                    minute:"2-digit"
+                }
+            );
+
+    }catch{
+
+        return String(value);
+
+    }
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+loadDashboard();
 
 </script>
 
-
 </body>
-
 </html>
